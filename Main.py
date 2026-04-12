@@ -1,5 +1,5 @@
 
-import tkinter as acc
+import tkinter as tk
 from app_manager import AppManager
 
 def main():

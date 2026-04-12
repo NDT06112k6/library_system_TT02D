@@ -1,8 +1,8 @@
 import tkinter as tk
-from page.login import loginPage
-from page.register import registerPage
-from page.account_manager import account_managerPage
-from page.edit_account import edit_accountPage
+from page.login import LoginPage
+from page.taotk import TaoTKPage
+from page.quanlytk import QuanLyTKPage
+from page.suatk import SuaTKPage
 
 
 class AppManager:
@@ -23,25 +23,25 @@ class AppManager:
         """Hiển thị trang đăng nhập"""
         self.clear_current_page()
         self.root.geometry("300x230")
-        self.current_page = loginPage(self.root, self)
+        self.current_page = LoginPage(self.root, self)
 
     def show_taotk_page(self):
         """Hiển thị trang tạo tài khoản"""
         self.clear_current_page()
         self.root.geometry("300x200")
-        self.current_page = registerPage(self.root, self)
+        self.current_page = TaoTKPage(self.root, self)
 
     def show_quanlytk_page(self):
         """Hiển thị trang quản lý tài khoản"""
         self.clear_current_page()
         self.root.geometry("600x400")
-        self.current_page = account_managerPage(self.root, self)
+        self.current_page = QuanLyTKPage(self.root, self)
 
     def show_suatk_page(self, username=None, password=None):
         """Hiển thị trang sửa tài khoản"""
         self.clear_current_page()
-        self.root.geometry("400x300")
-        self.current_page = edit_accountPage(self.root, self, username, password)
+        self.root.geometry("500x450")
+        self.current_page = SuaTKPage(self.root, self, username, password)
 
     def run(self):
         """Chạy ứng dụng"""

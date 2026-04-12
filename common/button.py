@@ -1,8 +1,7 @@
 
-import tkinter as acc
-from tkinter import ttk
+import tkinter as tk
 
-class CustomButton(ttk.Button):
+class CustomButton(tk.Button):
     """Button tùy chỉnh với style riêng"""
     
     def __init__(self, parent, text="", command=None, style_type="primary", **kwargs):
@@ -12,30 +11,15 @@ class CustomButton(ttk.Button):
         
     def configure_style(self):
         """Cấu hình style cho button"""
-        style = ttk.Style()
-        
         if self.style_type == "primary":
-            style.configure('Primary.TButton',
-                           font=('Arial', 10, 'bold'))
+            self.configure(bg='#007bff', fg='white', font=('Arial', 10, 'bold'))
         elif self.style_type == "success":
-            style.configure('Success.TButton',
-                           font=('Arial', 10),
-                           foreground='green')
+            self.configure(bg='#28a745', fg='white', font=('Arial', 10))
         elif self.style_type == "danger":
-            style.configure('Danger.TButton',
-                           font=('Arial', 10),
-                           foreground='red')
+            self.configure(bg='#dc3545', fg='white', font=('Arial', 10))
         elif self.style_type == "warning":
-            style.configure('Warning.TButton',
-                           font=('Arial', 10),
-                           foreground='orange')
+            self.configure(bg='#ffc107', fg='black', font=('Arial', 10))
         elif self.style_type == "info":
-            style.configure('Info.TButton',
-                           font=('Arial', 10),
-                           foreground='blue')
+            self.configure(bg='#17a2b8', fg='white', font=('Arial', 10))
         elif self.style_type == "secondary":
-            style.configure('Secondary.TButton',
-                           font=('Arial', 10),
-                           foreground='gray')
-            
-        self.configure(style=f'{self.style_type.capitalize()}.TButton')
+            self.configure(bg='#6c757d', fg='white', font=('Arial', 10))

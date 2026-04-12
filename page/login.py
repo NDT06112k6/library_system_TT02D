@@ -1,17 +1,11 @@
 import customtkinter as ctk
-from controllers.auth_controller import AuthController
+from tkinter import messagebox
 
 
-class loginPage:
-    """
-    View: Trang đăng nhập.
-    Chỉ xử lý giao diện, không chứa logic nghiệp vụ.
-    """
-
+class LoginPage:
     def __init__(self, master, app_manager):
-        self.master      = master
+        self.master = master
         self.app_manager = app_manager
-        self.controller  = AuthController()
 
         self.config()
         self.view()
@@ -19,22 +13,25 @@ class loginPage:
     def config(self):
         self.master.title("Đăng nhập")
         self.master.geometry("400x300")
-        ctk.set_appearance_mode("light")
+
+        # Theme
+        ctk.set_appearance_mode("light")  # hoặc "dark"
         ctk.set_default_color_theme("blue")
 
     def view(self):
-        # --- Card chính ---
+        # Frame chính (card)
         frame = ctk.CTkFrame(self.master, corner_radius=12)
         frame.pack(pady=30, padx=30, fill="both", expand=True)
 
         # Tiêu đề
-        ctk.CTkLabel(
+        label = ctk.CTkLabel(
             frame,
             text="ĐĂNG NHẬP",
             font=("Segoe UI", 24, "bold")
-        ).pack(pady=(20, 10))
+        )
+        label.pack(pady=(20, 10))
 
-        # Ô nhập username
+        # Username
         self.entry_username = ctk.CTkEntry(
             frame,
             placeholder_text="Nhập username...",
@@ -43,7 +40,7 @@ class loginPage:
         )
         self.entry_username.pack(pady=10, padx=20, fill="x")
 
-        # Ô nhập password
+        # Password
         self.entry_password = ctk.CTkEntry(
             frame,
             placeholder_text="Nhập password...",
@@ -53,38 +50,61 @@ class loginPage:
         )
         self.entry_password.pack(pady=10, padx=20, fill="x")
 
-        # --- Khu vực nút bấm ---
+        # Gmail
+        self.entry_gmail = ctk.CTkEntry(
+            frame,
+            placeholder_text="Nhập Gmail...",
+            height=35,
+            corner_radius=8
+        )
+        self.entry_gmail.pack(pady=10, padx=20, fill="x")
+
+        # Button frame
         btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
         btn_frame.pack(pady=20)
 
-        ctk.CTkButton(
+        # Nút tạo tài khoản
+        btn_register = ctk.CTkButton(
             btn_frame,
             text="Tạo tài khoản",
-            fg_color="#6c757d",
+            fg_color="#6c757d",  # xám
             hover_color="#5a6268",
             corner_radius=10,
-            command=self.go_to_register
-        ).grid(row=0, column=0, padx=10)
+            command=self.tao_tk
+        )
+        btn_register.grid(row=0, column=0, padx=10)
 
-        ctk.CTkButton(
+        # Nút đăng nhập
+        btn_login = ctk.CTkButton(
             btn_frame,
             text="Đăng nhập",
-            fg_color="#1A73E8",
+            fg_color="#1A73E8",  # xanh chủ đạo
             hover_color="#1669c1",
             corner_radius=10,
-            command=self.handle_login
-        ).grid(row=0, column=1, padx=10)
+            command=self.login
+        )
+        btn_login.grid(row=0, column=1, padx=10)
 
-    def handle_login(self):
-        """Lấy input và gửi sang Controller xử lý"""
-        username = self.entry_username.get().strip()
-        password = self.entry_password.get().strip()
-
-        success = self.controller.login(username, password)
-
-        if success:
-            self.app_manager.show_quanlytk_page()
-
-    def go_to_register(self):
-        """Chuyển sang trang đăng ký"""
+    def tao_tk(self):
         self.app_manager.show_taotk_page()
+
+    def login(self):
+        try:
+            with open("database/tk.csv", "r") as file:
+                for line in file:
+                    tk_info = line.strip().split(",")
+
+                    if (
+                        len(tk_info) >= 3
+                        and self.entry_username.get() == tk_info[0]
+                        and self.entry_password.get() == tk_info[1]
+                        and self.entry_gmail.get() == tk_info[2]
+                    ):
+                        messagebox.showinfo("Thông báo", "Đăng nhập thành công")
+                        self.app_manager.show_quanlytk_page()
+                        return
+
+                messagebox.showerror("Thông báo", "Đăng nhập thất bại")
+
+        except FileNotFoundError:
+            messagebox.showerror("Thông báo", "Chưa có tài khoản nào được tạo")

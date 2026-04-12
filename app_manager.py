@@ -45,16 +45,19 @@ class AppManager:
         self.root.geometry("500x450")
         self.current_page = SuaTKPage(self.root, self, username, password)
     def show_quanlysach_page(self):
+        """Hiển thị trang quản lý sách"""
         self.clear_current_page()
         self.root.geometry("800x550")
         self.current_page = QuanLySachPage(self.root, self)
 
     def show_themsach_page(self):
+        """Hiển thị trang thêm sách"""
         self.clear_current_page()
         self.root.geometry("450x480")
         self.current_page = ThemSachPage(self.root, self)
 
     def show_suasach_page(self, ma_sach):
+        """Hiển thị trang sửa sách"""
         self.clear_current_page()
         self.root.geometry("450x500")
         self.current_page = SuaSachPage(self.root, self, ma_sach)

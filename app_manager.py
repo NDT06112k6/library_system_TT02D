@@ -6,6 +6,8 @@ from page.suatk import SuaTKPage
 from page.quanlysach import QuanLySachPage
 from page.themsach import ThemSachPage
 from page.suasach import SuaSachPage
+from page.muontra import MuonTraPage
+from page.taomuon import TaoMuonPage
 
 class AppManager:
     def __init__(self):
@@ -61,6 +63,19 @@ class AppManager:
         self.clear_current_page()
         self.root.geometry("450x500")
         self.current_page = SuaSachPage(self.root, self, ma_sach)
+    
+    def show_muontra_page(self):
+        """Hiển thị trang quản lý mượn/trả"""
+        self.clear_current_page()
+        self.root.geometry("900x550")
+        self.current_page = MuonTraPage(self.root, self)
+
+    def show_taomuon_page(self):
+        """Hiển thị trang tạo phiếu mượn"""
+        self.clear_current_page()
+        self.root.geometry("600x550")
+        self.current_page = TaoMuonPage(self.root, self)
+    
     def run(self):
         """Chạy ứng dụng"""
         self.root.mainloop()

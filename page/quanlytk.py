@@ -43,6 +43,7 @@ class QuanLyTKPage:
         # Buttons (giữ nguyên logic)
         CustomButton(left_frame, text="Làm mới", command=self.load_accounts, style_type="info").pack(side="left", padx=5)
         CustomButton(left_frame, text="Quản lý sách", command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
+        CustomButton(left_frame, text="Mượn/Trả sách", command=lambda: self.app_manager.show_muontra_page(), style_type="primary").pack(side="left", padx=5)
         CustomButton(left_frame, text="Xóa", command=self.delete_account, style_type="danger").pack(side="left", padx=5)
         CustomButton(left_frame, text="Sửa", command=self.edit_account, style_type="warning").pack(side="left", padx=5)
 

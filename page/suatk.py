@@ -34,7 +34,7 @@ class SuaTKPage:
     def config(self):
         self.master.title("Sửa tài khoản")
         self.master.geometry("500x450")
-        self.master.resizable(False, False)
+        self.master.resizable(True, True)
 
     def view(self):
         # Title
@@ -117,10 +117,10 @@ class SuaTKPage:
     def toggle_password(self):
         """Toggle password visibility"""
         if self.show_password.get():
-            self.entry_password.config(show="")
+            self.entry_password.configure(show="")
         else:
-            self.entry_password.config(show="*")
-
+            self.entry_password.configure(show="*")
+    
     def reset_form(self):
         """Reset form to original values"""
         self.entry_username.delete(0, tk.END)

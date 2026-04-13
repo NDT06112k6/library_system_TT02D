@@ -16,7 +16,7 @@ class SuaSachPage:
     def config(self):
         self.master.title("Sửa sách")
         self.master.geometry("450x500")
-        self.master.resizable(False, False)
+        self.master.resizable(True, True)
 
     def view(self):
         # Tiêu đề

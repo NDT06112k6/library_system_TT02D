@@ -1,7 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox, ttk
 import os
-
 from common.button import CustomButton
 from query import Query
 

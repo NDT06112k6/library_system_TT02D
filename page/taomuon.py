@@ -2,6 +2,8 @@ import customtkinter as ctk
 from tkinter import messagebox, ttk
 import csv
 import os
+from query import Query
+import pandas as pd
 from datetime import datetime
 
 
@@ -9,6 +11,9 @@ class TaoMuonPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
+        self.Q_sach = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
+        self.Q_muontra = Query("database/muontra.csv", ["ma_phieu", "username", "ma_sach", "ngay_muon", "ngay_tra", "trang_thai"])
+        self.Q_tk = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
         self.config()
         self.view()
         self.load_sach_available()
@@ -111,16 +116,11 @@ class TaoMuonPage:
 
     def load_sach_available(self):
         """Chỉ hiển thị sách còn số lượng > 0"""
-        database_path = "database/books.csv"
-        if not os.path.exists(database_path):
-            return
         try:
-            with open(database_path, "r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                next(reader, None)  # Bỏ header
-                for row in reader:
-                    if len(row) >= 5 and int(row[4]) > 0:
-                        self.sach_tree.insert("", "end", values=(row[0], row[1], row[2], row[4]))
+            data = self.Q_sach.list(1, 9999)["data"]
+            for _, row in data.iterrows():
+                if int(row["so_luong"]) > 0:
+                    self.sach_tree.insert("", "end", values=(row["ma_sach"], row["ten_sach"], row["tac_gia"], row["so_luong"]))
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải danh sách sách: {str(e)}")
 
@@ -149,8 +149,7 @@ class TaoMuonPage:
         try:
             # Ghi phiếu mượn
             os.makedirs("database", exist_ok=True)
-            with open("database/muontra.csv", "a", encoding="utf-8", newline="") as f:
-                csv.writer(f).writerow([ma_phieu, username, ma_sach, ngay_muon, "", "dang_muon"])
+            self.Q_muontra.create([ma_phieu, username, ma_sach, ngay_muon, "", "dang_muon"])
 
             # Trừ 1 số lượng sách
             self._cap_nhat_so_luong_sach(ma_sach, delta=-1)
@@ -167,50 +166,26 @@ class TaoMuonPage:
     # ===== HÀM HỖ TRỢ =====
 
     def _sinh_ma_phieu(self):
-        """Tự động sinh mã phiếu tiếp theo (MT001, MT002, ...)"""
-        database_path = "database/muontra.csv"
-        if not os.path.exists(database_path):
-            return "MT001"
+        """Tự động sinh mã phiếu tiếp theo"""
         try:
-            with open(database_path, "r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                next(reader, None)  # Bỏ header
-                rows = [row for row in reader if row]
-                if not rows:
-                    return "MT001"
-                # Lấy số lớn nhất từ mã phiếu
-                so_lon_nhat = max(int(row[0][2:]) for row in rows if row[0].startswith("MT"))
-                return f"MT{str(so_lon_nhat + 1).zfill(3)}"
+            max_val = self.Q_muontra.max("ma_phieu")
+            if pd.isna(max_val):
+                return "MT001"
+            so = int(str(max_val)[2:]) + 1
+            return f"MT{str(so).zfill(3)}"
         except Exception:
             return "MT001"
 
     def _username_exists(self, username):
         """Kiểm tra username có trong tk.csv không"""
-        database_path = "database/tk.csv"
-        if not os.path.exists(database_path):
-            return False
-        try:
-            with open(database_path, "r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                return any(row[0] == username for row in reader if row)
-        except Exception:
-            return False
+        result = self.Q_tk.search("taikhoan", username, exact=True)
+        return len(result) > 0
 
     def _cap_nhat_so_luong_sach(self, ma_sach, delta):
-        """Cộng hoặc trừ số lượng sách (delta = +1 hoặc -1)"""
-        database_path = "database/books.csv"
-        temp_path = "database/books_temp.csv"
-
-        with open(database_path, "r", encoding="utf-8") as infile, \
-             open(temp_path, "w", encoding="utf-8", newline="") as outfile:
-            reader = csv.reader(infile)
-            writer = csv.writer(outfile)
-            writer.writerow(next(reader))  # Giữ header
-
-            for row in reader:
-                if row[0] == ma_sach:
-                    so_luong = int(row[4]) + delta
-                    row[4] = str(max(0, so_luong))  # Không để âm
-                writer.writerow(row)
-
-        os.replace(temp_path, database_path)
+        """Cộng hoặc trừ số lượng sách"""
+        sach = self.Q_sach.search("ma_sach", ma_sach, exact=True).iloc[0]
+        so_luong_moi = str(max(0, int(sach["so_luong"]) + delta))
+        self.Q_sach.update("ma_sach", ma_sach, [
+            ma_sach, sach["ten_sach"], sach["tac_gia"],
+            sach["the_loai"], so_luong_moi, sach["gia"]
+        ])

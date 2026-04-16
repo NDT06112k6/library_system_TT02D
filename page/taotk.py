@@ -1,11 +1,13 @@
 import customtkinter as ctk
 from tkinter import messagebox
 import os
+from query import Query
 
 class TaoTKPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
+        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
         self.config()
         self.view()
 
@@ -181,14 +183,18 @@ class TaoTKPage:
     def tao_tk(self):
         username = self.entry_username.get()
         password = self.entry_password.get()
+        gmail = self.entry_gmail.get()
 
         if username.strip() == "" or password.strip() == "":
             messagebox.showerror("Thông báo", "Vui lòng nhập đầy đủ thông tin")
             return
+        # Kiểm tra username đã tồn tại chưa
+        if len(self.Q.search("taikhoan", username, exact=True)) > 0:
+            messagebox.showerror("Thông báo", f"Username '{username}' đã tồn tại")
+            return
 
         os.makedirs("database", exist_ok=True)
-        with open("database/tk.csv", "a", encoding="utf-8") as f:
-            f.write(username + "," + password + "\n")
+        self.Q.create([username, password, gmail])
 
         messagebox.showinfo("Thông báo", "Tạo tài khoản thành công")
         self.app_manager.show_login_page()

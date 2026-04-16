@@ -2,12 +2,13 @@ import customtkinter as ctk
 from tkinter import messagebox
 import csv
 import os
-
+from query import Query
 
 class SuaSachPage:
     def __init__(self, master, app_manager, ma_sach):
         self.master = master
         self.app_manager = app_manager
+        self.Q = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
         self.ma_sach = ma_sach
         self.old_data = self._load_book_data(ma_sach)
         self.config()
@@ -133,42 +134,18 @@ class SuaSachPage:
 
     def _load_book_data(self, ma_sach):
         """Đọc dữ liệu sách theo mã sách"""
-        database_path = "database/books.csv"
-        if not os.path.exists(database_path):
+        result = self.Q.search("ma_sach", ma_sach, exact=True)
+        if result.empty:
             return {}
-
-        with open(database_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if row["ma_sach"] == ma_sach:
-                    return dict(row)
-        return {}
+        return result.iloc[0].to_dict()
 
     def _update_book_in_file(self, new_data):
         """Ghi dữ liệu mới vào CSV"""
-        database_path = "database/books.csv"
-        temp_path = "database/books_temp.csv"
-
-        with open(database_path, "r", encoding="utf-8") as infile, \
-             open(temp_path, "w", encoding="utf-8", newline="") as outfile:
-            reader = csv.reader(infile)
-            writer = csv.writer(outfile)
-
-            # Giữ lại header
-            writer.writerow(next(reader))
-
-            for row in reader:
-                if row[0] == self.ma_sach:
-                    # Ghi dữ liệu mới (giữ nguyên ma_sach)
-                    writer.writerow([
-                        self.ma_sach,
-                        new_data["ten_sach"],
-                        new_data["tac_gia"],
-                        new_data["the_loai"],
-                        new_data["so_luong"],
-                        new_data["gia"]
-                    ])
-                else:
-                    writer.writerow(row)
-
-        os.replace(temp_path, database_path)
+        self.Q.update("ma_sach", self.ma_sach, [
+            self.ma_sach,
+            new_data["ten_sach"],
+            new_data["tac_gia"],
+            new_data["the_loai"],
+            new_data["so_luong"],
+            new_data["gia"]
+        ])

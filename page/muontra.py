@@ -3,6 +3,7 @@ from tkinter import messagebox, ttk
 import csv
 import os
 from datetime import datetime
+from query import Query
 
 from common.button import CustomButton
 
@@ -11,6 +12,8 @@ class MuonTraPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
+        self.Q_muontra = Query("database/muontra.csv", ["ma_phieu", "username", "ma_sach", "ngay_muon", "ngay_tra", "trang_thai"])
+        self.Q_sach = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
         self.config()
         self.view()
         self.load_phieu()
@@ -165,52 +168,27 @@ class MuonTraPage:
 
     def _read_all_phieu(self):
         """Đọc toàn bộ phiếu từ CSV"""
-        database_path = "database/muontra.csv"
-        if not os.path.exists(database_path):
-            return []
         try:
-            with open(database_path, "r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                next(reader, None)  # Bỏ header
-                return [row for row in reader if len(row) >= 6]
+            data = self.Q_muontra.list(1, 9999)["data"]
+            return data.values.tolist()
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể đọc dữ liệu: {str(e)}")
             return []
 
     def _cap_nhat_tra(self, ma_phieu, ngay_tra):
-        """Cập nhật ngày trả và trạng thái trong CSV"""
-        database_path = "database/muontra.csv"
-        temp_path = "database/muontra_temp.csv"
-
-        with open(database_path, "r", encoding="utf-8") as infile, \
-             open(temp_path, "w", encoding="utf-8", newline="") as outfile:
-            reader = csv.reader(infile)
-            writer = csv.writer(outfile)
-            writer.writerow(next(reader))  # Giữ header
-
-            for row in reader:
-                if row[0] == ma_phieu:
-                    row[4] = ngay_tra
-                    row[5] = "da_tra"
-                writer.writerow(row)
-
-        os.replace(temp_path, database_path)
+        """Cập nhật ngày trả và trạng thái"""
+        # Lấy dữ liệu phiếu hiện tại
+        phieu = self.Q_muontra.search("ma_phieu", ma_phieu, exact=True).iloc[0]
+        self.Q_muontra.update("ma_phieu", ma_phieu, [
+            ma_phieu, phieu["username"], phieu["ma_sach"],
+            phieu["ngay_muon"], ngay_tra, "da_tra"
+        ])
 
     def _cap_nhat_so_luong_sach(self, ma_sach, delta):
-        """Cộng hoặc trừ số lượng sách (delta = +1 hoặc -1)"""
-        database_path = "database/books.csv"
-        temp_path = "database/books_temp.csv"
-
-        with open(database_path, "r", encoding="utf-8") as infile, \
-             open(temp_path, "w", encoding="utf-8", newline="") as outfile:
-            reader = csv.reader(infile)
-            writer = csv.writer(outfile)
-            writer.writerow(next(reader))  # Giữ header
-
-            for row in reader:
-                if row[0] == ma_sach:
-                    so_luong = int(row[4]) + delta
-                    row[4] = str(max(0, so_luong))  # Không để âm
-                writer.writerow(row)
-
-        os.replace(temp_path, database_path)
+        """Cộng hoặc trừ số lượng sách"""
+        sach = self.Q_sach.search("ma_sach", ma_sach, exact=True).iloc[0]
+        so_luong_moi = str(max(0, int(sach["so_luong"]) + delta))
+        self.Q_sach.update("ma_sach", ma_sach, [
+            ma_sach, sach["ten_sach"], sach["tac_gia"],
+            sach["the_loai"], so_luong_moi, sach["gia"]
+        ])

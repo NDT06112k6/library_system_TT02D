@@ -2,7 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox, ttk
 import csv
 import os
-
+from query import Query
 from common.button import CustomButton
 
 
@@ -10,6 +10,8 @@ class QuanLySachPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
+        # Khởi tạo Query cho file quản lý sách
+        self.Q = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
         self.config()
         self.view()
         self.load_books()
@@ -159,17 +161,10 @@ class QuanLySachPage:
     # ===== HÀM HỖ TRỢ =====
 
     def _read_all_books(self):
-        """Đọc toàn bộ sách từ CSV, trả về list các row (bỏ header)"""
-        database_path = "database/books.csv"
-        if not os.path.exists(database_path):
-            self.status_label.configure(text="Chưa có dữ liệu sách")
-            return []
-
+        """Đọc toàn bộ sách từ CSV"""
         try:
-            with open(database_path, "r", encoding="utf-8") as f:
-                reader = csv.reader(f)
-                next(reader, None)  # Bỏ qua header
-                return list(reader)
+            data = self.Q.list(1, 9999)["data"]
+            return data.values.tolist()
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể đọc dữ liệu: {str(e)}")
             return []
@@ -183,26 +178,11 @@ class QuanLySachPage:
         for idx, row in enumerate(rows, 1):
             if len(row) >= 6:
                 # Format giá: thêm dấu phẩy (VD: 120,000)
-                gia = f"{int(row[5]):,}" if row[5].isdigit() else row[5]
+                gia = f"{int(row[5]):,}"
                 self.book_tree.insert("", "end", values=(idx, row[0], row[1], row[2], row[3], row[4], gia))
 
         self.status_label.configure(text=f"Tổng: {len(rows)} sách")
 
     def _remove_book_from_file(self, ma_sach_xoa):
         """Xóa sách khỏi CSV theo mã sách"""
-        database_path = "database/books.csv"
-        temp_path = "database/books_temp.csv"
-
-        with open(database_path, "r", encoding="utf-8") as infile, \
-             open(temp_path, "w", encoding="utf-8", newline="") as outfile:
-            reader = csv.reader(infile)
-            writer = csv.writer(outfile)
-
-            # Giữ lại header
-            writer.writerow(next(reader))
-
-            for row in reader:
-                if row[0] != ma_sach_xoa:
-                    writer.writerow(row)
-
-        os.replace(temp_path, database_path)
+        self.Q.delete("ma_sach", ma_sach_xoa)

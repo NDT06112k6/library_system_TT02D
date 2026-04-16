@@ -1,13 +1,16 @@
+from unittest import result
+
 import customtkinter as ctk
 from tkinter import messagebox
 import csv
 import os
-
+from query import Query
 
 class ThemSachPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
+        self.Q = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
         self.config()
         self.view()
 
@@ -130,11 +133,10 @@ class ThemSachPage:
 
     def _ma_sach_exists(self, ma_sach):
         """Kiểm tra mã sách đã tồn tại chưa"""
-        database_path = "database/books.csv"
-        if not os.path.exists(database_path):
-            return False
+        result = self.Q.search("ma_sach", ma_sach, exact=True)
+        return len(result) > 0
 
-        with open(database_path, "r", encoding="utf-8") as f:
-            reader = csv.reader(f)
-            next(reader, None)  # Bỏ header
-            return any(row[0] == ma_sach for row in reader if row)
+        self.Q.create([
+            data["ma_sach"], data["ten_sach"], data["tac_gia"],
+            data["the_loai"], data["so_luong"], data["gia"]
+        ])

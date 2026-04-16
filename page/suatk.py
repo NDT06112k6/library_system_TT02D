@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 import csv
 import os
+from query import Query
 import customtkinter as ctk
 
 
@@ -9,6 +10,7 @@ class SuaTKPage:
     def __init__(self, master, app_manager, username=None, password=None):
         self.master = master
         self.app_manager = app_manager
+        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
         self.old_username = username or ""
         self.old_password = password or ""
         self.old_email = self.get_current_email(username) or ""
@@ -16,20 +18,11 @@ class SuaTKPage:
         self.view()
 
     def get_current_email(self, username):
-        """Get current email for the username"""
-        try:
-            database_path = "database/tk.csv"
-            if not os.path.exists(database_path):
-                return ""
-            with open(database_path, "r", encoding="utf-8") as file:
-                csv_reader = csv.reader(file)
-                next(csv_reader, None)  # Skip header
-                for row in csv_reader:
-                    if len(row) >= 3 and row[0] == username:
-                        return row[2]
+        """Lấy email hiện tại theo username"""
+        result = self.Q.search("taikhoan", username, exact=True)
+        if result.empty:
             return ""
-        except Exception:
-            return ""
+        return result.iloc[0]["email"]
 
     def config(self):
         self.master.title("Sửa tài khoản")
@@ -144,20 +137,9 @@ class SuaTKPage:
         return True
 
     def username_exists(self, username):
-        """Check if username already exists in database"""
-        try:
-            database_path = "database/tk.csv"
-            if not os.path.exists(database_path):
-                return False
-
-            with open(database_path, "r", encoding="utf-8") as file:
-                csv_reader = csv.reader(file)
-                for row in csv_reader:
-                    if len(row) >= 2 and row[0] == username:
-                        return True
-            return False
-        except Exception:
-            return False
+        """Kiểm tra username đã tồn tại chưa"""
+        result = self.Q.search("taikhoan", username, exact=True)
+        return len(result) > 0
 
     def save_changes(self):
         """Save changes to database"""
@@ -181,27 +163,8 @@ class SuaTKPage:
             messagebox.showerror("Lỗi", f"Không thể cập nhật tài khoản: {str(e)}")
 
     def update_account_in_file(self, new_username, new_password, new_email):
-        """Update account in CSV file"""
-        database_path = "database/tk.csv"
-        temp_path = "database/tk_temp.csv"
-        
-        with open(database_path, "r", encoding="utf-8") as infile, \
-             open(temp_path, "w", encoding="utf-8", newline="") as outfile:
-            csv_reader = csv.reader(infile)
-            csv_writer = csv.writer(outfile)
-            
-            for row in csv_reader:
-                if len(row) >= 2:
-                    if row[0] == self.old_username:
-                        csv_writer.writerow([new_username, new_password, new_email])
-                    else:
-                        # Ensure row has 3 columns
-                        while len(row) < 3:
-                            row.append("")
-                        csv_writer.writerow(row)
-        
-        # Replace original file with temp file
-        os.replace(temp_path, database_path)
+        """Cập nhật tài khoản trong CSV"""
+        self.Q.update("taikhoan", self.old_username, [new_username, new_password, new_email])
 
     def cancel(self):
         """Cancel and return to account management"""

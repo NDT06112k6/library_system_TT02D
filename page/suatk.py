@@ -172,11 +172,11 @@ class SuaTKPage:
             # Xóa tài khoản cũ
             self.Q.delete("taikhoan", self.old_username)
             # Tạo tài khoản mới
-            self.Q.create({
-                "taikhoan": new_username,
-                "matkhau": new_password,
-                "email": new_email
-            })
+            self.Q.create([
+                new_username,
+                new_password,
+                new_email
+            ])
             messagebox.showinfo("Thành công", "Đã cập nhật tài khoản thành công")
             self.app_manager.show_quanlytk_page()
         except Exception as e:

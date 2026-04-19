@@ -8,6 +8,7 @@ from page.themsach import ThemSachPage
 from page.suasach import SuaSachPage
 from page.muontra import MuonTraPage
 from page.taomuon import TaoMuonPage
+from page.thongke import ThongKePage
 
 class AppManager:
     def __init__(self):
@@ -75,6 +76,12 @@ class AppManager:
         self.clear_current_page()
         self.root.geometry("600x550")
         self.current_page = TaoMuonPage(self.root, self)
+
+    def show_thongke_page(self):
+        """Hiển thị trang thống kê"""
+        self.clear_current_page()
+        self.root.geometry("900x600")
+        self.current_page = ThongKePage(self.root, self)
     
     def run(self):
         """Chạy ứng dụng"""

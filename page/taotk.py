@@ -188,7 +188,7 @@ class TaoTKPage:
         # 5. Tạo tài khoản bằng Query
         try:
             os.makedirs("database", exist_ok=True)
-            self.Q.create({"taikhoan": username, "matkhau": password, "email": gmail})
+            self.Q.create([username, password, gmail])
             messagebox.showinfo("Thông báo", "Tạo tài khoản thành công!")
             self.app_manager.show_login_page()
         except Exception as e:

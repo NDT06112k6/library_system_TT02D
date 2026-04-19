@@ -1,5 +1,3 @@
-from unittest import result
-
 import customtkinter as ctk
 from tkinter import messagebox
 import csv
@@ -135,8 +133,3 @@ class ThemSachPage:
         """Kiểm tra mã sách đã tồn tại chưa"""
         result = self.Q.search("ma_sach", ma_sach, exact=True)
         return len(result) > 0
-
-        self.Q.create([
-            data["ma_sach"], data["ten_sach"], data["tac_gia"],
-            data["the_loai"], data["so_luong"], data["gia"]
-        ])

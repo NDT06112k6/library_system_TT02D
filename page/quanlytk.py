@@ -44,6 +44,7 @@ class QuanLyTKPage:
         CustomButton(left_frame, text="Sửa",              command=self.edit_account,                     style_type="warning").pack(side="left", padx=5)
         CustomButton(left_frame, text="Quản lý sách",      command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
         CustomButton(left_frame, text="Mượn/Trả sách",     command=lambda: self.app_manager.show_muontra_page(),    style_type="primary").pack(side="left", padx=5)
+        CustomButton(left_frame, text="Thống kê",           command=lambda: self.app_manager.show_thongke_page(), style_type="info").pack(side="left", padx=5)
 
         # Nút Đăng xuất thay cho Quay lại
         CustomButton(right_frame, text="Đăng xuất", command=self.dang_xuat, style_type="secondary").pack(side="right", padx=5)

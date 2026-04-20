@@ -29,6 +29,28 @@ class QuanLyTKPage:
         )
         title_label.pack(pady=15)
 
+                # ===== Thanh tìm kiếm =====
+        search_frame = ctk.CTkFrame(self.master, fg_color="transparent")
+        search_frame.pack(pady=5, padx=20, fill="x")
+
+        self.entry_search = ctk.CTkEntry(
+            search_frame,
+            placeholder_text="Tìm theo tên đăng nhập...",
+            height=35,
+            corner_radius=8
+        )
+        self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
+
+        CustomButton(
+            search_frame,
+            text="Tìm kiếm",
+            command=self.search_account,
+            style_type="info"
+        ).pack(side="left")
+
+        # Bind Enter key to search
+        self.entry_search.bind("<Return>", lambda event: self.search_account())
+
         # ===== Button Frame =====
         button_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         button_frame.pack(pady=10, padx=20, fill="x")
@@ -98,20 +120,11 @@ class QuanLyTKPage:
     # ====== LOGIC ======
 
     def load_accounts(self):
-        """Tải danh sách tài khoản bằng Query"""
-        for item in self.account_tree.get_children():
-            self.account_tree.delete(item)
-
+        """Tải toàn bộ tài khoản"""
+        self.entry_search.delete(0, "end")  # Xóa search
         try:
-            data = self.Q.list(1, 9999)["data"]  # Lấy toàn bộ
-            for idx, row in data.iterrows():
-                self.account_tree.insert("", "end", values=(
-                    idx + 1,
-                    row["taikhoan"],
-                    row["matkhau"],
-                    row["email"] if "email" in row and row["email"] else ""
-                ))
-            self.status_label.configure(text=f"Đã tải {len(data)} tài khoản")
+            data = self.Q.list(1, 9999)["data"]
+            self._populate_tree(data)
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải dữ liệu: {str(e)}")
             self.status_label.configure(text="Lỗi tải dữ liệu")
@@ -148,3 +161,35 @@ class QuanLyTKPage:
         """Hỏi xác nhận trước khi đăng xuất"""
         if messagebox.askyesno("Xác nhận đăng xuất", "Bạn có chắc chắn muốn đăng xuất không?"):
             self.app_manager.show_login_page()
+
+    def search_account(self):
+        """Tìm kiếm tài khoản theo tên đăng nhập"""
+        keyword = self.entry_search.get().strip()
+        try:
+            if not keyword:
+                # Nếu không có từ khóa, tải tất cả
+                self.load_accounts()
+            else:
+                # Tìm kiếm một phần theo tên đăng nhập
+                result = self.Q.search("taikhoan", keyword, exact=False)
+                self._populate_tree(result)
+                self.status_label.configure(text=f"Tìm thấy {len(result)} tài khoản")
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
+            self.status_label.configure(text="Lỗi tìm kiếm")
+
+    def _populate_tree(self, data):
+        """Điền dữ liệu vào Treeview"""
+        # Xóa dữ liệu cũ
+        for item in self.account_tree.get_children():
+            self.account_tree.delete(item)
+        
+        # Thêm dữ liệu mới
+        for idx, row in data.iterrows():
+            stt = idx + 1
+            username = row.get("taikhoan", "")
+            password = row.get("matkhau", "")
+            email = row.get("email", "")
+            self.account_tree.insert("", "end", values=(stt, username, password, email))
+
+    

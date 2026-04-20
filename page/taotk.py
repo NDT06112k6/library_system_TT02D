@@ -3,6 +3,8 @@ from tkinter import messagebox
 import os
 import re
 from query import Query
+from common.validation import Validation
+from common.validation import Validation
 
 
 class TaoTKPage:
@@ -13,7 +15,7 @@ class TaoTKPage:
         self.config()
         self.view()
 
-    def config(self):
+    def config(self):   
         self.master.title("Tạo tài khoản")
         self.master.geometry("420x420")
         ctk.set_appearance_mode("light")
@@ -164,7 +166,7 @@ class TaoTKPage:
         gmail    = self.entry_gmail.get().strip()
         password = self.entry_password.get().strip()
         confirm  = self.entry_confirm.get().strip()
-
+        
         # 1. Kiểm tra bỏ trống
         if not username or not password or not gmail:
             messagebox.showerror("Thông báo", "Vui lòng nhập đầy đủ thông tin")

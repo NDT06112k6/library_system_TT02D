@@ -3,6 +3,7 @@ from tkinter import messagebox, ttk
 import csv
 import os
 from datetime import datetime
+import pandas as pd
 from query import Query
 
 from common.button import CustomButton
@@ -121,8 +122,10 @@ class MuonTraPage:
         for idx, row in enumerate(filtered, 1):
             trang_thai_display = "Đang mượn" if row[5] == "dang_muon" else "Đã trả"
             tag = row[5]  # "dang_muon" hoặc "da_tra"
+            # Xử lý ngày trả: nếu chưa trả thì hiển thị "Chưa trả"
+            ngay_tra_display = "Chưa trả" if pd.isna(row[4]) or str(row[4]).strip() == "" else row[4]
             self.phieu_tree.insert("", "end",
-                values=(idx, row[0], row[1], row[2], row[3], row[4], trang_thai_display),
+                values=(idx, row[0], row[1], row[2], row[3], ngay_tra_display, trang_thai_display),
                 tags=(tag,)
             )
 

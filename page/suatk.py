@@ -4,6 +4,7 @@ import os
 import re
 import customtkinter as ctk
 from query import Query
+from common.validation import Validation
 
 
 class SuaTKPage:

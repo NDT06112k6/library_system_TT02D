@@ -1,6 +1,5 @@
 import customtkinter as ctk
 from tkinter import messagebox, ttk
-import csv
 import os
 from query import Query
 import pandas as pd
@@ -141,6 +140,12 @@ class TaoMuonPage:
         if not selected:
             messagebox.showerror("Lỗi", "Vui lòng chọn sách cần mượn")
             return
+        
+        # Kiểm tra user đã mượn sách này chưa (chưa trả)
+        ma_sach = self.sach_tree.item(selected[0], "values")[0]
+        if self._da_muon_chua_tra(username, ma_sach):
+            messagebox.showerror("Lỗi", f"'{username}' đang mượn sách này rồi, chưa trả!")
+            return
 
         ma_sach = self.sach_tree.item(selected[0], "values")[0]
         ma_phieu = self.entry_maphieu.get()
@@ -189,3 +194,16 @@ class TaoMuonPage:
             ma_sach, sach["ten_sach"], sach["tac_gia"],
             sach["the_loai"], so_luong_moi, sach["gia"]
         ])
+    
+    def _da_muon_chua_tra(self, username, ma_sach):
+        """Kiểm tra user đang mượn sách này chưa trả"""
+        try:
+            data = self.Q_muontra.list(1, 9999)["data"]
+            mask = (
+                (data["username"] == username) &
+                (data["ma_sach"] == ma_sach) &
+                (data["trang_thai"] == "dang_muon")
+            )
+            return len(data[mask]) > 0
+        except Exception:
+            return False

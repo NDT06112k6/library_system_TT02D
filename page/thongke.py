@@ -1,8 +1,6 @@
 import customtkinter as ctk
 from tkinter import ttk
 from query import Query
-import csv
-import os
 
 class ThongKePage:
     def __init__(self, master, app_manager):
@@ -32,9 +30,9 @@ class ThongKePage:
         card_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         card_frame.pack(pady=10, padx=20, fill="x")
 
-        # Card 1: Số sách đang mượn
-        so_dang_muon = self._dem_sach_dang_muon()
-        self._tao_card(card_frame, "Số sách đang mượn", str(so_dang_muon), "#3498db")
+        # Card 1: Tổng số sách trong thư viện
+        tong_sach = self._dem_tong_sach()
+        self._tao_card(card_frame, "Tổng số sách", str(tong_sach), "#3498db")
 
         # Card 2: Số phiếu đã trả
         so_da_tra = self._dem_phieu_da_tra()
@@ -113,14 +111,13 @@ class ThongKePage:
             text_color="white"
         ).pack(pady=(5, 10))
 
-    def _dem_sach_dang_muon(self):
-        """Đếm số sách đang mượn (phiếu có trạng thái 'dang_muon')"""
+    def _dem_tong_sach(self):
+        """Đếm tổng số đầu sách trong thư viện"""
         try:
-            data = self.Q_muontra.list(1, 9999)["data"]
-            count = len(data[data["trang_thai"] == "dang_muon"])
-            return count
+            data = self.Q_sach.list(1, 9999)["data"]
+            return len(data)
         except Exception:
-            return 0
+            return 0    
 
     def _dem_phieu_da_tra(self):
         """Đếm số phiếu đã trả"""

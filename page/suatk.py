@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import messagebox
-import os
 import re
 import customtkinter as ctk
 from query import Query
@@ -171,13 +170,7 @@ class SuaTKPage:
 
         try:
             # Xóa tài khoản cũ
-            self.Q.delete("taikhoan", self.old_username)
-            # Tạo tài khoản mới
-            self.Q.create([
-                new_username,
-                new_password,
-                new_email
-            ])
+            self.Q.update("taikhoan", self.old_username, [new_username, new_password, new_email])
             messagebox.showinfo("Thành công", "Đã cập nhật tài khoản thành công")
             self.app_manager.show_quanlytk_page()
         except Exception as e:

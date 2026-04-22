@@ -1,7 +1,5 @@
 import customtkinter as ctk
 from tkinter import messagebox
-import csv
-import os
 from query import Query
 
 class SuaSachPage:

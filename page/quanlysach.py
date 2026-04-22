@@ -1,7 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox, ttk
-import csv
-import os
+import pandas as pd
 from query import Query
 from common.button import CustomButton
 
@@ -112,15 +111,21 @@ class QuanLySachPage:
 
     def search_books(self):
         """Lọc sách theo tên hoặc tác giả"""
-        keyword = self.entry_search.get().strip().lower()
+        keyword = self.entry_search.get().strip()
         if not keyword:
             self.load_books()
             return
 
-        all_books = self._read_all_books()
-        # Tìm theo tên sách (cột 1) hoặc tác giả (cột 2)
-        filtered = [b for b in all_books if keyword in b[1].lower() or keyword in b[2].lower()]
-        self._populate_tree(filtered)
+        try:
+            # Tìm theo tên sách
+            by_ten = self.Q.search("ten_sach", keyword, exact=False)
+            # Tìm theo tác giả
+            by_tac_gia = self.Q.search("tac_gia", keyword, exact=False)
+            # Gộp kết quả, bỏ trùng
+            result = pd.concat([by_ten, by_tac_gia]).drop_duplicates()
+            self._populate_tree(result.values.tolist())
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
 
     def them_sach(self):
         self.app_manager.show_themsach_page()

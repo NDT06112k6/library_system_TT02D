@@ -1,7 +1,5 @@
 import customtkinter as ctk
 from tkinter import messagebox, ttk
-import csv
-import os
 from datetime import datetime
 import pandas as pd
 from query import Query
@@ -33,6 +31,26 @@ class MuonTraPage:
             font=("Arial", 24, "bold")
         ).pack(pady=15)
 
+        # ===== Thanh tìm kiếm =====
+        search_frame = ctk.CTkFrame(self.master, fg_color="transparent")
+        search_frame.pack(pady=5, padx=20, fill="x")
+
+        self.entry_search = ctk.CTkEntry(
+            search_frame,
+            placeholder_text="Tìm theo username, mã sách hoặc trạng thái...",
+            height=35,
+            corner_radius=8
+        )
+        self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        self.entry_search.bind("<Return>", lambda event: self.search_phieu())
+
+        CustomButton(
+            search_frame,
+            text="Tìm kiếm",
+            command=self.search_phieu,
+            style_type="info"
+        ).pack(side="left")
+
         # ===== Bộ lọc trạng thái =====
         filter_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         filter_frame.pack(pady=5, padx=20, fill="x")
@@ -61,6 +79,7 @@ class MuonTraPage:
         CustomButton(left_frame, text="Làm mới", command=self.load_phieu, style_type="info").pack(side="left", padx=5)
         CustomButton(left_frame, text="Tạo phiếu mượn", command=self.tao_muon, style_type="success").pack(side="left", padx=5)
         CustomButton(left_frame, text="Xác nhận trả", command=self.xac_nhan_tra, style_type="warning").pack(side="left", padx=5)
+        CustomButton(left_frame, text="Xóa phiếu", command=self.xoa_phieu, style_type="danger").pack(side="left", padx=5)
 
         CustomButton(right_frame, text="Quay lại", command=self.back, style_type="secondary").pack(side="right", padx=5)
 
@@ -107,6 +126,7 @@ class MuonTraPage:
 
     def load_phieu(self):
         """Tải danh sách phiếu, lọc theo trạng thái"""
+        self.entry_search.delete(0, "end")  # Xóa search
         all_phieu = self._read_all_phieu()
         filter_val = self.filter_var.get()
 
@@ -164,6 +184,40 @@ class MuonTraPage:
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể cập nhật: {str(e)}")
 
+    def search_phieu(self):
+        """Tìm kiếm phiếu theo username hoặc mã sách"""
+        keyword = self.entry_search.get().strip()
+        if not keyword:
+            self.load_phieu()
+            return
+
+        try:
+            by_username = self.Q_muontra.search("username", keyword, exact=False)
+            by_masach = self.Q_muontra.search("ma_sach", keyword, exact=False)
+            result = pd.concat([by_username, by_masach]).drop_duplicates()
+
+            # Lọc thêm theo trạng thái nếu đang filter
+            filter_val = self.filter_var.get()
+            if filter_val != "tat_ca":
+                result = result[result["trang_thai"] == filter_val]
+
+            # Xóa dữ liệu cũ
+            for item in self.phieu_tree.get_children():
+                self.phieu_tree.delete(item)
+
+            for idx, row in enumerate(result.values.tolist(), 1):
+                trang_thai_display = "Đang mượn" if row[5] == "dang_muon" else "Đã trả"
+                tag = row[5]
+                # Xử lý ngày trả: nếu chưa trả thì hiển thị "Chưa trả"
+                ngay_tra_display = "Chưa trả" if str(row[4]).strip() in ["", "nan"] else row[4]
+                self.phieu_tree.insert("", "end",
+                    values=(idx, row[0], row[1], row[2], row[3], ngay_tra_display, trang_thai_display),
+                    tags=(tag,)
+                )
+            self.status_label.configure(text=f"Tìm thấy {len(result)} phiếu")
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
+
     def back(self):
         self.app_manager.show_quanlytk_page()
 
@@ -195,3 +249,28 @@ class MuonTraPage:
             ma_sach, sach["ten_sach"], sach["tac_gia"],
             sach["the_loai"], so_luong_moi, sach["gia"]
         ])
+
+    def xoa_phieu(self):
+        """Xóa phiếu mượn"""
+        selected = self.phieu_tree.selection()
+        if not selected:
+            messagebox.showwarning("Cảnh báo", "Vui lòng chọn phiếu cần xóa")
+            return
+
+        values = self.phieu_tree.item(selected[0], "values")
+        ma_phieu = values[1]
+
+        if not messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa phiếu '{ma_phieu}'?"):
+            return
+
+        try:
+            # Nếu đang mượn thì cộng lại số lượng sách
+            if values[6] == "Đang mượn":
+                ma_sach = values[3]
+                self._cap_nhat_so_luong_sach(ma_sach, delta=+1)
+
+            self.Q_muontra.delete("ma_phieu", ma_phieu)
+            self.load_phieu()
+            messagebox.showinfo("Thành công", "Đã xóa phiếu thành công")
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")

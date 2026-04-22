@@ -27,8 +27,8 @@ class Query:
             # Khớp chính xác
             result = data[data[title_keyword].astype(str) == str(keyword)]
         else:
-            # Khớp một phần
-            result = data[data[title_keyword].astype(str).str.contains(keyword)]
+            # Khớp một phần, không phân biệt hoa thường
+            result = data[data[title_keyword].astype(str).str.contains(keyword, case=False)]
         return result
 
     def delete(self, title_keyword, keyword, exact=True):

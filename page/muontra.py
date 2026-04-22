@@ -35,14 +35,39 @@ class MuonTraPage:
         search_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         search_frame.pack(pady=5, padx=20, fill="x")
 
+        ctk.CTkLabel(search_frame, text="Tìm kiếm:", font=("Arial", 12)).pack(side="left", padx=(0, 10))
+
         self.entry_search = ctk.CTkEntry(
             search_frame,
-            placeholder_text="Tìm theo username, mã sách hoặc trạng thái...",
             height=35,
             corner_radius=8
         )
         self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        self.entry_search.insert(0, "Tìm theo username, mã sách hoặc trạng thái...")
+        self.entry_search.configure(text_color="gray")
+
+        # Manual placeholder behavior
+        def on_focus_in(event):
+            if self.entry_search.get() == "Tìm theo username, mã sách hoặc trạng thái...":
+                self.entry_search.delete(0, "end")
+                self.entry_search.configure(text_color="black")
+
+        def on_focus_out(event):
+            if self.entry_search.get() == "":
+                self.entry_search.insert(0, "Tìm theo username, mã sách hoặc trạng thái...")
+                self.entry_search.configure(text_color="gray")
+
+        def on_key_press(event):
+            if self.entry_search.get() == "Tìm theo username, mã sách hoặc trạng thái...":
+                self.entry_search.delete(0, "end")
+                self.entry_search.configure(text_color="black")
+
+        self.entry_search.bind("<FocusIn>", on_focus_in)
+        self.entry_search.bind("<FocusOut>", on_focus_out)
+        self.entry_search.bind("<Key>", on_key_press)
+        self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
         self.entry_search.bind("<Return>", lambda event: self.search_phieu())
+        self.entry_search.bind("<KeyRelease>", lambda event: self.search_phieu())
 
         CustomButton(
             search_frame,
@@ -126,7 +151,9 @@ class MuonTraPage:
 
     def load_phieu(self):
         """Tải danh sách phiếu, lọc theo trạng thái"""
-        self.entry_search.delete(0, "end")  # Xóa search
+        self.entry_search.delete(0, "end")
+        self.entry_search.insert(0, "Tìm theo username, mã sách hoặc trạng thái...")
+        self.entry_search.configure(text_color="gray")
         all_phieu = self._read_all_phieu()
         filter_val = self.filter_var.get()
 
@@ -185,8 +212,10 @@ class MuonTraPage:
             messagebox.showerror("Lỗi", f"Không thể cập nhật: {str(e)}")
 
     def search_phieu(self):
-        """Tìm kiếm phiếu theo username hoặc mã sách"""
+        """Tìm kiếm phiếu theo username, mã sách hoặc trạng thái"""
         keyword = self.entry_search.get().strip()
+        if keyword == "Tìm theo username, mã sách hoặc trạng thái...":
+            keyword = ""
         if not keyword:
             self.load_phieu()
             return

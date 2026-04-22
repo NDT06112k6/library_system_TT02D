@@ -34,11 +34,32 @@ class QuanLyTKPage:
 
         self.entry_search = ctk.CTkEntry(
             search_frame,
-            placeholder_text="Tìm theo tên đăng nhập...",
             height=35,
             corner_radius=8
         )
         self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
+        self.entry_search.configure(text_color="gray")
+
+        # Manual placeholder behavior
+        def on_focus_in(event):
+            if self.entry_search.get() == "Tìm theo tên đăng nhập...":
+                self.entry_search.delete(0, "end")
+                self.entry_search.configure(text_color="black")
+
+        def on_focus_out(event):
+            if self.entry_search.get() == "":
+                self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
+                self.entry_search.configure(text_color="gray")
+
+        def on_key_press(event):
+            if self.entry_search.get() == "Tìm theo tên đăng nhập...":
+                self.entry_search.delete(0, "end")
+                self.entry_search.configure(text_color="black")
+
+        self.entry_search.bind("<FocusIn>", on_focus_in)
+        self.entry_search.bind("<FocusOut>", on_focus_out)
+        self.entry_search.bind("<Key>", on_key_press)
 
         CustomButton(
             search_frame,
@@ -120,7 +141,9 @@ class QuanLyTKPage:
 
     def load_accounts(self):
         """Tải toàn bộ tài khoản"""
-        self.entry_search.delete(0, "end")  # Xóa search
+        self.entry_search.delete(0, "end")
+        self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
+        self.entry_search.configure(text_color="gray")
         try:
             data = self.Q.list(1, 9999)["data"]
             self._populate_tree(data)
@@ -164,6 +187,8 @@ class QuanLyTKPage:
     def search_account(self):
         """Tìm kiếm tài khoản theo tên đăng nhập"""
         keyword = self.entry_search.get().strip()
+        if keyword == "Tìm theo tên đăng nhập...":
+            keyword = ""
         try:
             if not keyword:
                 # Nếu không có từ khóa, tải tất cả

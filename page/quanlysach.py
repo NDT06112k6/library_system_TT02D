@@ -26,7 +26,7 @@ class QuanLySachPage:
         ctk.CTkLabel(
             self.master,
             text="Quản lý sách",
-            font=("Arial", 24, "bold")
+            font=("Segoe UI", 24, "bold")
         ).pack(pady=15)
 
         # ===== Thanh tìm kiếm =====
@@ -72,8 +72,8 @@ class QuanLySachPage:
         # Style cho Treeview
         style = ttk.Style()
         style.theme_use("default")
-        style.configure("Treeview", rowheight=30, font=("Arial", 11), borderwidth=0)
-        style.configure("Treeview.Heading", font=("Arial", 12, "bold"))
+        style.configure("Treeview", rowheight=30, font=("Segoe UI", 11), borderwidth=0)
+        style.configure("Treeview.Heading", font=("Segoe UI", 12, "bold"))
 
         columns = ("STT", "Mã sách", "Tên sách", "Tác giả", "Thể loại", "Số lượng", "Giá")
         self.book_tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=15)

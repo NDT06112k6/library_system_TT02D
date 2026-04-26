@@ -24,7 +24,7 @@ class QuanLyTKPage:
         title_label = ctk.CTkLabel(
             self.master,
             text="Quản lý tài khoản",
-            font=("Arial", 24, "bold")
+            font=("Segoe UI", 24, "bold")
         )
         title_label.pack(pady=15)
 
@@ -99,10 +99,10 @@ class QuanLyTKPage:
         style.theme_use("default")
         style.configure("Treeview",
                         rowheight=30,
-                        font=("Arial", 11),
+                        font=("Segoe UI", 11),
                         borderwidth=0)
         style.configure("Treeview.Heading",
-                        font=("Arial", 12, "bold"))
+                        font=("Segoe UI", 12, "bold"))
 
         # Treeview – thêm cột Gmail
         columns = ("STT", "Username", "Password", "Gmail")

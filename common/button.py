@@ -12,14 +12,14 @@ class CustomButton(tk.Button):
     def configure_style(self):
         """Cấu hình style cho button"""
         if self.style_type == "primary":
-            self.configure(bg='#007bff', fg='white', font=('Arial', 10, 'bold'))
+            self.configure(bg='#007bff', fg='white', font=('Segoe UI', 10, 'bold'))
         elif self.style_type == "success":
-            self.configure(bg='#28a745', fg='white', font=('Arial', 10))
+            self.configure(bg='#28a745', fg='white', font=('Segoe UI', 10))
         elif self.style_type == "danger":
-            self.configure(bg='#dc3545', fg='white', font=('Arial', 10))
+            self.configure(bg='#dc3545', fg='white', font=('Segoe UI', 10))
         elif self.style_type == "warning":
-            self.configure(bg='#ffc107', fg='black', font=('Arial', 10))
+            self.configure(bg='#ffc107', fg='black', font=('Segoe UI', 10))
         elif self.style_type == "info":
-            self.configure(bg='#17a2b8', fg='white', font=('Arial', 10))
+            self.configure(bg='#17a2b8', fg='white', font=('Segoe UI', 10))
         elif self.style_type == "secondary":
-            self.configure(bg='#6c757d', fg='white', font=('Arial', 10))
+            self.configure(bg='#6c757d', fg='white', font=('Segoe UI', 10))

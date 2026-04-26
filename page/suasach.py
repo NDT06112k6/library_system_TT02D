@@ -22,7 +22,7 @@ class SuaSachPage:
         ctk.CTkLabel(
             self.master,
             text="Sửa thông tin sách",
-            font=("Arial", 24, "bold"),
+            font=("Segoe UI", 24, "bold"),
             text_color="#0066cc"
         ).pack(pady=20)
 
@@ -44,9 +44,9 @@ class SuaSachPage:
             row = ctk.CTkFrame(form_frame, fg_color="transparent")
             row.pack(fill="x", padx=20, pady=8)
 
-            ctk.CTkLabel(row, text=label, font=("Arial", 12), width=100, anchor="w").pack(side="left")
+            ctk.CTkLabel(row, text=label, font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
 
-            entry = ctk.CTkEntry(row, font=("Arial", 12), corner_radius=8)
+            entry = ctk.CTkEntry(row, font=("Segoe UI", 12), corner_radius=8)
             entry.pack(side="right", fill="x", expand=True)
 
             # Điền dữ liệu cũ vào form

@@ -102,6 +102,7 @@ python -m venv .venv
 ```bash
 # Windows
 .venv\Scripts\activate
+```
 
 ### Bước 4: Cài đặt thư viện
 ```bash

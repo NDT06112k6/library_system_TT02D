@@ -28,14 +28,14 @@ class MuonTraPage:
         ctk.CTkLabel(
             self.master,
             text="Quản lý mượn/trả sách",
-            font=("Arial", 24, "bold")
+            font=("Segoe UI", 24, "bold")
         ).pack(pady=15)
 
         # ===== Thanh tìm kiếm =====
         search_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         search_frame.pack(pady=5, padx=20, fill="x")
 
-        ctk.CTkLabel(search_frame, text="Tìm kiếm:", font=("Arial", 12)).pack(side="left", padx=(0, 10))
+        ctk.CTkLabel(search_frame, text="Tìm kiếm:", font=("Segoe UI", 12)).pack(side="left", padx=(0, 10))
 
         self.entry_search = ctk.CTkEntry(
             search_frame,
@@ -80,7 +80,7 @@ class MuonTraPage:
         filter_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         filter_frame.pack(pady=5, padx=20, fill="x")
 
-        ctk.CTkLabel(filter_frame, text="Lọc:", font=("Arial", 12)).pack(side="left", padx=(0, 10))
+        ctk.CTkLabel(filter_frame, text="Lọc:", font=("Segoe UI", 12)).pack(side="left", padx=(0, 10))
 
         self.filter_var = ctk.StringVar(value="tat_ca")
         options = [("Tất cả", "tat_ca"), ("Đang mượn", "dang_muon"), ("Đã trả", "da_tra")]
@@ -114,8 +114,8 @@ class MuonTraPage:
 
         style = ttk.Style()
         style.theme_use("default")
-        style.configure("Treeview", rowheight=30, font=("Arial", 11), borderwidth=0)
-        style.configure("Treeview.Heading", font=("Arial", 12, "bold"))
+        style.configure("Treeview", rowheight=30, font=("Segoe UI", 11), borderwidth=0)
+        style.configure("Treeview.Heading", font=("Segoe UI", 12, "bold"))
 
         columns = ("STT", "Mã phiếu", "Username", "Mã sách", "Ngày mượn", "Ngày trả", "Trạng thái")
         self.phieu_tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=15)

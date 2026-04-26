@@ -23,7 +23,7 @@ class ThongKePage:
         ctk.CTkLabel(
             self.master,
             text="Thống kê mượn sách",
-            font=("Arial", 24, "bold")
+            font=("Segoe UI", 24, "bold")
         ).pack(pady=15)
 
         # ===== Khung card thống kê =====
@@ -46,7 +46,7 @@ class ThongKePage:
         ctk.CTkLabel(
             self.master,
             text="Top 5 sách mượn nhiều nhất:",
-            font=("Arial", 14, "bold"),
+            font=("Segoe UI", 14, "bold"),
             anchor="w"
         ).pack(padx=20, pady=(15, 5), fill="x")
 
@@ -55,8 +55,8 @@ class ThongKePage:
 
         style = ttk.Style()
         style.theme_use("default")
-        style.configure("Treeview", rowheight=25, font=("Arial", 11), borderwidth=0)
-        style.configure("Treeview.Heading", font=("Arial", 11, "bold"))
+        style.configure("Treeview", rowheight=25, font=("Segoe UI", 11), borderwidth=0)
+        style.configure("Treeview.Heading", font=("Segoe UI", 11, "bold"))
 
         columns = ("STT", "Mã sách", "Tên sách", "Lần mượn")
         self.top_tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=7)
@@ -101,13 +101,13 @@ class ThongKePage:
 
         ctk.CTkLabel(
             card, text=title,
-            font=("Arial", 12),
+            font=("Segoe UI", 12),
             text_color="white"
         ).pack(pady=(10, 5))
 
         ctk.CTkLabel(
             card, text=value,
-            font=("Arial", 28, "bold"),
+            font=("Segoe UI", 28, "bold"),
             text_color="white"
         ).pack(pady=(5, 10))
 

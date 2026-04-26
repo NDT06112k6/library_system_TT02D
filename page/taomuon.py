@@ -27,7 +27,7 @@ class TaoMuonPage:
         ctk.CTkLabel(
             self.master,
             text="Tạo phiếu mượn sách",
-            font=("Arial", 24, "bold"),
+            font=("Segoe UI", 24, "bold"),
             text_color="#0066cc"
         ).pack(pady=20)
 
@@ -38,8 +38,8 @@ class TaoMuonPage:
         # Mã phiếu (tự sinh, không cho sửa)
         row1 = ctk.CTkFrame(form_frame, fg_color="transparent")
         row1.pack(fill="x", padx=20, pady=8)
-        ctk.CTkLabel(row1, text="Mã phiếu:", font=("Arial", 12), width=100, anchor="w").pack(side="left")
-        self.entry_maphieu = ctk.CTkEntry(row1, font=("Arial", 12), corner_radius=8, fg_color="#e9ecef")
+        ctk.CTkLabel(row1, text="Mã phiếu:", font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
+        self.entry_maphieu = ctk.CTkEntry(row1, font=("Segoe UI", 12), corner_radius=8, fg_color="#e9ecef")
         self.entry_maphieu.pack(side="right", fill="x", expand=True)
         self.entry_maphieu.insert(0, self._sinh_ma_phieu())
         self.entry_maphieu.configure(state="disabled")
@@ -47,16 +47,16 @@ class TaoMuonPage:
         # Username người mượn
         row2 = ctk.CTkFrame(form_frame, fg_color="transparent")
         row2.pack(fill="x", padx=20, pady=8)
-        ctk.CTkLabel(row2, text="Username:", font=("Arial", 12), width=100, anchor="w").pack(side="left")
-        self.entry_username = ctk.CTkEntry(row2, font=("Arial", 12), corner_radius=8,
+        ctk.CTkLabel(row2, text="Username:", font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
+        self.entry_username = ctk.CTkEntry(row2, font=("Segoe UI", 12), corner_radius=8,
                                            placeholder_text="Nhập username người mượn...")
         self.entry_username.pack(side="right", fill="x", expand=True)
 
         # Ngày mượn (tự động lấy ngày hiện tại)
         row3 = ctk.CTkFrame(form_frame, fg_color="transparent")
         row3.pack(fill="x", padx=20, pady=8)
-        ctk.CTkLabel(row3, text="Ngày mượn:", font=("Arial", 12), width=100, anchor="w").pack(side="left")
-        self.entry_ngaymuon = ctk.CTkEntry(row3, font=("Arial", 12), corner_radius=8, fg_color="#e9ecef")
+        ctk.CTkLabel(row3, text="Ngày mượn:", font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
+        self.entry_ngaymuon = ctk.CTkEntry(row3, font=("Segoe UI", 12), corner_radius=8, fg_color="#e9ecef")
         self.entry_ngaymuon.pack(side="right", fill="x", expand=True)
         self.entry_ngaymuon.insert(0, datetime.now().strftime("%d/%m/%Y"))
         self.entry_ngaymuon.configure(state="disabled")
@@ -65,7 +65,7 @@ class TaoMuonPage:
         ctk.CTkLabel(
             self.master,
             text="Chọn sách (chỉ hiển thị sách còn hàng):",
-            font=("Arial", 12, "bold"),
+            font=("Segoe UI", 12, "bold"),
             anchor="w"
         ).pack(padx=20, pady=(15, 5), fill="x")
 
@@ -74,8 +74,8 @@ class TaoMuonPage:
 
         style = ttk.Style()
         style.theme_use("default")
-        style.configure("Treeview", rowheight=28, font=("Arial", 11))
-        style.configure("Treeview.Heading", font=("Arial", 11, "bold"))
+        style.configure("Treeview", rowheight=28, font=("Segoe UI", 11))
+        style.configure("Treeview.Heading", font=("Segoe UI", 11, "bold"))
 
         columns = ("Mã sách", "Tên sách", "Tác giả", "Số lượng còn")
         self.sach_tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=8)

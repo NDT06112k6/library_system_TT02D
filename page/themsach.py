@@ -22,7 +22,7 @@ class ThemSachPage:
         ctk.CTkLabel(
             self.master,
             text="Thêm sách mới",
-            font=("Arial", 24, "bold"),
+            font=("Segoe UI", 24, "bold"),
             text_color="#0066cc"
         ).pack(pady=20)
 
@@ -45,9 +45,9 @@ class ThemSachPage:
             row = ctk.CTkFrame(form_frame, fg_color="transparent")
             row.pack(fill="x", padx=20, pady=8)
 
-            ctk.CTkLabel(row, text=label, font=("Arial", 12), width=100, anchor="w").pack(side="left")
+            ctk.CTkLabel(row, text=label, font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
 
-            entry = ctk.CTkEntry(row, font=("Arial", 12), corner_radius=8)
+            entry = ctk.CTkEntry(row, font=("Segoe UI", 12), corner_radius=8)
             entry.pack(side="right", fill="x", expand=True)
 
             self.entries[key] = entry
@@ -56,7 +56,7 @@ class ThemSachPage:
         ctk.CTkLabel(
             form_frame,
             text="• Mã sách không được trùng\n• Số lượng và giá phải là số nguyên dương",
-            font=("Arial", 10),
+            font=("Segoe UI", 10),
             text_color="gray"
         ).pack(pady=10)
 

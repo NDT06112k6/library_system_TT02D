@@ -36,7 +36,7 @@ class SuaTKPage:
         # Title
         ctk.CTkLabel(
             self.master, text="Sửa thông tin tài khoản",
-            font=("Arial", 24, "bold"), text_color='#0066cc'
+            font=("Segoe UI", 24, "bold"), text_color='#0066cc'
         ).pack(pady=20)
 
         # Main frame
@@ -46,7 +46,7 @@ class SuaTKPage:
         # ─── Thông tin hiện tại ───────────────────────────────────────────
         ctk.CTkLabel(
             main_frame, text="Thông tin hiện tại",
-            font=("Arial", 14, "bold"), text_color='#004080'
+            font=("Segoe UI", 14, "bold"), text_color='#004080'
         ).pack(anchor="w", padx=20, pady=(0, 10))
 
         old_frame = ctk.CTkFrame(main_frame, fg_color='#cce7ff', border_width=1)
@@ -54,12 +54,12 @@ class SuaTKPage:
 
         ctk.CTkLabel(old_frame, text=f"Tên đăng nhập: {self.old_username}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
         ctk.CTkLabel(old_frame, text=f"Mật khẩu: {self.old_password}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
-        ctk.CTkLabel(old_frame, text=f"Email: {self.old_email}", font=("Arial", 12)).pack(anchor="w", padx=20, pady=8)
+        ctk.CTkLabel(old_frame, text=f"Email: {self.old_email}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
 
         # ─── Thông tin mới ────────────────────────────────────────────────
         ctk.CTkLabel(
             main_frame, text="Thông tin mới",
-            font=("Arial", 14, "bold"), text_color='#004080'
+            font=("Segoe UI", 14, "bold"), text_color='#004080'
         ).pack(anchor="w", padx=20, pady=(0, 10))
 
         new_frame = ctk.CTkFrame(main_frame, fg_color='#cce7ff', border_width=1)
@@ -68,8 +68,8 @@ class SuaTKPage:
         def make_row(parent, label_text, show=""):
             row = ctk.CTkFrame(parent, fg_color='transparent')
             row.pack(fill="x", padx=20, pady=8)
-            ctk.CTkLabel(row, text=label_text, font=("Arial", 12), width=160, anchor="w").pack(side="left")
-            entry = ctk.CTkEntry(row, font=("Arial", 12), show=show)
+            ctk.CTkLabel(row, text=label_text, font=("Segoe UI", 12), width=160, anchor="w").pack(side="left")
+            entry = ctk.CTkEntry(row, font=("Segoe UI", 12), show=show)
             entry.pack(side="right", fill="x", expand=True)
             return entry
 
@@ -87,14 +87,14 @@ class SuaTKPage:
         tk.Checkbutton(
             new_frame, text="Hiển thị mật khẩu",
             variable=self.show_password, command=self.toggle_password,
-            font=("Arial", 12), bg='#cce7ff'
+            font=("Segoe UI", 12), bg='#cce7ff'
         ).pack(pady=4)
 
         # Validation info
         ctk.CTkLabel(
             new_frame,
             text="• Tên đăng nhập không được trùng\n• Gmail phải đúng định dạng @gmail.com",
-            font=("Arial", 10), text_color="gray"
+            font=("Segoe UI", 10), text_color="gray"
         ).pack(pady=8)
 
         # ─── Buttons ──────────────────────────────────────────────────────

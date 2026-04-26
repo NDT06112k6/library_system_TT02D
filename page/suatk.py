@@ -52,8 +52,8 @@ class SuaTKPage:
         old_frame = ctk.CTkFrame(main_frame, fg_color='#cce7ff', border_width=1)
         old_frame.pack(fill="x", pady=(0, 20))
 
-        ctk.CTkLabel(old_frame, text=f"Tên đăng nhập: {self.old_username}", font=("Arial", 12)).pack(anchor="w", padx=20, pady=8)
-        ctk.CTkLabel(old_frame, text=f"Mật khẩu: {'*' * len(self.old_password)}", font=("Arial", 12)).pack(anchor="w", padx=20, pady=8)
+        ctk.CTkLabel(old_frame, text=f"Tên đăng nhập: {self.old_username}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
+        ctk.CTkLabel(old_frame, text=f"Mật khẩu: {self.old_password}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
         ctk.CTkLabel(old_frame, text=f"Email: {self.old_email}", font=("Arial", 12)).pack(anchor="w", padx=20, pady=8)
 
         # ─── Thông tin mới ────────────────────────────────────────────────

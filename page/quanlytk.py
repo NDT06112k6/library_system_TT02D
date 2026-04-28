@@ -14,7 +14,7 @@ class QuanLyTKPage:
         self.load_accounts()
 
     def config(self):
-        self.master.title("Quản lý tài khoản")
+        self.master.title("👤 Quản lý tài khoản")
         self.master.geometry("900x500")
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
@@ -23,7 +23,7 @@ class QuanLyTKPage:
         # ===== Title =====
         title_label = ctk.CTkLabel(
             self.master,
-            text="Quản lý tài khoản",
+            text="👤Quản lý tài khoản",
             font=("Segoe UI", 24, "bold")
         )
         title_label.pack(pady=15)
@@ -81,15 +81,15 @@ class QuanLyTKPage:
         right_frame = ctk.CTkFrame(button_frame, fg_color="transparent")
         right_frame.pack(side="right")
 
-        CustomButton(left_frame, text="Làm mới",           command=self.load_accounts,                    style_type="info").pack(side="left", padx=5)
-        CustomButton(left_frame, text="Xóa",              command=self.delete_account,                   style_type="danger").pack(side="left", padx=5)
-        CustomButton(left_frame, text="Sửa",              command=self.edit_account,                     style_type="warning").pack(side="left", padx=5)
-        CustomButton(left_frame, text="Quản lý sách",      command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
-        CustomButton(left_frame, text="Mượn/Trả sách",     command=lambda: self.app_manager.show_muontra_page(),    style_type="primary").pack(side="left", padx=5)
-        CustomButton(left_frame, text="Thống kê",           command=lambda: self.app_manager.show_thongke_page(), style_type="info").pack(side="left", padx=5)
+        CustomButton(left_frame, text="🔄 Làm mới",           command=self.load_accounts,                    style_type="info").pack(side="left", padx=5)
+        CustomButton(left_frame, text="🗑️Xóa",              command=self.delete_account,                   style_type="danger").pack(side="left", padx=5)
+        CustomButton(left_frame, text="✏️Sửa",              command=self.edit_account,                     style_type="warning").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📖Quản lý sách",      command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📚Mượn/Trả sách",     command=lambda: self.app_manager.show_muontra_page(),    style_type="primary").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📊Thống kê",           command=lambda: self.app_manager.show_thongke_page(), style_type="info").pack(side="left", padx=5)
 
         # Nút Đăng xuất thay cho Quay lại
-        CustomButton(right_frame, text="Đăng xuất", command=self.dang_xuat, style_type="secondary").pack(side="right", padx=5)
+        CustomButton(right_frame, text="🚪Đăng xuất", command=self.dang_xuat, style_type="secondary").pack(side="right", padx=5)
 
         # ===== Table Frame =====
         table_frame = ctk.CTkFrame(self.master, corner_radius=10)

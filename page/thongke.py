@@ -3,7 +3,19 @@ from tkinter import ttk
 from query import Query
 
 class ThongKePage:
+    """
+    Trang thống kê.
+
+    Hiển thị các thống kê về sách và mượn trả.
+    """
     def __init__(self, master, app_manager):
+        """
+        Khởi tạo ThongKePage.
+
+        Args:
+            master: Cửa sổ chính
+            app_manager: Quản lý ứng dụng
+        """
         self.master = master
         self.app_manager = app_manager
         self.Q_muontra = Query("database/muontra.csv", ["ma_phieu", "username", "ma_sach", "ngay_muon", "ngay_tra", "trang_thai"])
@@ -13,12 +25,18 @@ class ThongKePage:
         self.view()
 
     def config(self):
+        """
+        Cấu hình cửa sổ thống kê.
+        """
         self.master.title("Thống kê")
         self.master.geometry("900x600")
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
     def view(self):
+        """
+        Vẽ giao diện thống kê.
+        """
         # ===== Tiêu đề =====
         ctk.CTkLabel(
             self.master,
@@ -161,4 +179,7 @@ class ThongKePage:
             print(f"Lỗi load top sách: {str(e)}")
 
     def back(self):
+        """
+        Quay lại trang quản lý tài khoản.
+        """
         self.app_manager.show_quanlytk_page()

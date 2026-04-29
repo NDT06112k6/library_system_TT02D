@@ -19,11 +19,11 @@ class LoginPage:
         self.config()
         self.view()
         # Tự động điền thông tin ghi nhớ nếu có
-        self.load_remembered()
+        self.load_remembered_account()
 
     def config(self):
         """Cấu hình cửa sổ đăng nhập"""
-        self.master.title("Đăng nhập")
+        self.master.title("🔐 Đăng nhập")
         self.master.geometry("400x370")
 
         # Theme
@@ -31,7 +31,7 @@ class LoginPage:
         ctk.set_default_color_theme("blue")
 
     def view(self):
-        # Frame chính (card)
+        """Vẽ giao diện đăng nhập"""
         frame = ctk.CTkFrame(self.master, corner_radius=12)
         frame.pack(pady=20, padx=30, fill="both", expand=True)
 
@@ -43,7 +43,7 @@ class LoginPage:
         )
         label.pack(pady=(20, 10))
 
-        # Username
+        # Ô nhập username
         self.entry_username = ctk.CTkEntry(
             frame,
             placeholder_text="Nhập username...",
@@ -52,7 +52,7 @@ class LoginPage:
         )
         self.entry_username.pack(pady=8, padx=20, fill="x")
 
-        # Password
+        # Ô nhập password
         self.entry_password = ctk.CTkEntry(
             frame,
             placeholder_text="Nhập password...",
@@ -62,7 +62,7 @@ class LoginPage:
         )
         self.entry_password.pack(pady=8, padx=20, fill="x")
 
-        # Gmail
+        # Ô nhập gmail
         self.entry_gmail = ctk.CTkEntry(
             frame,
             placeholder_text="Nhập Gmail...",
@@ -71,7 +71,7 @@ class LoginPage:
         )
         self.entry_gmail.pack(pady=8, padx=20, fill="x")
 
-        # Ghi nhớ tài khoản checkbox
+        # Checkbox ghi nhớ tài khoản
         self.remember_var = ctk.BooleanVar(value=False)
         self.chk_remember = ctk.CTkCheckBox(
             frame,
@@ -83,7 +83,7 @@ class LoginPage:
         )
         self.chk_remember.pack(pady=(4, 0), padx=20, anchor="w")
 
-        # Button frame
+        # Khung nút
         btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
         btn_frame.pack(pady=20)
 
@@ -109,8 +109,8 @@ class LoginPage:
         )
         btn_login.grid(row=0, column=1, padx=10)
 
-    def load_remembered(self):
-        """Tự động điền thông tin nếu đã ghi nhớ"""
+    def load_remembered_account(self):
+        """Tự động điền tài khoản ghi nhớ nếu có"""
         try:
             if os.path.exists(REMEMBER_FILE):
                 with open(REMEMBER_FILE, "r", encoding="utf-8") as f:
@@ -124,7 +124,7 @@ class LoginPage:
             pass
 
     def save_remember(self, username, password, gmail):
-        """Lưu thông tin đăng nhập"""
+        """Lưu tài khoản vào file remember.json"""
         os.makedirs("database", exist_ok=True)
         try:
             with open(REMEMBER_FILE, "w", encoding="utf-8") as f:
@@ -147,6 +147,7 @@ class LoginPage:
             pass
 
     def tao_tk(self):
+        """Chuyển đến trang tạo tài khoản"""
         self.app_manager.show_taotk_page()
 
     def login(self):

@@ -30,7 +30,7 @@ class SuaTKPage:
     def config(self):
         self.master.title("Sửa tài khoản")
         self.master.geometry("500x450")
-        self.master.resizable(False, False)
+        self.master.resizable(True, True)
 
     def view(self):
         # Title

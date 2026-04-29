@@ -1,4 +1,6 @@
+# Import thư viện tkinter để tạo giao diện
 import tkinter as tk
+# Import các trang từ module page
 from page.login import LoginPage
 from page.taotk import TaoTKPage
 from page.quanlytk import QuanLyTKPage
@@ -11,7 +13,17 @@ from page.taomuon import TaoMuonPage
 from page.thongke import ThongKePage
 
 class AppManager:
+    """
+    Lớp quản lý ứng dụng chính.
+
+    Quản lý các trang và điều hướng giữa chúng.
+    """
     def __init__(self):
+        """
+        Khởi tạo AppManager.
+
+        Tạo cửa sổ chính và hiển thị trang đăng nhập.
+        """
         self.root = tk.Tk()
         self.root.title("Ứng dụng Đăng nhập")
         self.root.geometry("300x200")

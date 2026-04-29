@@ -8,20 +8,38 @@ from common.validation import Validation
 
 
 class TaoTKPage:
+    """
+    Trang tạo tài khoản mới.
+
+    Cho phép người dùng nhập thông tin để tạo tài khoản.
+    """
     def __init__(self, master, app_manager):
+        """
+        Khởi tạo TaoTKPage.
+
+        Args:
+            master: Cửa sổ chính
+            app_manager: Quản lý ứng dụng
+        """
         self.master = master
         self.app_manager = app_manager
         self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
         self.config()
         self.view()
 
-    def config(self):   
+    def config(self):
+        """
+        Cấu hình cửa sổ tạo tài khoản.
+        """
         self.master.title("Tạo tài khoản")
         self.master.geometry("420x420")
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
     def view(self):
+        """
+        Vẽ giao diện tạo tài khoản.
+        """
         for widget in self.master.winfo_children():
             widget.destroy()
 
@@ -136,12 +154,22 @@ class TaoTKPage:
         ).pack()
 
     def on_focus(self, entry, is_focused):
+        """
+        Xử lý sự kiện focus cho entry.
+
+        Args:
+            entry: Ô nhập liệu
+            is_focused: Trạng thái focus
+        """
         if is_focused:
             entry.configure(border_color="#2980B9", border_width=2)
         else:
             entry.configure(border_color="#ABB2B9", border_width=1)
 
     def back_login(self):
+        """
+        Quay lại trang đăng nhập.
+        """
         self.app_manager.show_login_page()
 
     # ── Validation helpers ──────────────────────────────────────────────────

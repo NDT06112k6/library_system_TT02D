@@ -2,6 +2,9 @@
 from datetime import datetime
 
 class Validation:
+    """
+    Lớp chứa các phương thức kiểm tra dữ liệu.
+    """
     @staticmethod
     def validate_email(email):
         """"Kiểm tra email hợp lệ"""

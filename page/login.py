@@ -8,16 +8,21 @@ REMEMBER_FILE = "database/remember.json"
 
 
 class LoginPage:
+    """Trang đăng nhập - xác thực người dùng"""
+
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
+        # Khởi tạo Query để xử lý file tk.csv
         self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
 
         self.config()
         self.view()
+        # Tự động điền thông tin ghi nhớ nếu có
         self.load_remembered()
 
     def config(self):
+        """Cấu hình cửa sổ đăng nhập"""
         self.master.title("Đăng nhập")
         self.master.geometry("400x370")
 

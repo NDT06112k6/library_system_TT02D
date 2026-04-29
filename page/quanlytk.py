@@ -5,7 +5,19 @@ from query import Query
 
 
 class QuanLyTKPage:
+    """
+    Trang quản lý tài khoản.
+
+    Hiển thị danh sách tài khoản và cho phép thêm, sửa, xóa.
+    """
     def __init__(self, master, app_manager):
+        """
+        Khởi tạo QuanLyTKPage.
+
+        Args:
+            master: Cửa sổ chính
+            app_manager: Quản lý ứng dụng
+        """
         self.master = master
         self.app_manager = app_manager
         self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
@@ -14,12 +26,18 @@ class QuanLyTKPage:
         self.load_accounts()
 
     def config(self):
+        """
+        Cấu hình cửa sổ quản lý tài khoản.
+        """
         self.master.title("👤 Quản lý tài khoản")
         self.master.geometry("900x500")
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
     def view(self):
+        """
+        Vẽ giao diện quản lý tài khoản.
+        """
         # ===== Title =====
         title_label = ctk.CTkLabel(
             self.master,
@@ -82,14 +100,14 @@ class QuanLyTKPage:
         right_frame.pack(side="right")
 
         CustomButton(left_frame, text="🔄 Làm mới",           command=self.load_accounts,                    style_type="info").pack(side="left", padx=5)
-        CustomButton(left_frame, text="🗑️Xóa",              command=self.delete_account,                   style_type="danger").pack(side="left", padx=5)
-        CustomButton(left_frame, text="✏️Sửa",              command=self.edit_account,                     style_type="warning").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📖Quản lý sách",      command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📚Mượn/Trả sách",     command=lambda: self.app_manager.show_muontra_page(),    style_type="primary").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📊Thống kê",           command=lambda: self.app_manager.show_thongke_page(), style_type="info").pack(side="left", padx=5)
+        CustomButton(left_frame, text="🗑️ Xóa",              command=self.delete_account,                   style_type="danger").pack(side="left", padx=5)
+        CustomButton(left_frame, text="✏️ Sửa",              command=self.edit_account,                     style_type="warning").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📖 Quản lý sách",      command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📚 Mượn/Trả sách",     command=lambda: self.app_manager.show_muontra_page(),    style_type="primary").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📊 Thống kê",           command=lambda: self.app_manager.show_thongke_page(), style_type="info").pack(side="left", padx=5)
 
         # Nút Đăng xuất thay cho Quay lại
-        CustomButton(right_frame, text="🚪Đăng xuất", command=self.dang_xuat, style_type="secondary").pack(side="right", padx=5)
+        CustomButton(right_frame, text="🚪 Đăng xuất", command=self.dang_xuat, style_type="secondary").pack(side="right", padx=5)
 
         # ===== Table Frame =====
         table_frame = ctk.CTkFrame(self.master, corner_radius=10)
@@ -152,6 +170,9 @@ class QuanLyTKPage:
             self.status_label.configure(text="Lỗi tải dữ liệu")
 
     def delete_account(self):
+        """
+        Xóa tài khoản được chọn.
+        """
         selected_item = self.account_tree.selection()
         if not selected_item:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn tài khoản cần xóa")
@@ -168,6 +189,9 @@ class QuanLyTKPage:
                 messagebox.showerror("Lỗi", f"Không thể xóa tài khoản: {str(e)}")
 
     def edit_account(self):
+        """
+        Chỉnh sửa tài khoản được chọn.
+        """
         selected_item = self.account_tree.selection()
         if not selected_item:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn tài khoản cần sửa")

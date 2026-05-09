@@ -23,7 +23,7 @@ class TaoTKPage:
         """
         self.master = master
         self.app_manager = app_manager
-        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
+        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "hoten", "sdt", "chucvu", "email"])
         self.config()
         self.view()
 
@@ -32,7 +32,7 @@ class TaoTKPage:
         Cấu hình cửa sổ tạo tài khoản.
         """
         self.master.title("Tạo tài khoản")
-        self.master.geometry("420x420")
+        self.master.geometry("420x650")
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
@@ -91,6 +91,60 @@ class TaoTKPage:
         self.entry_gmail.pack(pady=(0, 10))
         self.entry_gmail.bind("<FocusIn>",  lambda e: self.on_focus(self.entry_gmail, True))
         self.entry_gmail.bind("<FocusOut>", lambda e: self.on_focus(self.entry_gmail, False))
+
+        # ----- Họ tên -----
+        ctk.CTkLabel(
+            form_frame,
+            text="HỌ TÊN",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color="#566573"
+        ).pack(anchor="w", padx=10, pady=(0, 4))
+
+        self.entry_hoten = ctk.CTkEntry(
+            form_frame, width=280, height=40,
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            placeholder_text="Nhập họ tên...",
+            border_color="#ABB2B9", border_width=1, corner_radius=8
+        )
+        self.entry_hoten.pack(pady=(0, 10))
+        self.entry_hoten.bind("<FocusIn>",  lambda e: self.on_focus(self.entry_hoten, True))
+        self.entry_hoten.bind("<FocusOut>", lambda e: self.on_focus(self.entry_hoten, False))
+
+        # ----- SĐT -----
+        ctk.CTkLabel(
+            form_frame,
+            text="SỐ ĐIỆN THOẠI",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color="#566573"
+        ).pack(anchor="w", padx=10, pady=(0, 4))
+
+        self.entry_sdt = ctk.CTkEntry(
+            form_frame, width=280, height=40,
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            placeholder_text="Nhập SĐT...",
+            border_color="#ABB2B9", border_width=1, corner_radius=8
+        )
+        self.entry_sdt.pack(pady=(0, 10))
+        self.entry_sdt.bind("<FocusIn>",  lambda e: self.on_focus(self.entry_sdt, True))
+        self.entry_sdt.bind("<FocusOut>", lambda e: self.on_focus(self.entry_sdt, False))
+
+        # ----- Chức vụ -----
+        ctk.CTkLabel(
+            form_frame,
+            text="CHỨC VỤ",
+            font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+            text_color="#566573"
+        ).pack(anchor="w", padx=10, pady=(0, 4))
+
+        self.entry_chucvu = ctk.CTkEntry(
+            form_frame, width=280, height=40,
+            font=ctk.CTkFont(family="Segoe UI", size=12),
+            placeholder_text="Nhập chức vụ...",
+            border_color="#ABB2B9", border_width=1, corner_radius=8
+        )
+        self.entry_chucvu.pack(pady=(0, 10))
+        self.entry_chucvu.bind("<FocusIn>",  lambda e: self.on_focus(self.entry_chucvu, True))
+        self.entry_chucvu.bind("<FocusOut>", lambda e: self.on_focus(self.entry_chucvu, False))
 
         # ----- Password -----
         ctk.CTkLabel(
@@ -192,11 +246,14 @@ class TaoTKPage:
     def tao_tk(self):
         username = self.entry_username.get().strip()
         gmail    = self.entry_gmail.get().strip()
+        hoten    = self.entry_hoten.get().strip()
+        sdt      = self.entry_sdt.get().strip()
+        chucvu   = self.entry_chucvu.get().strip()
         password = self.entry_password.get().strip()
         confirm  = self.entry_confirm.get().strip()
         
         # 1. Kiểm tra bỏ trống
-        if not username or not password or not gmail:
+        if not username or not password or not gmail or not hoten or not sdt or not chucvu:
             messagebox.showerror("Thông báo", "Vui lòng nhập đầy đủ thông tin")
             return
 
@@ -218,7 +275,7 @@ class TaoTKPage:
         # 5. Tạo tài khoản bằng Query
         try:
             os.makedirs("database", exist_ok=True)
-            self.Q.create([username, password, gmail])
+            self.Q.create([username, password, hoten, sdt, chucvu, gmail])
             messagebox.showinfo("Thông báo", "Tạo tài khoản thành công!")
             self.app_manager.show_login_page()
         except Exception as e:

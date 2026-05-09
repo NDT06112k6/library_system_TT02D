@@ -14,7 +14,7 @@ class LoginPage:
         self.master = master
         self.app_manager = app_manager
         # Khởi tạo Query để xử lý file tk.csv
-        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
+        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "hoten", "sdt", "chucvu", "email"])
 
         self.config()
         self.view()

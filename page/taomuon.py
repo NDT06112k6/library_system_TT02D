@@ -191,8 +191,11 @@ class TaoMuonPage:
         sach = self.Q_sach.search("ma_sach", ma_sach, exact=True).iloc[0]
         so_luong_moi = str(max(0, int(sach["so_luong"]) + delta))
         self.Q_sach.update("ma_sach", ma_sach, [
-            ma_sach, sach["ten_sach"], sach["tac_gia"],
-            sach["the_loai"], so_luong_moi, sach["gia"]
+            ma_sach, 
+            sach["ten_sach"], 
+            sach["tac_gia"],
+            sach["the_loai"], 
+            so_luong_moi, sach["gia"]
         ])
     
     def _da_muon_chua_tra(self, username, ma_sach):

@@ -15,13 +15,11 @@ from page.thongke import ThongKePage
 class AppManager:
     """
     Lớp quản lý ứng dụng chính.
-
     Quản lý các trang và điều hướng giữa chúng.
     """
     def __init__(self):
         """
         Khởi tạo AppManager.
-
         Tạo cửa sổ chính và hiển thị trang đăng nhập.
         """
         self.root = tk.Tk()
@@ -54,11 +52,12 @@ class AppManager:
         self.root.geometry("600x400")
         self.current_page = QuanLyTKPage(self.root, self)
 
-    def show_suatk_page(self, username=None, password=None):
+    def show_suatk_page(self, username=None, password=None, hoten=None, sdt=None, chucvu=None, email=None):
         """Hiển thị trang sửa tài khoản"""
         self.clear_current_page()
-        self.root.geometry("500x450")
-        self.current_page = SuaTKPage(self.root, self, username, password)
+        self.root.geometry("550x750")
+        self.current_page = SuaTKPage(self.root, self, username, password, hoten, sdt, chucvu, email)
+    
     def show_quanlysach_page(self):
         """Hiển thị trang quản lý sách"""
         self.clear_current_page()

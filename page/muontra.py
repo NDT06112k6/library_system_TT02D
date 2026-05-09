@@ -265,7 +265,8 @@ class MuonTraPage:
         """Cập nhật ngày trả và trạng thái"""
         # Lấy dữ liệu phiếu hiện tại
         phieu = self.Q_muontra.search("ma_phieu", ma_phieu, exact=True).iloc[0]
-        self.Q_muontra.update("ma_phieu", ma_phieu, [
+        self.Q_muontra.update("ma_phieu", ma_phieu, 
+                              [
             ma_phieu, phieu["username"], phieu["ma_sach"],
             phieu["ngay_muon"], ngay_tra, "da_tra"
         ])

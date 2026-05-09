@@ -20,7 +20,7 @@ class QuanLyTKPage:
         """
         self.master = master
         self.app_manager = app_manager
-        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
+        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "hoten", "sdt", "chucvu", "email"])
         self.config()
         self.view()
         self.load_accounts()
@@ -122,8 +122,8 @@ class QuanLyTKPage:
         style.configure("Treeview.Heading",
                         font=("Segoe UI", 12, "bold"))
 
-        # Treeview – thêm cột Gmail
-        columns = ("STT", "Username", "Password", "Gmail")
+        # Treeview – các cột mới
+        columns = ("STT", "Username", "Password", "HoTen", "SDT", "ChucVu", "Gmail", "HanhDong")
         self.account_tree = ttk.Treeview(
             table_frame,
             columns=columns,
@@ -134,12 +134,20 @@ class QuanLyTKPage:
         self.account_tree.heading("STT",      text="STT")
         self.account_tree.heading("Username", text="Tên đăng nhập")
         self.account_tree.heading("Password", text="Mật khẩu")
+        self.account_tree.heading("HoTen",    text="Họ tên")
+        self.account_tree.heading("SDT",      text="SĐT")
+        self.account_tree.heading("ChucVu",   text="Chức vụ")
         self.account_tree.heading("Gmail",    text="Gmail")
+        self.account_tree.heading("HanhDong", text="Hành động")
 
-        self.account_tree.column("STT",      width=50,  anchor="center")
-        self.account_tree.column("Username", width=200, anchor="center")
-        self.account_tree.column("Password", width=200, anchor="center")
-        self.account_tree.column("Gmail",    width=300, anchor="center")
+        self.account_tree.column("STT",      width=40,  anchor="center")
+        self.account_tree.column("Username", width=120, anchor="center")
+        self.account_tree.column("Password", width=100, anchor="center")
+        self.account_tree.column("HoTen",    width=120, anchor="center")
+        self.account_tree.column("SDT",      width=100, anchor="center")
+        self.account_tree.column("ChucVu",   width=100, anchor="center")
+        self.account_tree.column("Gmail",    width=150, anchor="center")
+        self.account_tree.column("HanhDong", width=80,  anchor="center")
 
         scrollbar = ctk.CTkScrollbar(table_frame, command=self.account_tree.yview)
         self.account_tree.configure(yscrollcommand=scrollbar.set)
@@ -200,8 +208,12 @@ class QuanLyTKPage:
         item_values  = self.account_tree.item(selected_item[0], "values")
         old_username = item_values[1]
         old_password = item_values[2]
+        old_hoten = item_values[3]
+        old_sdt = item_values[4]
+        old_chucvu = item_values[5]
+        old_email = item_values[6]
 
-        self.app_manager.show_suatk_page(old_username, old_password)
+        self.app_manager.show_suatk_page(old_username, old_password, old_hoten, old_sdt, old_chucvu, old_email)
 
     def dang_xuat(self):
         """Hỏi xác nhận trước khi đăng xuất"""
@@ -237,7 +249,10 @@ class QuanLyTKPage:
             stt = idx + 1
             username = row.get("taikhoan", "")
             password = row.get("matkhau", "")
+            hoten = row.get("hoten", "")
+            sdt = row.get("sdt", "")
+            chucvu = row.get("chucvu", "")
             email = row.get("email", "")
-            self.account_tree.insert("", "end", values=(stt, username, password, email))
+            self.account_tree.insert("", "end", values=(stt, username, password, hoten, sdt, chucvu, email, "Sửa/Xóa"))
 
     

@@ -1,18 +1,17 @@
 import customtkinter as ctk
 from tkinter import messagebox, ttk
 from datetime import datetime
-import pandas as pd
-from query import Query
+from query.muontra import MuonTraData
+from query.books import BookData
 
 from common.button import CustomButton
-
 
 class MuonTraPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
-        self.Q_muontra = Query("database/muontra.csv", ["ma_phieu", "username", "ma_sach", "ngay_muon", "ngay_tra", "trang_thai"])
-        self.Q_sach = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
+        self.muontra_data = MuonTraData()
+        self.book_data = BookData()
         self.config()
         self.view()
         self.load_phieu()
@@ -154,7 +153,7 @@ class MuonTraPage:
         self.entry_search.delete(0, "end")
         self.entry_search.insert(0, "Tìm theo username, mã sách hoặc trạng thái...")
         self.entry_search.configure(text_color="gray")
-        all_phieu = self._read_all_phieu()
+        all_phieu = self.muontra_data.get_all()
         filter_val = self.filter_var.get()
 
         if filter_val == "tat_ca":
@@ -170,7 +169,7 @@ class MuonTraPage:
             trang_thai_display = "Đang mượn" if row[5] == "dang_muon" else "Đã trả"
             tag = row[5]  # "dang_muon" hoặc "da_tra"
             # Xử lý ngày trả: nếu chưa trả thì hiển thị "Chưa trả"
-            ngay_tra_display = "Chưa trả" if pd.isna(row[4]) or str(row[4]).strip() == "" else row[4]
+            ngay_tra_display = "Chưa trả" if str(row[4]).strip() in ["", "nan"] else row[4]
             self.phieu_tree.insert("", "end",
                 values=(idx, row[0], row[1], row[2], row[3], ngay_tra_display, trang_thai_display),
                 tags=(tag,)
@@ -182,6 +181,7 @@ class MuonTraPage:
         self.app_manager.show_taomuon_page()
 
     def xac_nhan_tra(self):
+        """Xử lý logic xác nhận trả sách cho phiếu đang được chọn trong bảng."""
         """Xác nhận trả sách cho phiếu được chọn"""
         selected = self.phieu_tree.selection()
         if not selected:
@@ -203,8 +203,8 @@ class MuonTraPage:
             ma_sach = values[3]
             ngay_tra = datetime.now().strftime("%d/%m/%Y")
 
-            self._cap_nhat_tra(ma_phieu, ngay_tra)
-            self._cap_nhat_so_luong_sach(ma_sach, delta=+1)  # Trả sách → cộng 1
+            self.muontra_data.confirm_return(ma_phieu, ngay_tra)
+            self.book_data.update_quantity(ma_sach, delta=1)
 
             self.load_phieu()
             messagebox.showinfo("Thành công", "Đã xác nhận trả sách thành công")
@@ -212,6 +212,7 @@ class MuonTraPage:
             messagebox.showerror("Lỗi", f"Không thể cập nhật: {str(e)}")
 
     def search_phieu(self):
+        """Tìm kiếm phiếu mượn/trả dựa trên từ khóa và bộ lọc trạng thái."""
         """Tìm kiếm phiếu theo username, mã sách hoặc trạng thái"""
         keyword = self.entry_search.get().strip()
         if keyword == "Tìm theo username, mã sách hoặc trạng thái...":
@@ -221,20 +222,19 @@ class MuonTraPage:
             return
 
         try:
-            by_username = self.Q_muontra.search("username", keyword, exact=False)
-            by_masach = self.Q_muontra.search("ma_sach", keyword, exact=False)
-            result = pd.concat([by_username, by_masach]).drop_duplicates()
+            # Sử dụng method đã được định nghĩa trong MuonTraData
+            result_list = self.muontra_data.search_muon_tra(keyword)
 
             # Lọc thêm theo trạng thái nếu đang filter
             filter_val = self.filter_var.get()
-            if filter_val != "tat_ca":
-                result = result[result["trang_thai"] == filter_val]
 
             # Xóa dữ liệu cũ
             for item in self.phieu_tree.get_children():
                 self.phieu_tree.delete(item)
 
-            for idx, row in enumerate(result.values.tolist(), 1):
+            for idx, row in enumerate(result_list, 1):
+                if filter_val != "tat_ca" and row[5] != filter_val:
+                    continue
                 trang_thai_display = "Đang mượn" if row[5] == "dang_muon" else "Đã trả"
                 tag = row[5]
                 # Xử lý ngày trả: nếu chưa trả thì hiển thị "Chưa trả"
@@ -243,7 +243,7 @@ class MuonTraPage:
                     values=(idx, row[0], row[1], row[2], row[3], ngay_tra_display, trang_thai_display),
                     tags=(tag,)
                 )
-            self.status_label.configure(text=f"Tìm thấy {len(result)} phiếu")
+            self.status_label.configure(text=f"Tìm kiếm hoàn tất")
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
 
@@ -255,32 +255,21 @@ class MuonTraPage:
     def _read_all_phieu(self):
         """Đọc toàn bộ phiếu từ CSV"""
         try:
-            data = self.Q_muontra.list(1, 9999)["data"]
-            return data.values.tolist()
+            return self.muontra_data.get_all()
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể đọc dữ liệu: {str(e)}")
             return []
 
     def _cap_nhat_tra(self, ma_phieu, ngay_tra):
         """Cập nhật ngày trả và trạng thái"""
-        # Lấy dữ liệu phiếu hiện tại
-        phieu = self.Q_muontra.search("ma_phieu", ma_phieu, exact=True).iloc[0]
-        self.Q_muontra.update("ma_phieu", ma_phieu, 
-                              [
-            ma_phieu, phieu["username"], phieu["ma_sach"],
-            phieu["ngay_muon"], ngay_tra, "da_tra"
-        ])
+        self.muontra_data.confirm_return(ma_phieu, ngay_tra)
 
     def _cap_nhat_so_luong_sach(self, ma_sach, delta):
         """Cộng hoặc trừ số lượng sách"""
-        sach = self.Q_sach.search("ma_sach", ma_sach, exact=True).iloc[0]
-        so_luong_moi = str(max(0, int(sach["so_luong"]) + delta))
-        self.Q_sach.update("ma_sach", ma_sach, [
-            ma_sach, sach["ten_sach"], sach["tac_gia"],
-            sach["the_loai"], so_luong_moi, sach["gia"]
-        ])
+        self.book_data.update_quantity(ma_sach, delta)
 
     def xoa_phieu(self):
+        """Xử lý xóa phiếu mượn được chọn khỏi hệ thống."""
         """Xóa phiếu mượn"""
         selected = self.phieu_tree.selection()
         if not selected:
@@ -299,7 +288,7 @@ class MuonTraPage:
                 ma_sach = values[3]
                 self._cap_nhat_so_luong_sach(ma_sach, delta=+1)
 
-            self.Q_muontra.delete("ma_phieu", ma_phieu)
+            self.muontra_data.delete("ma_phieu", ma_phieu)
             self.load_phieu()
             messagebox.showinfo("Thành công", "Đã xóa phiếu thành công")
         except Exception as e:

@@ -1,14 +1,13 @@
 import customtkinter as ctk
 from tkinter import messagebox
-import csv
-import os
-from query import Query
+from query.books import BookData
+from common.theme import Colors, Fonts, Spacing
 
 class ThemSachPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
-        self.Q = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
+        self.book_data = BookData()
         self.config()
         self.view()
 
@@ -18,63 +17,72 @@ class ThemSachPage:
         self.master.resizable(True, True)
 
     def view(self):
-        # Tiêu đề
+        # Master Frame
+        main_frame = ctk.CTkFrame(self.master, fg_color=Colors.BG_MAIN)
+        main_frame.pack(fill="both", expand=True)
+
+        # Header
+        header = ctk.CTkFrame(main_frame, fg_color=Colors.PRIMARY, corner_radius=0)
+        header.pack(fill="x")
         ctk.CTkLabel(
-            self.master,
-            text="Thêm sách mới",
-            font=("Segoe UI", 24, "bold"),
-            text_color="#0066cc"
-        ).pack(pady=20)
+            header,
+            text="📖 THÊM SÁCH MỚI",
+            font=Fonts.HEADER,
+            text_color=Colors.WHITE
+        ).pack(pady=Spacing.MD)
 
         # Form frame
-        form_frame = ctk.CTkFrame(self.master, fg_color="white")
-        form_frame.pack(expand=True, fill="both", padx=20, pady=10)
+        form_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
+        form_frame.pack(fill="both", expand=True, padx=Spacing.LG, pady=Spacing.LG)
 
-        # Các trường nhập liệu
+        def create_form_field(parent, label_text, placeholder=""):
+            """Tạo form field chuẩn"""
+            label = ctk.CTkLabel(parent, text=label_text, font=Fonts.SMALL_BOLD, text_color=Colors.TEXT_PRIMARY)
+            label.pack(anchor="w", padx=Spacing.MD, pady=(Spacing.MD, Spacing.XS))
+            
+            entry = ctk.CTkEntry(
+                parent, height=40, font=Fonts.REGULAR, 
+                placeholder_text=placeholder,
+                fg_color=Colors.BG_MAIN, border_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY
+            )
+            entry.pack(fill="x", padx=Spacing.MD, pady=(0, Spacing.MD))
+            return entry
+
         self.entries = {}
-        fields = [
-            ("ma_sach",   "Mã sách"),
-            ("ten_sach",  "Tên sách"),
-            ("tac_gia",   "Tác giả"),
-            ("the_loai",  "Thể loại"),
-            ("so_luong",  "Số lượng"),
-            ("gia",       "Giá (VNĐ)"),
-        ]
+        self.entries["ma_sach"] = create_form_field(form_frame, "📝 Mã Sách (VD: S001)", "Nhập mã sách...")
+        self.entries["ten_sach"] = create_form_field(form_frame, "📖 Tên Sách", "Nhập tên sách...")
+        self.entries["tac_gia"] = create_form_field(form_frame, "✍️ Tác Giả", "Nhập tên tác giả...")
+        self.entries["the_loai"] = create_form_field(form_frame, "📂 Thể Loại", "Nhập thể loại...")
 
-        for key, label in fields:
-            row = ctk.CTkFrame(form_frame, fg_color="transparent")
-            row.pack(fill="x", padx=20, pady=8)
+        # Row: số lượng & giá
+        row_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
+        row_frame.pack(fill="x", padx=Spacing.MD, pady=Spacing.MD)
 
-            ctk.CTkLabel(row, text=label, font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
+        left_col = ctk.CTkFrame(row_frame, fg_color="transparent")
+        left_col.pack(side="left", fill="both", expand=True, padx=(0, Spacing.SM))
+        ctk.CTkLabel(left_col, text="📚 Số Lượng", font=Fonts.SMALL_BOLD).pack(anchor="w", pady=(0, Spacing.XS))
+        self.entries["so_luong"] = ctk.CTkEntry(left_col, height=40, font=Fonts.REGULAR, fg_color=Colors.BG_MAIN, border_color=Colors.BORDER)
+        self.entries["so_luong"].pack(fill="x")
 
-            entry = ctk.CTkEntry(row, font=("Segoe UI", 12), corner_radius=8)
-            entry.pack(side="right", fill="x", expand=True)
+        right_col = ctk.CTkFrame(row_frame, fg_color="transparent")
+        right_col.pack(side="right", fill="both", expand=True, padx=(Spacing.SM, 0))
+        ctk.CTkLabel(right_col, text="💰 Giá (VND)", font=Fonts.SMALL_BOLD).pack(anchor="w", pady=(0, Spacing.XS))
+        self.entries["gia"] = ctk.CTkEntry(right_col, height=40, font=Fonts.REGULAR, fg_color=Colors.BG_MAIN, border_color=Colors.BORDER)
+        self.entries["gia"].pack(fill="x")
 
-            self.entries[key] = entry
-
-        # Ghi chú validation
-        ctk.CTkLabel(
-            form_frame,
-            text="• Mã sách không được trùng\n• Số lượng và giá phải là số nguyên dương",
-            font=("Segoe UI", 10),
-            text_color="gray"
-        ).pack(pady=10)
-
-        # Nút bấm
-        btn_frame = ctk.CTkFrame(self.master, fg_color="white")
-        btn_frame.pack(pady=15)
+        # Button frame
+        btn_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
+        btn_frame.pack(fill="x", padx=Spacing.MD, pady=Spacing.MD)
 
         ctk.CTkButton(
-            btn_frame, text="Thêm sách",
-            fg_color="#28a745", hover_color="#218838",
-            command=self.save
-        ).pack(side="left", padx=10)
+            btn_frame, text="💾 Lưu Sách", height=40, font=Fonts.BOLD,
+            fg_color=Colors.SUCCESS, hover_color="#1E8449", command=self.save
+        ).pack(side="left", fill="x", expand=True, padx=(0, Spacing.SM))
 
         ctk.CTkButton(
-            btn_frame, text="Hủy bỏ",
-            fg_color="#6c757d", hover_color="#5a6268",
-            command=self.cancel
-        ).pack(side="left", padx=10)
+            btn_frame, text="← Quay Lại", height=40, font=Fonts.BOLD,
+            fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, hover_color=Colors.BORDER_DARK, command=self.cancel
+        ).pack(side="left", fill="x", expand=True)
 
     def validate(self):
         """Kiểm tra dữ liệu đầu vào"""
@@ -93,32 +101,23 @@ class ThemSachPage:
                 return None
 
         # Kiểm tra mã sách trùng
-        if self._ma_sach_exists(data["ma_sach"]):
+        if self.book_data.check_exists(data["ma_sach"]):
             messagebox.showerror("Lỗi", f"Mã sách '{data['ma_sach']}' đã tồn tại")
             return None
 
         return data
 
     def save(self):
-        """Lưu sách mới vào CSV"""
+        """Xử lý logic khi người dùng nhấn nút 'Thêm sách'."""
         data = self.validate()
         if data is None:
             return
 
         try:
-            os.makedirs("database", exist_ok=True)
-            database_path = "database/books.csv"
-
-            # Tạo header nếu file chưa tồn tại
-            if not os.path.exists(database_path):
-                with open(database_path, "w", encoding="utf-8", newline="") as f:
-                    csv.writer(f).writerow(["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
-
-            with open(database_path, "a", encoding="utf-8", newline="") as f:
-                csv.writer(f).writerow([
-                    data["ma_sach"], data["ten_sach"], data["tac_gia"],
-                    data["the_loai"], data["so_luong"], data["gia"]
-                ])
+            self.book_data.create([
+                data["ma_sach"], data["ten_sach"], data["tac_gia"],
+                data["the_loai"], data["so_luong"], data["gia"]
+            ])
 
             messagebox.showinfo("Thành công", "Đã thêm sách thành công")
             self.app_manager.show_quanlysach_page()
@@ -128,8 +127,3 @@ class ThemSachPage:
 
     def cancel(self):
         self.app_manager.show_quanlysach_page()
-
-    def _ma_sach_exists(self, ma_sach):
-        """Kiểm tra mã sách đã tồn tại chưa"""
-        result = self.Q.search("ma_sach", ma_sach, exact=True)
-        return len(result) > 0

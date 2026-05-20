@@ -1,12 +1,12 @@
 import customtkinter as ctk
 from tkinter import messagebox
-from query import Query
+from query.books import BookData
 
 class SuaSachPage:
     def __init__(self, master, app_manager, ma_sach):
         self.master = master
         self.app_manager = app_manager
-        self.Q = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
+        self.book_data = BookData()
         self.ma_sach = ma_sach
         self.old_data = self._load_book_data(ma_sach)
         self.config()
@@ -100,7 +100,7 @@ class SuaSachPage:
         return data
 
     def save(self):
-        """Lưu thay đổi vào CSV"""
+        """Xử lý logic khi người dùng nhấn nút 'Lưu thay đổi' thông tin sách."""
         data = self.validate()
         if data is None:
             return
@@ -132,14 +132,14 @@ class SuaSachPage:
 
     def _load_book_data(self, ma_sach):
         """Đọc dữ liệu sách theo mã sách"""
-        result = self.Q.search("ma_sach", ma_sach, exact=True)
+        result = self.book_data.search("ma_sach", ma_sach, exact=True)
         if result.empty:
             return {}
         return result.iloc[0].to_dict()
 
     def _update_book_in_file(self, new_data):
         """Ghi dữ liệu mới vào CSV"""
-        self.Q.update("ma_sach", self.ma_sach, [
+        self.book_data.update("ma_sach", self.ma_sach, [
             self.ma_sach,
             new_data["ten_sach"],
             new_data["tac_gia"],

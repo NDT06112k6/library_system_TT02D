@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox, ttk
 from common.button import CustomButton
-from query import Query
+from query.taikhoan import AccountData
 
 
 class QuanLyTKPage:
@@ -20,7 +20,7 @@ class QuanLyTKPage:
         """
         self.master = master
         self.app_manager = app_manager
-        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "hoten", "sdt", "chucvu", "email"])
+        self.account_data = AccountData()
         self.config()
         self.view()
         self.load_accounts()
@@ -171,8 +171,8 @@ class QuanLyTKPage:
         self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
         self.entry_search.configure(text_color="gray")
         try:
-            data = self.Q.list(1, 9999)["data"]
-            self._populate_tree(data)
+            rows = self.account_data.get_all_accounts()
+            self._populate_tree(rows)
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải dữ liệu: {str(e)}")
             self.status_label.configure(text="Lỗi tải dữ liệu")
@@ -190,7 +190,7 @@ class QuanLyTKPage:
 
         if messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa tài khoản '{username}'?"):
             try:
-                self.Q.delete("taikhoan", username)
+                self.account_data.delete_account(username)
                 self.load_accounts()
                 messagebox.showinfo("Thành công", "Đã xóa tài khoản thành công")
             except Exception as e:
@@ -231,9 +231,9 @@ class QuanLyTKPage:
                 self.load_accounts()
             else:
                 # Tìm kiếm một phần theo tên đăng nhập
-                result = self.Q.search("taikhoan", keyword, exact=False)
-                self._populate_tree(result)
-                self.status_label.configure(text=f"Tìm thấy {len(result)} tài khoản")
+                rows = self.account_data.search_accounts(keyword)
+                self._populate_tree(rows)
+                self.status_label.configure(text=f"Tìm thấy {len(rows)} tài khoản")
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
             self.status_label.configure(text="Lỗi tìm kiếm")
@@ -244,15 +244,16 @@ class QuanLyTKPage:
         for item in self.account_tree.get_children():
             self.account_tree.delete(item)
         
-        # Thêm dữ liệu mới
-        for idx, row in data.iterrows():
-            stt = idx + 1
-            username = row.get("taikhoan", "")
-            password = row.get("matkhau", "")
-            hoten = row.get("hoten", "")
-            sdt = row.get("sdt", "")
-            chucvu = row.get("chucvu", "")
-            email = row.get("email", "")
-            self.account_tree.insert("", "end", values=(stt, username, password, hoten, sdt, chucvu, email, "Sửa/Xóa"))
-
+        # Dữ liệu truyền vào bây giờ là list of lists
+        for idx, row in enumerate(data, 1):
+            self.account_tree.insert("", "end", values=(
+                idx, 
+                row[0], # Username
+                row[1], # Password
+                row[2], # HoTen
+                row[3], # SDT
+                row[4], # ChucVu
+                row[5], # Email
+                "Sửa/Xóa"
+            ))
     

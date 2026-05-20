@@ -1,8 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
-import re
 import customtkinter as ctk
-from query import Query
+from query.taikhoan import AccountData
 from common.validation import Validation
 
 
@@ -16,14 +15,14 @@ class SuaTKPage:
         self.old_sdt = sdt or ""
         self.old_chucvu = chucvu or ""
         self.old_email = email or ""
-        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "hoten", "sdt", "chucvu", "email"])
+        self.account_data = AccountData()
         self.config()
         self.view()
 
     def get_current_email(self, username):
         """Get current email for the username"""
         try:
-            result = self.Q.search("taikhoan", username, exact=True)
+            result = self.account_data.search("taikhoan", username, exact=True)
             if not result.empty:
                 return result.iloc[0]["email"]
             return ""
@@ -156,15 +155,10 @@ class SuaTKPage:
             entry.delete(0, tk.END)
             entry.insert(0, val)
 
-    def is_valid_gmail(self, email: str) -> bool:
-        """Kiểm tra định dạng @gmail.com"""
-        pattern = r'^[a-zA-Z0-9._%+\-]+@gmail\.com$'
-        return bool(re.match(pattern, email))
-
     def username_exists(self, username: str) -> bool:
         """Kiểm tra tên đăng nhập đã tồn tại (bỏ qua tài khoản hiện tại)"""
         try:
-            result = self.Q.search("taikhoan", username, exact=True)
+            result = self.account_data.search("taikhoan", username, exact=True)
             if result.empty:
                 return False
             # Nếu có kết quả, kiểm tra xem có phải tài khoản hiện tại không
@@ -181,14 +175,22 @@ class SuaTKPage:
             messagebox.showerror("Lỗi", f"Tên đăng nhập '{new_username}' đã tồn tại!")
             return False
 
-        # Định dạng Gmail
-        if new_email and not self.is_valid_gmail(new_email):
-            messagebox.showerror("Lỗi", "Gmail không hợp lệ!\nĐịnh dạng đúng: example@gmail.com")
+        # Kiểm tra Email & SĐT
+        valid_email, msg_email = Validation.is_valid_email_simple(new_email)
+        if not valid_email:
+            messagebox.showerror("Lỗi", msg_email)
+            return False
+
+        new_sdt = self.entry_sdt.get().strip()
+        valid_phone, msg_phone = Validation.is_valid_phone(new_sdt)
+        if not valid_phone:
+            messagebox.showerror("Lỗi", msg_phone)
             return False
 
         return True
 
     def save_changes(self):
+        """Xử lý logic khi người dùng nhấn nút 'Lưu thay đổi' tài khoản."""
         if not self.validate_input():
             return
 
@@ -207,7 +209,7 @@ class SuaTKPage:
 
         try:
             # Cập nhật tài khoản
-            self.Q.update("taikhoan", self.old_username, [new_username, new_password, new_hoten, new_sdt, new_chucvu, new_email])
+            self.account_data.update("taikhoan", self.old_username, [new_username, new_password, new_hoten, new_sdt, new_chucvu, new_email])
             messagebox.showinfo("Thành công", "Đã cập nhật tài khoản thành công")
             self.app_manager.show_quanlytk_page()
         except Exception as e:

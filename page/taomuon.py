@@ -1,18 +1,21 @@
 import customtkinter as ctk
 from tkinter import messagebox, ttk
-import os
-from query import Query
-import pandas as pd
 from datetime import datetime
+from query.books import BookData
+from query.muontra import MuonTraData
+from query.taikhoan import AccountData
 
 
 class TaoMuonPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
-        self.Q_sach = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
-        self.Q_muontra = Query("database/muontra.csv", ["ma_phieu", "username", "ma_sach", "ngay_muon", "ngay_tra", "trang_thai"])
-        self.Q_tk = Query("database/tk.csv", ["taikhoan", "matkhau", "email"])
+        
+        # Sử dụng các lớp dữ liệu chuyên biệt
+        self.book_data = BookData()
+        self.muontra_data = MuonTraData()
+        self.account_data = AccountData()
+
         self.config()
         self.view()
         self.load_sach_available()
@@ -41,7 +44,7 @@ class TaoMuonPage:
         ctk.CTkLabel(row1, text="Mã phiếu:", font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
         self.entry_maphieu = ctk.CTkEntry(row1, font=("Segoe UI", 12), corner_radius=8, fg_color="#e9ecef")
         self.entry_maphieu.pack(side="right", fill="x", expand=True)
-        self.entry_maphieu.insert(0, self._sinh_ma_phieu())
+        self.entry_maphieu.insert(0, self.muontra_data.generate_new_id())
         self.entry_maphieu.configure(state="disabled")
 
         # Username người mượn
@@ -116,10 +119,10 @@ class TaoMuonPage:
     def load_sach_available(self):
         """Chỉ hiển thị sách còn số lượng > 0"""
         try:
-            data = self.Q_sach.list(1, 9999)["data"]
-            for _, row in data.iterrows():
-                if int(row["so_luong"]) > 0:
-                    self.sach_tree.insert("", "end", values=(row["ma_sach"], row["ten_sach"], row["tac_gia"], row["so_luong"]))
+            books = self.book_data.get_all()
+            for row in books:
+                if int(row[4]) > 0: # row[4] là so_luong
+                    self.sach_tree.insert("", "end", values=(row[0], row[1], row[2], row[4]))
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải danh sách sách: {str(e)}")
 
@@ -131,7 +134,7 @@ class TaoMuonPage:
             return
 
         # Kiểm tra username tồn tại trong tk.csv
-        if not self._username_exists(username):
+        if not self.account_data.check_exists(username):
             messagebox.showerror("Lỗi", f"Username '{username}' không tồn tại")
             return
 
@@ -143,7 +146,7 @@ class TaoMuonPage:
         
         # Kiểm tra user đã mượn sách này chưa (chưa trả)
         ma_sach = self.sach_tree.item(selected[0], "values")[0]
-        if self._da_muon_chua_tra(username, ma_sach):
+        if self.muontra_data.is_currently_borrowing(username, ma_sach):
             messagebox.showerror("Lỗi", f"'{username}' đang mượn sách này rồi, chưa trả!")
             return
 
@@ -153,11 +156,10 @@ class TaoMuonPage:
 
         try:
             # Ghi phiếu mượn
-            os.makedirs("database", exist_ok=True)
-            self.Q_muontra.create([ma_phieu, username, ma_sach, ngay_muon, "", "dang_muon"])
+            self.muontra_data.create([ma_phieu, username, ma_sach, ngay_muon, "", "dang_muon"])
 
             # Trừ 1 số lượng sách
-            self._cap_nhat_so_luong_sach(ma_sach, delta=-1)
+            self.book_data.update_quantity(ma_sach, delta=-1)
 
             messagebox.showinfo("Thành công", f"Đã tạo phiếu mượn '{ma_phieu}' thành công")
             self.app_manager.show_muontra_page()
@@ -167,46 +169,3 @@ class TaoMuonPage:
 
     def cancel(self):
         self.app_manager.show_muontra_page()
-
-    # ===== HÀM HỖ TRỢ =====
-
-    def _sinh_ma_phieu(self):
-        """Tự động sinh mã phiếu tiếp theo"""
-        try:
-            max_val = self.Q_muontra.max("ma_phieu")
-            if pd.isna(max_val):
-                return "MT001"
-            so = int(str(max_val)[2:]) + 1
-            return f"MT{str(so).zfill(3)}"
-        except Exception:
-            return "MT001"
-
-    def _username_exists(self, username):
-        """Kiểm tra username có trong tk.csv không"""
-        result = self.Q_tk.search("taikhoan", username, exact=True)
-        return len(result) > 0
-
-    def _cap_nhat_so_luong_sach(self, ma_sach, delta):
-        """Cộng hoặc trừ số lượng sách"""
-        sach = self.Q_sach.search("ma_sach", ma_sach, exact=True).iloc[0]
-        so_luong_moi = str(max(0, int(sach["so_luong"]) + delta))
-        self.Q_sach.update("ma_sach", ma_sach, [
-            ma_sach, 
-            sach["ten_sach"], 
-            sach["tac_gia"],
-            sach["the_loai"], 
-            so_luong_moi, sach["gia"]
-        ])
-    
-    def _da_muon_chua_tra(self, username, ma_sach):
-        """Kiểm tra user đang mượn sách này chưa trả"""
-        try:
-            data = self.Q_muontra.list(1, 9999)["data"]
-            mask = (
-                (data["username"] == username) &
-                (data["ma_sach"] == ma_sach) &
-                (data["trang_thai"] == "dang_muon")
-            )
-            return len(data[mask]) > 0
-        except Exception:
-            return False

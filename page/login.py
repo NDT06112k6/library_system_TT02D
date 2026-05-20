@@ -1,8 +1,10 @@
 import customtkinter as ctk
 from tkinter import messagebox
+import tkinter as tk
 import os
 import json
-from query import Query
+from query.taikhoan import AccountData
+from common.theme import Colors, Fonts, Spacing
 
 REMEMBER_FILE = "database/remember.json"
 
@@ -13,8 +15,8 @@ class LoginPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
-        # Khởi tạo Query để xử lý file tk.csv
-        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "hoten", "sdt", "chucvu", "email"])
+        # Sử dụng class chuyên biệt
+        self.account_data = AccountData()
 
         self.config()
         self.view()
@@ -23,91 +25,108 @@ class LoginPage:
 
     def config(self):
         """Cấu hình cửa sổ đăng nhập"""
-        self.master.title("🔐 Đăng nhập")
-        self.master.geometry("400x370")
+        self.master.title("🔐 Đăng Nhập")
+        self.master.geometry("400x480")
+        self.master.configure(fg_color=Colors.BG_MAIN)
 
         # Theme
         ctk.set_appearance_mode("light")
-        ctk.set_default_color_theme("blue")
 
     def view(self):
         """Vẽ giao diện đăng nhập"""
-        frame = ctk.CTkFrame(self.master, corner_radius=12)
-        frame.pack(pady=20, padx=30, fill="both", expand=True)
+        main_frame = ctk.CTkFrame(
+            self.master,
+            fg_color=Colors.BG_SECONDARY,
+            corner_radius=12,
+            border_width=1,
+            border_color=Colors.BORDER
+        )
+        main_frame.pack(padx=Spacing.LG, pady=Spacing.LG, fill="both", expand=True)
 
         # Tiêu đề
-        label = ctk.CTkLabel(
-            frame,
-            text="ĐĂNG NHẬP",
-            font=("Segoe UI", 24, "bold")
+        title = ctk.CTkLabel(
+            main_frame,
+            text="🔐 ĐĂNG NHẬP",
+            font=Fonts.HEADER,
+            text_color=Colors.PRIMARY
         )
-        label.pack(pady=(20, 10))
+        title.pack(pady=(Spacing.XL, Spacing.LG))
 
-        # Ô nhập username
+        # Input Fields
+        ctk.CTkLabel(
+            main_frame,
+            text="Username",
+            font=Fonts.SMALL_BOLD,
+            text_color=Colors.TEXT_PRIMARY
+        ).pack(anchor="w", padx=Spacing.XL, pady=(Spacing.MD, Spacing.XS))
+
         self.entry_username = ctk.CTkEntry(
-            frame,
+            main_frame,
             placeholder_text="Nhập username...",
-            height=35,
-            corner_radius=8
+            height=40,
+            font=Fonts.REGULAR,
+            fg_color=Colors.BG_MAIN,
+            border_color=Colors.BORDER,
+            text_color=Colors.TEXT_PRIMARY
         )
-        self.entry_username.pack(pady=8, padx=20, fill="x")
+        self.entry_username.pack(fill="x", padx=Spacing.XL, pady=(0, Spacing.MD))
 
-        # Ô nhập password
+        ctk.CTkLabel(
+            main_frame,
+            text="Password",
+            font=Fonts.SMALL_BOLD,
+            text_color=Colors.TEXT_PRIMARY
+        ).pack(anchor="w", padx=Spacing.XL, pady=(Spacing.MD, Spacing.XS))
+
         self.entry_password = ctk.CTkEntry(
-            frame,
+            main_frame,
             placeholder_text="Nhập password...",
             show="*",
-            height=35,
-            corner_radius=8
+            height=40,
+            font=Fonts.REGULAR,
+            fg_color=Colors.BG_MAIN,
+            border_color=Colors.BORDER,
+            text_color=Colors.TEXT_PRIMARY
         )
-        self.entry_password.pack(pady=8, padx=20, fill="x")
+        self.entry_password.pack(fill="x", padx=Spacing.XL, pady=(0, Spacing.MD))
 
-        # Ô nhập gmail
-        self.entry_gmail = ctk.CTkEntry(
-            frame,
-            placeholder_text="Nhập Gmail...",
-            height=35,
-            corner_radius=8
-        )
-        self.entry_gmail.pack(pady=8, padx=20, fill="x")
-
-        # Checkbox ghi nhớ tài khoản
-        self.remember_var = ctk.BooleanVar(value=False)
-        self.chk_remember = ctk.CTkCheckBox(
-            frame,
-            text="Ghi nhớ tài khoản",
+        self.remember_var = tk.BooleanVar(value=False)
+        checkbox = ctk.CTkCheckBox(
+            main_frame,
+            text="Ghi nhớ mật khẩu",
+            font=Fonts.SMALL,
+            text_color=Colors.TEXT_SECONDARY,
             variable=self.remember_var,
-            font=("Segoe UI", 12),
-            checkbox_width=18,
-            checkbox_height=18
+            fg_color=Colors.PRIMARY,
+            hover_color=Colors.PRIMARY_HOVER
         )
-        self.chk_remember.pack(pady=(4, 0), padx=20, anchor="w")
+        checkbox.pack(anchor="w", padx=Spacing.XL, pady=Spacing.MD)
 
-        # Khung nút
-        btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
-        btn_frame.pack(pady=20)
+        # Buttons Frame
+        btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
+        btn_frame.pack(fill="x", padx=Spacing.XL, pady=Spacing.XL)
 
-        # Nút tạo tài khoản
-        btn_register = ctk.CTkButton(
+        ctk.CTkButton(
             btn_frame,
-            text="Tạo tài khoản",
-            fg_color="#6c757d",
-            hover_color="#5a6268",
-            corner_radius=10,
-            command=self.tao_tk
-        )
-        btn_register.grid(row=0, column=0, padx=10)
+            text="🔓 Đăng Nhập",
+            command=self.login,
+            height=45,
+            font=Fonts.BOLD,
+            fg_color=Colors.PRIMARY,
+            hover_color=Colors.PRIMARY_HOVER,
+            text_color=Colors.WHITE
+        ).pack(side="left", fill="x", expand=True, padx=(0, Spacing.SM))
 
-        # Nút đăng nhập
-        btn_login = ctk.CTkButton(
+        ctk.CTkButton(
             btn_frame,
-            text="Đăng nhập",
-            fg_color="#1A73E8",
-            hover_color="#1669c1",
-            corner_radius=10,
-            command=self.login
-        )
-        btn_login.grid(row=0, column=1, padx=10)
+            text="📝 Tạo TK",
+            command=self.tao_tk,
+            height=45,
+            font=Fonts.BOLD,
+            fg_color=Colors.BORDER,
+            hover_color=Colors.BORDER_DARK,
+            text_color=Colors.TEXT_PRIMARY
+        ).pack(side="left", fill="x", expand=True)
 
     def load_remembered_account(self):
         """Tự động điền tài khoản ghi nhớ nếu có"""
@@ -118,21 +137,19 @@ class LoginPage:
                 if data.get("remember"):
                     self.entry_username.insert(0, data.get("username", ""))
                     self.entry_password.insert(0, data.get("password", ""))
-                    self.entry_gmail.insert(0, data.get("gmail", ""))
                     self.remember_var.set(True)
         except Exception:
             pass
 
-    def save_remember(self, username, password, gmail):
-        """Lưu tài khoản vào file remember.json"""
+    def save_remember(self, username, password):
+        """Lưu username và mật khẩu vào file remember.json"""
         os.makedirs("database", exist_ok=True)
         try:
             with open(REMEMBER_FILE, "w", encoding="utf-8") as f:
                 json.dump({
                     "remember": True,
                     "username": username,
-                    "password": password,
-                    "gmail": gmail
+                    "password": password
                 }, f, ensure_ascii=False)
         except Exception:
             pass
@@ -151,26 +168,31 @@ class LoginPage:
         self.app_manager.show_taotk_page()
 
     def login(self):
-        username = self.entry_username.get().strip()
-        password = self.entry_password.get().strip()
-        gmail = self.entry_gmail.get().strip()
-
+        """Xử lý logic khi người dùng nhấn nút 'Đăng nhập'."""
         try:
-            # Tìm kiếm bằng Query
-            result = self.Q.search("taikhoan", username, exact=True)
-            
-            if not result.empty:
-                row = result.iloc[0]
-                if row["matkhau"] == password and row["email"] == gmail:
-                    # Xử lý ghi nhớ tài khoản
-                    if self.remember_var.get():
-                        self.save_remember(username, password, gmail)
-                    else:
-                        self.clear_remember()
+            username = self.entry_username.get().strip()
+            password = self.entry_password.get().strip()
 
-                    messagebox.showinfo("Thông báo", "Đăng nhập thành công")
-                    self.app_manager.show_quanlytk_page()
-                    return
+            if not username:
+                messagebox.showerror("Lỗi", "Vui lòng nhập username")
+                return
+            if not password:
+                messagebox.showerror("Lỗi", "Vui lòng nhập password")
+                return
+
+            # Sử dụng phương thức authenticate đã đóng gói logic
+            user = self.account_data.authenticate(username, password)
+            
+            if user:
+                if self.remember_var.get():
+                    self.save_remember(username, password)
+                else:
+                    self.clear_remember()
+
+                messagebox.showinfo("Thông báo", "Đăng nhập thành công")
+                # Sử dụng after để tránh lỗi 'invalid command name' khi chuyển trang
+                self.master.after(10, lambda: self.app_manager.show_main_page(username))
+                return
 
             messagebox.showerror("Thông báo", "Đăng nhập thất bại")
 

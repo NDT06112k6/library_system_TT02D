@@ -1,5 +1,6 @@
 # Import thư viện tkinter để tạo giao diện
 import tkinter as tk
+import customtkinter as ctk
 # Import các trang từ module page
 from page.login import LoginPage
 from page.taotk import TaoTKPage
@@ -11,6 +12,7 @@ from page.suasach import SuaSachPage
 from page.muontra import MuonTraPage
 from page.taomuon import TaoMuonPage
 from page.thongke import ThongKePage
+from page.main_page import MainPage
 
 class AppManager:
     """
@@ -22,7 +24,7 @@ class AppManager:
         Khởi tạo AppManager.
         Tạo cửa sổ chính và hiển thị trang đăng nhập.
         """
-        self.root = tk.Tk()
+        self.root = ctk.CTk()
         self.root.title("Ứng dụng Đăng nhập")
         self.root.geometry("300x200")
         self.current_page = None
@@ -30,20 +32,26 @@ class AppManager:
 
     def clear_current_page(self):
         """Xóa tất cả widget của page hiện tại"""
-        if self.current_page:
-            for widget in self.root.winfo_children():
-                widget.destroy()
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        self.current_page = None
 
     def show_login_page(self):
         """Hiển thị trang đăng nhập"""
         self.clear_current_page()
-        self.root.geometry("300x230")
+        self.root.geometry("400x480")
         self.current_page = LoginPage(self.root, self)
+
+    def show_main_page(self, username="Admin"):
+        """Hiển thị trang Dashboard chính"""
+        self.clear_current_page()
+        self.root.geometry("1000x650")
+        self.current_page = MainPage(self.root, self, username)
 
     def show_taotk_page(self):
         """Hiển thị trang tạo tài khoản"""
         self.clear_current_page()
-        self.root.geometry("300x200")
+        self.root.geometry("420x650")
         self.current_page = TaoTKPage(self.root, self)
 
     def show_quanlytk_page(self):

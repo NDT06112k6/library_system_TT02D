@@ -1,9 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox
-import os
-import re
-from query import Query
-from common.validation import Validation
+from query.taikhoan import AccountData
 from common.validation import Validation
 
 
@@ -23,7 +20,7 @@ class TaoTKPage:
         """
         self.master = master
         self.app_manager = app_manager
-        self.Q = Query("database/tk.csv", ["taikhoan", "matkhau", "hoten", "sdt", "chucvu", "email"])
+        self.account_data = AccountData()
         self.config()
         self.view()
 
@@ -226,24 +223,10 @@ class TaoTKPage:
         """
         self.app_manager.show_login_page()
 
-    # ── Validation helpers ──────────────────────────────────────────────────
-
-    def is_valid_gmail(self, email: str) -> bool:
-        """Kiểm tra định dạng @gmail.com"""
-        pattern = r'^[a-zA-Z0-9._%+\-]+@gmail\.com$'
-        return bool(re.match(pattern, email))
-
-    def username_exists(self, username: str) -> bool:
-        """Kiểm tra tên đăng nhập đã tồn tại"""
-        try:
-            result = self.Q.search("taikhoan", username, exact=True)
-            return not result.empty
-        except Exception:
-            return False
-
     # ── Main action ─────────────────────────────────────────────────────────
 
     def tao_tk(self):
+        """Xử lý logic khi người dùng nhấn nút 'TẠO TÀI KHOẢN'."""
         username = self.entry_username.get().strip()
         gmail    = self.entry_gmail.get().strip()
         hoten    = self.entry_hoten.get().strip()
@@ -252,30 +235,38 @@ class TaoTKPage:
         password = self.entry_password.get().strip()
         confirm  = self.entry_confirm.get().strip()
         
-        # 1. Kiểm tra bỏ trống
-        if not username or not password or not gmail or not hoten or not sdt or not chucvu:
-            messagebox.showerror("Thông báo", "Vui lòng nhập đầy đủ thông tin")
+        # 1. Kiểm tra username và sự tồn tại
+        valid, msg = Validation.is_valid_username(username)
+        if not valid:
+            messagebox.showerror("Lỗi", msg)
             return
 
-        # 2. Mật khẩu khớp
+        if self.account_data.check_exists(username):
+            messagebox.showerror("Lỗi", f"Tên đăng nhập '{username}' đã tồn tại!")
+            return
+
+        # 2. Kiểm tra Email & SĐT
+        valid_email, msg_email = Validation.is_valid_email_simple(gmail)
+        if not valid_email:
+            messagebox.showerror("Lỗi", msg_email)
+            return
+
+        valid_phone, msg_phone = Validation.is_valid_phone(sdt)
+        if not valid_phone:
+            messagebox.showerror("Lỗi", msg_phone)
+            return
+
+        # 3. Kiểm tra các trường khác và mật khẩu
+        if not hoten or not chucvu or not password:
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin")
+            return
+
         if password != confirm:
-            messagebox.showerror("Thông báo", "Mật khẩu xác nhận không khớp")
+            messagebox.showerror("Lỗi", "Mật khẩu xác nhận không khớp")
             return
 
-        # 3. Định dạng Gmail
-        if not self.is_valid_gmail(gmail):
-            messagebox.showerror("Thông báo", "Gmail không hợp lệ!\nĐịnh dạng đúng: example@gmail.com")
-            return
-
-        # 4. Tên đăng nhập trùng
-        if self.username_exists(username):
-            messagebox.showerror("Thông báo", f"Tên đăng nhập '{username}' đã tồn tại!\nVui lòng chọn tên khác.")
-            return
-
-        # 5. Tạo tài khoản bằng Query
         try:
-            os.makedirs("database", exist_ok=True)
-            self.Q.create([username, password, hoten, sdt, chucvu, gmail])
+            self.account_data.create([username, password, hoten, sdt, chucvu, gmail])
             messagebox.showinfo("Thông báo", "Tạo tài khoản thành công!")
             self.app_manager.show_login_page()
         except Exception as e:

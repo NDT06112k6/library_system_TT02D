@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from tkinter import ttk
-from query import Query
+from query.muontra import MuonTraData
+from query.books import BookData
 
 class ThongKePage:
     """
@@ -18,8 +19,8 @@ class ThongKePage:
         """
         self.master = master
         self.app_manager = app_manager
-        self.Q_muontra = Query("database/muontra.csv", ["ma_phieu", "username", "ma_sach", "ngay_muon", "ngay_tra", "trang_thai"])
-        self.Q_sach = Query("database/books.csv", ["ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
+        self.muontra_data = MuonTraData()
+        self.book_data = BookData()
         
         self.config()
         self.view()
@@ -132,42 +133,35 @@ class ThongKePage:
     def _dem_tong_sach(self):
         """Đếm tổng số đầu sách trong thư viện"""
         try:
-            data = self.Q_sach.list(1, 9999)["data"]
-            return len(data)
+            return self.book_data.get_total_count()
         except Exception:
             return 0    
 
     def _dem_phieu_da_tra(self):
         """Đếm số phiếu đã trả"""
         try:
-            data = self.Q_muontra.list(1, 9999)["data"]
-            count = len(data[data["trang_thai"] == "da_tra"])
-            return count
+            counts = self.muontra_data.get_status_counts()
+            return counts.get("da_tra", 0)
         except Exception:
             return 0
 
     def _dem_phieu_dang_muon(self):
         """Đếm số phiếu đang mượn"""
         try:
-            data = self.Q_muontra.list(1, 9999)["data"]
-            count = len(data[data["trang_thai"] == "dang_muon"])
-            return count
+            counts = self.muontra_data.get_status_counts()
+            return counts.get("dang_muon", 0)
         except Exception:
             return 0
 
     def _load_top_sach(self):
         """Tải top 5 sách mượn nhiều nhất"""
         try:
-            # Đọc toàn bộ phiếu mượn
-            muontra_data = self.Q_muontra.list(1, 9999)["data"]
+            # Lấy top sách từ data layer
+            top_list = self.muontra_data.get_top_borrowed_books(5)
             
-            # Đếm số lần mượn mỗi sách
-            so_muon = muontra_data["ma_sach"].value_counts().head(5)
-            
-            # Đếm STT
-            for idx, (ma_sach, count) in enumerate(so_muon.items(), 1):
+            for idx, (ma_sach, count) in enumerate(top_list, 1):
                 # Lấy tên sách từ books.csv
-                sach_data = self.Q_sach.search("ma_sach", str(ma_sach), exact=True)
+                sach_data = self.book_data.search("ma_sach", str(ma_sach), exact=True)
                 if not sach_data.empty:
                     ten_sach = sach_data.iloc[0]["ten_sach"]
                 else:

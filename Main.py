@@ -14,3 +14,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    '''
+    làm giao diện tài khoản và giao diện quản lý riêng ra
+    '''

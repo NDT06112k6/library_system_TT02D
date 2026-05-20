@@ -6,6 +6,44 @@ class Validation:
     Lớp chứa các phương thức kiểm tra dữ liệu.
     """
     @staticmethod
+    def is_empty(value):
+        return not value or not str(value).strip()
+
+    @staticmethod
+    def is_valid_username(username):
+        if Validation.is_empty(username):
+            return False, "Username không được trống"
+        if len(username) < 3:
+            return False, "Username phải ≥ 3 ký tự"
+        if len(username) > 20:
+            return False, "Username phải ≤ 20 ký tự"
+        return True, ""
+
+    @staticmethod
+    def is_valid_email_simple(email):
+        if '@' not in email or '.' not in email:
+            return False, "Email không hợp lệ"
+        return True, ""
+
+    @staticmethod
+    def is_valid_phone(phone):
+        if not phone.isdigit() or len(phone) != 10:
+            return False, "SĐT phải 10 chữ số"
+        if not phone.startswith('0'):
+            return False, "SĐT phải bắt đầu từ 0"
+        return True, ""
+
+    @staticmethod
+    def is_positive_number(value, field_name="Giá trị"):
+        try:
+            num = int(value)
+            if num <= 0:
+                return False, f"{field_name} phải > 0"
+            return True, ""
+        except:
+            return False, f"{field_name} phải là số"
+
+    @staticmethod
     def validate_email(email):
         """"Kiểm tra email hợp lệ"""
         pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'

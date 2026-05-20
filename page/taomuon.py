@@ -80,13 +80,14 @@ class TaoMuonPage:
         style.configure("Treeview", rowheight=28, font=("Segoe UI", 11))
         style.configure("Treeview.Heading", font=("Segoe UI", 11, "bold"))
 
-        columns = ("Mã sách", "Tên sách", "Tác giả", "Số lượng còn")
+        columns = ("ID", "Mã sách", "Tên sách", "Tác giả", "Số lượng còn")
         self.sach_tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=8)
 
         col_configs = {
-            "Mã sách":      (80,  "center"),
-            "Tên sách":     (220, "w"),
-            "Tác giả":      (130, "center"),
+            "ID":           (50,  "center"),
+            "Mã sách":      (100, "center"),
+            "Tên sách":     (200, "w"),
+            "Tác giả":      (120, "center"),
             "Số lượng còn": (100, "center"),
         }
         for col, (width, anchor) in col_configs.items():
@@ -121,8 +122,8 @@ class TaoMuonPage:
         try:
             books = self.book_data.get_all()
             for row in books:
-                if int(row[4]) > 0: # row[4] là so_luong
-                    self.sach_tree.insert("", "end", values=(row[0], row[1], row[2], row[4]))
+                if int(row[5]) > 0: # Index 5 là so_luong trong DB (id=0, ma_sach=1, ..., so_luong=5)
+                    self.sach_tree.insert("", "end", values=(row[0], row[1], row[2], row[3], row[5]))
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải danh sách sách: {str(e)}")
 
@@ -145,12 +146,12 @@ class TaoMuonPage:
             return
         
         # Kiểm tra user đã mượn sách này chưa (chưa trả)
-        ma_sach = self.sach_tree.item(selected[0], "values")[0]
+        values = self.sach_tree.item(selected[0], "values")
+        ma_sach = values[1] # Cột Mã sách hiện ở index 1
         if self.muontra_data.is_currently_borrowing(username, ma_sach):
             messagebox.showerror("Lỗi", f"'{username}' đang mượn sách này rồi, chưa trả!")
             return
 
-        ma_sach = self.sach_tree.item(selected[0], "values")[0]
         ma_phieu = self.entry_maphieu.get()
         ngay_muon = self.entry_ngaymuon.get()
 

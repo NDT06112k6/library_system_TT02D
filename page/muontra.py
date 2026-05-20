@@ -38,32 +38,11 @@ class MuonTraPage:
 
         self.entry_search = ctk.CTkEntry(
             search_frame,
-            height=35,
-            corner_radius=8
+            height=40,
+            placeholder_text="Tìm theo username, mã sách hoặc trạng thái...",
+            corner_radius=8,
+            border_width=2
         )
-        self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
-        self.entry_search.insert(0, "Tìm theo username, mã sách hoặc trạng thái...")
-        self.entry_search.configure(text_color="gray")
-
-        # Manual placeholder behavior
-        def on_focus_in(event):
-            if self.entry_search.get() == "Tìm theo username, mã sách hoặc trạng thái...":
-                self.entry_search.delete(0, "end")
-                self.entry_search.configure(text_color="black")
-
-        def on_focus_out(event):
-            if self.entry_search.get() == "":
-                self.entry_search.insert(0, "Tìm theo username, mã sách hoặc trạng thái...")
-                self.entry_search.configure(text_color="gray")
-
-        def on_key_press(event):
-            if self.entry_search.get() == "Tìm theo username, mã sách hoặc trạng thái...":
-                self.entry_search.delete(0, "end")
-                self.entry_search.configure(text_color="black")
-
-        self.entry_search.bind("<FocusIn>", on_focus_in)
-        self.entry_search.bind("<FocusOut>", on_focus_out)
-        self.entry_search.bind("<Key>", on_key_press)
         self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
         self.entry_search.bind("<Return>", lambda event: self.search_phieu())
         self.entry_search.bind("<KeyRelease>", lambda event: self.search_phieu())
@@ -166,12 +145,12 @@ class MuonTraPage:
             self.phieu_tree.delete(item)
 
         for idx, row in enumerate(filtered, 1):
-            trang_thai_display = "Đang mượn" if row[5] == "dang_muon" else "Đã trả"
-            tag = row[5]  # "dang_muon" hoặc "da_tra"
+            trang_thai_display = "Đang mượn" if row[6] == "dang_muon" else "Đã trả"
+            tag = row[6]
             # Xử lý ngày trả: nếu chưa trả thì hiển thị "Chưa trả"
-            ngay_tra_display = "Chưa trả" if str(row[4]).strip() in ["", "nan"] else row[4]
+            ngay_tra_display = "Chưa trả" if str(row[5]).strip() in ["", "nan", "None"] else row[5]
             self.phieu_tree.insert("", "end",
-                values=(idx, row[0], row[1], row[2], row[3], ngay_tra_display, trang_thai_display),
+                values=(idx, row[1], row[2], row[3], row[4], ngay_tra_display, trang_thai_display),
                 tags=(tag,)
             )
 

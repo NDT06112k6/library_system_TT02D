@@ -1,2 +1,3 @@
 customtkinter
 pandas
+mysql-connector-python

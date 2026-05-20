@@ -44,7 +44,7 @@ class SuaSachPage:
             row = ctk.CTkFrame(form_frame, fg_color="transparent")
             row.pack(fill="x", padx=20, pady=8)
 
-            ctk.CTkLabel(row, text=label, font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
+            ctk.CTkLabel(row, text=label, font=("Segoe UI", 13, "bold"), width=120, anchor="w").pack(side="left")
 
             entry = ctk.CTkEntry(row, font=("Segoe UI", 12), corner_radius=8)
             entry.pack(side="right", fill="x", expand=True)

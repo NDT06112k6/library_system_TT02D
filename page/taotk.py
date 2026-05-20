@@ -65,11 +65,9 @@ class TaoTKPage:
             form_frame, width=280, height=40,
             font=ctk.CTkFont(family="Segoe UI", size=12),
             placeholder_text="Nhập tên đăng nhập...",
-            border_color="#ABB2B9", border_width=1, corner_radius=8
+            border_width=2, corner_radius=8
         )
         self.entry_username.pack(pady=(0, 10))
-        self.entry_username.bind("<FocusIn>",  lambda e: self.on_focus(self.entry_username, True))
-        self.entry_username.bind("<FocusOut>", lambda e: self.on_focus(self.entry_username, False))
 
         # ----- Gmail -----
         ctk.CTkLabel(

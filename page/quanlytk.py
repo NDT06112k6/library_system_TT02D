@@ -140,14 +140,14 @@ class QuanLyTKPage:
         self.account_tree.heading("Gmail",    text="Gmail")
         self.account_tree.heading("HanhDong", text="Hành động")
 
-        self.account_tree.column("STT",      width=40,  anchor="center")
-        self.account_tree.column("Username", width=120, anchor="center")
-        self.account_tree.column("Password", width=100, anchor="center")
-        self.account_tree.column("HoTen",    width=120, anchor="center")
-        self.account_tree.column("SDT",      width=100, anchor="center")
-        self.account_tree.column("ChucVu",   width=100, anchor="center")
-        self.account_tree.column("Gmail",    width=150, anchor="center")
-        self.account_tree.column("HanhDong", width=80,  anchor="center")
+        self.account_tree.column("STT",      width=40,  anchor="center", stretch=False)
+        self.account_tree.column("Username", width=120, anchor="center", stretch=True)
+        self.account_tree.column("Password", width=100, anchor="center", stretch=True)
+        self.account_tree.column("HoTen",    width=150, anchor="center", stretch=True)
+        self.account_tree.column("SDT",      width=100, anchor="center", stretch=False)
+        self.account_tree.column("ChucVu",   width=100, anchor="center", stretch=False)
+        self.account_tree.column("Gmail",    width=180, anchor="center", stretch=True)
+        self.account_tree.column("HanhDong", width=80,  anchor="center", stretch=False)
 
         scrollbar = ctk.CTkScrollbar(table_frame, command=self.account_tree.yview)
         self.account_tree.configure(yscrollcommand=scrollbar.set)
@@ -248,12 +248,12 @@ class QuanLyTKPage:
         for idx, row in enumerate(data, 1):
             self.account_tree.insert("", "end", values=(
                 idx, 
-                row[0], # Username
-                row[1], # Password
-                row[2], # HoTen
-                row[3], # SDT
-                row[4], # ChucVu
-                row[5], # Email
+                row[1], # Username (index 0 là ID)
+                row[2], # Password
+                row[3], # HoTen
+                row[4], # SDT
+                row[5], # ChucVu
+                row[6], # Email
                 "Sửa/Xóa"
             ))
     

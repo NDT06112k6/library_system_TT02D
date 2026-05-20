@@ -20,7 +20,7 @@ class SuaTKPage:
         self.view()
 
     def get_current_email(self, username):
-        """Get current email for the username"""
+        """Lấy email hiện tại của tài khoản"""
         try:
             result = self.account_data.search("taikhoan", username, exact=True)
             if not result.empty:
@@ -41,7 +41,7 @@ class SuaTKPage:
             font=("Segoe UI", 24, "bold"), text_color='#0066cc'
         ).pack(pady=15)
 
-        # Canvas + Scrollbar để kéo được
+        # Canvas + Scrollbar di chuyển
         canvas = tk.Canvas(self.master, bg='white', highlightthickness=0)
         scrollbar = ctk.CTkScrollbar(self.master, command=canvas.yview)
         
@@ -53,7 +53,6 @@ class SuaTKPage:
         main_frame = ctk.CTkFrame(canvas, fg_color='white')
         canvas_window = canvas.create_window((0, 0), window=main_frame, anchor="nw")
 
-        # Cập nhật kích thước canvas khi main_frame thay đổi
         def on_frame_configure(event=None):
             canvas.configure(scrollregion=canvas.bbox("all"))
             canvas.itemconfig(canvas_window, width=canvas.winfo_width())
@@ -61,9 +60,8 @@ class SuaTKPage:
         main_frame.bind("<Configure>", on_frame_configure)
         canvas.bind("<Configure>", lambda e: canvas.itemconfig(canvas_window, width=e.width))
 
-        # Bind mouse wheel để kéo được
         def on_mousewheel(event):
-            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
         
         canvas.bind_all("<MouseWheel>", on_mousewheel)
 
@@ -107,7 +105,7 @@ class SuaTKPage:
         self.entry_chucvu   = make_row(new_frame, "Chức vụ mới:")
         self.entry_email    = make_row(new_frame, "Email mới (Gmail):")
 
-        # Điền giá trị cũ
+        # Điền giá trị ban đầu vào form
         self.entry_username.insert(0, self.old_username)
         self.entry_password.insert(0, self.old_password)
         self.entry_hoten.insert(0, self.old_hoten)
@@ -115,7 +113,7 @@ class SuaTKPage:
         self.entry_chucvu.insert(0, self.old_chucvu)
         self.entry_email.insert(0, self.old_email)
 
-        # Show password checkbox
+        # Hộp kiểm hiển thị mật khẩu
         self.show_password = tk.BooleanVar()
         tk.Checkbutton(
             new_frame, text="Hiển thị mật khẩu",
@@ -123,14 +121,13 @@ class SuaTKPage:
             font=("Segoe UI", 12), bg='#cce7ff'
         ).pack(pady=4)
 
-        # Validation info
         ctk.CTkLabel(
             new_frame,
             text="• Tên đăng nhập không được trùng\n• Gmail phải đúng định dạng @gmail.com",
             font=("Segoe UI", 10), text_color="gray"
         ).pack(pady=8)
 
-        # ─── Buttons ──────────────────────────────────────────────────────
+        # ─── Nút chức năng ────────────────────────────────────────────────
         button_frame = ctk.CTkFrame(self.master, fg_color='transparent')
         button_frame.pack(pady=10)
 
@@ -138,7 +135,7 @@ class SuaTKPage:
         ctk.CTkButton(button_frame, text="Hủy bỏ", fg_color="#6c757d", command=self.cancel).pack(side="left", padx=10)
         ctk.CTkButton(button_frame, text="Khôi phục", fg_color="#ffc107", command=self.reset_form).pack(side="left", padx=10)
 
-    # ── Helpers ─────────────────────────────────────────────────────────────
+    # ── Chức năng Logic ──────────────────────────────────────────────────────
 
     def toggle_password(self):
         self.entry_password.configure(show="" if self.show_password.get() else "*")
@@ -156,13 +153,14 @@ class SuaTKPage:
             entry.insert(0, val)
 
     def username_exists(self, username: str) -> bool:
-        """Kiểm tra tên đăng nhập đã tồn tại (bỏ qua tài khoản hiện tại)"""
+        """Kiểm tra tên đăng nhập tồn tại duy nhất"""
         try:
             result = self.account_data.search("taikhoan", username, exact=True)
-            if result.empty:
+            if hasattr(result, "empty") and result.empty:
                 return False
-            # Nếu có kết quả, kiểm tra xem có phải tài khoản hiện tại không
-            return result.iloc[0]["taikhoan"] != self.old_username
+            if hasattr(result, "iloc") and len(result) > 0:
+                return result.iloc[0]["taikhoan"] != self.old_username
+            return False
         except Exception:
             return False
 
@@ -170,12 +168,10 @@ class SuaTKPage:
         new_username = self.entry_username.get().strip()
         new_email = self.entry_email.get().strip()
 
-        # Tên đăng nhập trùng
         if new_username != self.old_username and self.username_exists(new_username):
             messagebox.showerror("Lỗi", f"Tên đăng nhập '{new_username}' đã tồn tại!")
             return False
 
-        # Kiểm tra Email & SĐT
         valid_email, msg_email = Validation.is_valid_email_simple(new_email)
         if not valid_email:
             messagebox.showerror("Lỗi", msg_email)
@@ -190,7 +186,7 @@ class SuaTKPage:
         return True
 
     def save_changes(self):
-        """Xử lý logic khi người dùng nhấn nút 'Lưu thay đổi' tài khoản."""
+        """Xử lý logic cập nhật dữ liệu tài khoản."""
         if not self.validate_input():
             return
 
@@ -202,14 +198,24 @@ class SuaTKPage:
         new_email = self.entry_email.get().strip()
 
         if (new_username == self.old_username and new_password == self.old_password and 
-            new_hoten == self.old_hoten and new_sdt == self.old_sdt and 
-            new_chucvu == self.old_chucvu and new_email == self.old_email):
+                new_hoten == self.old_hoten and new_sdt == self.old_sdt and 
+                new_chucvu == self.old_chucvu and new_email == self.old_email):
             messagebox.showinfo("Thông báo", "Không có thay đổi nào được thực hiện")
             return
 
         try:
-            # Cập nhật tài khoản
-            self.account_data.update("taikhoan", self.old_username, [new_username, new_password, new_hoten, new_sdt, new_chucvu, new_email])
+            # SỬA TẠI ĐÂY: Đóng gói thành Dictionary thay vì mảng List để hết lỗi .keys()
+            thong_tin_sua = {
+                "taikhoan": new_username,
+                "matkhau": new_password,
+                "hoten": new_hoten,
+                "sdt": new_sdt,
+                "chucvu": new_chucvu,
+                "email": new_email
+            }
+            
+            # Thực thi cập nhật dựa trên tên cột khóa chính 'taikhoan' và giá trị cũ self.old_username
+            self.account_data.update("taikhoan", self.old_username, thong_tin_sua)
             messagebox.showinfo("Thành công", "Đã cập nhật tài khoản thành công")
             self.app_manager.show_quanlytk_page()
         except Exception as e:
@@ -231,4 +237,3 @@ class SuaTKPage:
             self.entry_chucvu.get().strip() != self.old_chucvu or
             self.entry_email.get().strip() != self.old_email
         )
-        

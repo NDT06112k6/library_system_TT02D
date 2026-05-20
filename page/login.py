@@ -10,30 +10,25 @@ REMEMBER_FILE = "database/remember.json"
 
 
 class LoginPage:
-    """Trang đăng nhập - xác thực người dùng"""
 
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
-        # Sử dụng class chuyên biệt
+
         self.account_data = AccountData()
 
         self.config()
         self.view()
-        # Tự động điền thông tin ghi nhớ nếu có
+
         self.load_remembered_account()
 
     def config(self):
-        """Cấu hình cửa sổ đăng nhập"""
         self.master.title("🔐 Đăng Nhập")
         self.master.geometry("400x480")
         self.master.configure(fg_color=Colors.BG_MAIN)
-
-        # Theme
         ctk.set_appearance_mode("light")
 
     def view(self):
-        """Vẽ giao diện đăng nhập"""
         main_frame = ctk.CTkFrame(
             self.master,
             fg_color=Colors.BG_SECONDARY,
@@ -43,7 +38,6 @@ class LoginPage:
         )
         main_frame.pack(padx=Spacing.LG, pady=Spacing.LG, fill="both", expand=True)
 
-        # Tiêu đề
         title = ctk.CTkLabel(
             main_frame,
             text="🔐 ĐĂNG NHẬP",
@@ -52,7 +46,6 @@ class LoginPage:
         )
         title.pack(pady=(Spacing.XL, Spacing.LG))
 
-        # Input Fields
         ctk.CTkLabel(
             main_frame,
             text="Username",
@@ -102,11 +95,10 @@ class LoginPage:
         )
         checkbox.pack(anchor="w", padx=Spacing.XL, pady=Spacing.MD)
 
-        # Buttons Frame
         btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
         btn_frame.pack(fill="x", padx=Spacing.XL, pady=Spacing.XL)
 
-        ctk.CTkButton(
+        self.login_button = ctk.CTkButton(
             btn_frame,
             text="🔓 Đăng Nhập",
             command=self.login,
@@ -115,21 +107,10 @@ class LoginPage:
             fg_color=Colors.PRIMARY,
             hover_color=Colors.PRIMARY_HOVER,
             text_color=Colors.WHITE
-        ).pack(side="left", fill="x", expand=True, padx=(0, Spacing.SM))
-
-        ctk.CTkButton(
-            btn_frame,
-            text="📝 Tạo TK",
-            command=self.tao_tk,
-            height=45,
-            font=Fonts.BOLD,
-            fg_color=Colors.BORDER,
-            hover_color=Colors.BORDER_DARK,
-            text_color=Colors.TEXT_PRIMARY
-        ).pack(side="left", fill="x", expand=True)
+        )
+        self.login_button.pack(fill="x", expand=True)
 
     def load_remembered_account(self):
-        """Tự động điền tài khoản ghi nhớ nếu có"""
         try:
             if os.path.exists(REMEMBER_FILE):
                 with open(REMEMBER_FILE, "r", encoding="utf-8") as f:
@@ -142,7 +123,6 @@ class LoginPage:
             pass
 
     def save_remember(self, username, password):
-        """Lưu username và mật khẩu vào file remember.json"""
         os.makedirs("database", exist_ok=True)
         try:
             with open(REMEMBER_FILE, "w", encoding="utf-8") as f:
@@ -155,7 +135,6 @@ class LoginPage:
             pass
 
     def clear_remember(self):
-        """Xóa thông tin đã ghi nhớ"""
         try:
             if os.path.exists(REMEMBER_FILE):
                 with open(REMEMBER_FILE, "w", encoding="utf-8") as f:
@@ -163,12 +142,8 @@ class LoginPage:
         except Exception:
             pass
 
-    def tao_tk(self):
-        """Chuyển đến trang tạo tài khoản"""
-        self.app_manager.show_taotk_page()
-
     def login(self):
-        """Xử lý logic khi người dùng nhấn nút 'Đăng nhập'."""
+        """Xử lý đăng nhập, lấy chức vụ từ kết quả MySQL để phân quyền hệ thống"""
         try:
             username = self.entry_username.get().strip()
             password = self.entry_password.get().strip()
@@ -180,21 +155,34 @@ class LoginPage:
                 messagebox.showerror("Lỗi", "Vui lòng nhập password")
                 return
 
-            # Sử dụng phương thức authenticate đã đóng gói logic
+            # Xác thực tài khoản với database MySQL
             user = self.account_data.authenticate(username, password)
             
             if user:
+                # 1. Quản lý lưu file ghi nhớ mật khẩu cục bộ
                 if self.remember_var.get():
                     self.save_remember(username, password)
                 else:
                     self.clear_remember()
 
-                messagebox.showinfo("Thông báo", "Đăng nhập thành công")
-                # Sử dụng after để tránh lỗi 'invalid command name' khi chuyển trang
-                self.master.after(10, lambda: self.app_manager.show_main_page(username))
+                # 2. PHÂN TÍCH QUYỀN HẠN (ROLE CHUCVU)
+                chuc_vu = "Sinh viên"  # Vai trò mặc định phòng trường hợp lỗi
+                
+                if isinstance(user, dict):
+                    # Nếu AccountData trả về dạng dữ liệu Từ điển
+                    chuc_vu = user.get("chucvu") or user.get("chuc_vu") or "Sinh viên"
+                elif isinstance(user, (list, tuple)) and len(user) > 0:
+                    # Nếu AccountData trả về hàng dữ liệu dạng List/Tuple (ID=0, TK=1, MK=2, HT=3, SDT=4, CV=5...)
+                    # Thông thường nếu câu lệnh SELECT * FROM taikhoan thì cột chucvu nằm ở index 4 hoặc 5
+                    chuc_vu = user[4] if len(user) == 6 else user[5]
+
+                messagebox.showinfo("Thông báo", f"Đăng nhập thành công!\nChức vụ: {chuc_vu}")
+                
+                # 3. ĐỒNG BỘ: Gọi hàm login_success của AppManager để nạp quyền toàn hệ thống
+                self.master.after(10, lambda: self.app_manager.login_success(username, str(chuc_vu).strip()))
                 return
 
-            messagebox.showerror("Thông báo", "Đăng nhập thất bại")
+            messagebox.showerror("Thông báo", "Đăng nhập thất bại! Sai tài khoản hoặc mật khẩu.")
 
         except FileNotFoundError:
             messagebox.showerror("Thông báo", "Chưa có tài khoản nào được tạo")

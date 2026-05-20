@@ -94,11 +94,28 @@ class ThemSachPage:
                 messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin")
                 return None
 
-        # Kiểm tra số lượng và giá là số nguyên dương
-        for field in ("so_luong", "gia"):
-            if not data[field].isdigit() or int(data[field]) <= 0:
-                messagebox.showerror("Lỗi", f"'{field.replace('_', ' ').title()}' phải là số nguyên dương")
+        # Kiểm tra số lượng phải là số nguyên dương
+        try:
+            so_luong = int(data["so_luong"])
+            if so_luong <= 0:
+                messagebox.showerror("Lỗi", "Số lượng phải là số nguyên dương")
                 return None
+        except ValueError:
+            messagebox.showerror("Lỗi", "Số lượng phải là số nguyên")
+            return None
+
+        # Kiểm tra giá là số dương (cho phép thập phân) và không quá lớn
+        try:
+            gia = float(data["gia"])
+            if gia <= 0:
+                messagebox.showerror("Lỗi", "Giá tiền phải lớn hơn 0")
+                return None
+            if gia > 999999999:  # Max DECIMAL(15,2)
+                messagebox.showerror("Lỗi", "Giá tiền quá lớn (max 999,999,999)")
+                return None
+        except ValueError:
+            messagebox.showerror("Lỗi", "Giá tiền phải là số")
+            return None
 
         # Kiểm tra mã sách trùng
         if self.book_data.check_exists(data["ma_sach"]):

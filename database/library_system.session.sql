@@ -38,7 +38,7 @@ INSERT INTO taikhoan (taikhoan, matkhau, hoten, sdt, chucvu, email) VALUES
 ('NDT06112k6', '01213322896', 'Nguyễn Đức Trường', '0123456789', 'Nhân viên', 'ductruong6116@gmail.com');
 
 INSERT INTO books (ma_sach, ten_sach, tac_gia, the_loai, so_luong, gia) VALUES
-('S001', 'Lập Trình Python Cơ Bản', 'Nguyen Van A', 'Công nghệ', 8, 120000),
+('S001', 'Lap Trinh Python Co Ban', 'Nguyen Van A', 'Công nghệ', 8, 120000),
 ('S002', 'Cấu Trúc Dữ Liệu & Giải Thuật', 'Tran Thi B', 'Công nghệ', 6, 150000);
 
 INSERT INTO muontra (ma_phieu, username, ma_sach, ngay_muon, ngay_tra, trang_thai) VALUES

@@ -1,139 +1,134 @@
+import mysql.connector
 import pandas as pd
-from typing import List, Dict, Any, Optional
-from abc import ABC
-from database.mysql_handler import MySQLHandler
+from tkinter import messagebox
 
-class Query(ABC):
-    """Lớp cơ sở xử lý thao tác với MySQL Database"""
-    
-    def __init__(self, table_name: str, columns: List[str]):
-        """
-        Khởi tạo Query.
-        
-        Args:
-            table_name (str): Tên bảng MySQL
-            columns (list): Danh sách tên cột
-        """
+class Query:
+    def __init__(self, table_name=None, fields=None):
+        self.host = "localhost"
+        self.user = "root"
+        self.password = "root"
+        self.database = "library_system"
+        self.connection = None
         self.table_name = table_name
-        self.columns = columns
-        self.db = MySQLHandler()
-        self.db.connect()
+        self.fields = fields
 
-    def list(self, page: int = 1, page_size: int = 9999) -> Dict[str, Any]:
-        """
-        Lấy dữ liệu với phân trang.
-        
-        Args:
-            page (int): Số trang hiện tại
-            page_size (int): Số bản ghi trên 1 trang
-            
-        Returns:
-            dict: {'page', 'page_size', 'total_records', 'data'}
-        """
-        # Lấy tổng số bản ghi
-        total_query = f"SELECT COUNT(*) as count FROM {self.table_name}"
-        result = self.db.fetch_one(total_query)
-        total_records = result[0] if result else 0
-        
-        # Lấy dữ liệu với LIMIT
-        offset = (page - 1) * page_size
-        query = f"SELECT * FROM {self.table_name} LIMIT %s OFFSET %s"
-        data = self.db.fetch_all_as_dict(query, (page_size, offset))
-        
-        return {
-            "page": page,
-            "page_size": page_size,
-            "total_records": total_records,
-            "data": data
-        }
+    def connect(self) :
+        try :
+            self.connection = mysql.connector.connect(
+                host=self.host,
+                user=self.user,
+                password=self.password,
+                database=self.database,
+                charset="utf8mb4"
+            )
+            return self.connection
+        except mysql.connector.Error as err :
+            messagebox.showerror("Lỗi kết nối", f"Không thể kết nối cơ sở dữ liệu : {err}")
+            return None
 
-    def list_all(self) -> List[List[Any]]:
-        """Lấy toàn bộ dữ liệu dưới dạng list."""
-        query = f"SELECT * FROM {self.table_name}"
-        results = self.db.fetch_all(query)
-        return results
+    def close(self):
+        if self.connection and self.connection.is_connected():
+            self.connection.close()
 
-    def search(self, column: str, keyword: str, exact: bool = False) -> pd.DataFrame:
-        """
-        Tìm kiếm dữ liệu.
-        
-        Args:
-            column (str): Tên cột tìm kiếm
-            keyword (str): Từ khóa tìm kiếm
-            exact (bool): Tìm khớp hoàn toàn hay chứa từ khóa
-            
-        Returns:
-            pd.DataFrame: Kết quả tìm kiếm
-        """
+    def execute_query(self, query, params=None):
+        conn = self.connect()
+        if not conn:
+            return None
+        cursor = conn.cursor(dictionary=True)
+        try:
+            cursor.execute(query, params or ())
+            result = cursor.fetchall()
+            conn.commit()
+            return result
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi truy vấn", f"Lỗi thực thi lệnh SQL: {err}")
+            return None
+        finally:
+            cursor.close()
+            self.close()
+
+    def search(self, column_name, keyword, exact=False):
         if exact:
-            query = f"SELECT * FROM {self.table_name} WHERE {column} = %s"
-            results = self.db.fetch_all_as_dict(query, (keyword,))
+            query = f"SELECT * FROM {self.table_name} WHERE {column_name} = %s"
+            params = (keyword,)
         else:
-            query = f"SELECT * FROM {self.table_name} WHERE {column} LIKE %s"
-            results = self.db.fetch_all_as_dict(query, (f"%{keyword}%",))
+            query = f"SELECT * FROM {self.table_name} WHERE {column_name} LIKE %s"
+            params = (f"%{keyword}%",)
         
-        # Chuyển thành DataFrame để tương thích với code cũ
-        return pd.DataFrame(results)
+        result = self.execute_query(query, params)
+        if result is not None:
+            return pd.DataFrame(result)
+        return pd.DataFrame(columns=self.fields)
 
-    def add(self, new_row_data: List[Any]) -> bool:
-        """
-        Thêm bản ghi mới.
+    def list_all(self):
+        query = f"SELECT * FROM {self.table_name}"
+        result = self.execute_query(query)
+        if result is not None:
+            return [list(row.values()) for row in result]
+        return []
+
+    def delete(self, column_name, value):
+        query = f"DELETE FROM {self.table_name} WHERE {column_name} = %s"
+        conn = self.connect()
+        if not conn:
+            return False
+        cursor = conn.cursor()
+        try:
+            cursor.execute(query, (value,))
+            conn.commit()
+            return cursor.rowcount > 0
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi xóa", f"Không thể xóa dữ liệu: {err}")
+            return False
+        finally:
+            cursor.close()
+            self.close()
+
+    def create(self, data):
+        columns = ", ".join(self.fields[1:])
+        placeholders = ", ".join(["%s"] * len(data))
+        query = f"INSERT INTO {self.table_name} ({columns}) VALUES ({placeholders})"
+        conn = self.connect()
+        if not conn:
+            return False
+        cursor = conn.cursor()
+        try:
+            cursor.execute(query, tuple(data))
+            conn.commit()
+            return True
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi thêm", f"Không thể thêm dữ liệu: {err}")
+            return False
+        finally:
+            cursor.close()
+            self.close()
         
-        Args:
-            new_row_data (list): Dữ liệu mới [col1, col2, ...]
+    def update(self, key_column, key_value, update_data: dict):
+        """
+        Cập nhật dữ liệu động cho bất kỳ bảng nào.
+        update_data: dict dạng {"tên_cột": "giá_trị_mới"}
+        """
+        if not update_data:
+            return False
             
-        Returns:
-            bool: True nếu thành công
-        """
-        placeholders = ", ".join(["%s"] * len(self.columns))
-        query = f"INSERT INTO {self.table_name} ({', '.join(self.columns)}) VALUES ({placeholders})"
-        return self.db.execute_query(query, tuple(new_row_data))
-
-    def create(self, new_row_data: List[Any]) -> bool:
-        """Alias cho add()."""
-        return self.add(new_row_data)
-
-    def update(self, id_column: str, id_value: Any, updated_row_data: List[Any]) -> bool:
-        """
-        Cập nhật bản ghi.
+        # Xây dựng mệnh đề SET của câu lệnh SQL (VD: hoten = %s, sdt = %s)
+        set_clause = ", ".join([f"{col} = %s" for col in update_data.keys()])
+        query = f"UPDATE {self.table_name} SET {set_clause} WHERE {key_column} = %s"
         
-        Args:
-            id_column (str): Tên cột ID (khóa chính)
-            id_value (any): Giá trị ID cần update
-            updated_row_data (list): Dữ liệu mới [col1, col2, ...]
-            
-        Returns:
-            bool: True nếu thành công
-        """
-        set_clause = ", ".join([f"{col} = %s" for col in self.columns])
-        query = f"UPDATE {self.table_name} SET {set_clause} WHERE {id_column} = %s"
-        params = tuple(updated_row_data) + (id_value,)
-        return self.db.execute_query(query, params)
-
-    def delete(self, id_column: str, id_value: Any) -> bool:
-        """
-        Xóa bản ghi.
+        # Gộp các giá trị cần cập nhật kèm theo điều kiện WHERE ở cuối
+        params = list(update_data.values()) + [key_value]
         
-        Args:
-            id_column (str): Tên cột ID
-            id_value (any): Giá trị ID cần xóa
-            
-        Returns:
-            bool: True nếu thành công
-        """
-        query = f"DELETE FROM {self.table_name} WHERE {id_column} = %s"
-        return self.db.execute_query(query, (id_value,))
-
-    def get_max_value(self, column: str) -> Optional[Any]:
-        """
-        Lấy giá trị lớn nhất của cột.
-        
-        Args:
-            column (str): Tên cột
-            
-        Returns:
-            any: Giá trị max hoặc None
-        """
-        query = f"SELECT MAX({column}) as max_value FROM {self.table_name}"
-        result = self.db.fetch_one(query)
-        return result[0] if result else None
+        conn = self.connect()
+        if not conn:
+            return False
+        cursor = conn.cursor()
+        try:
+            cursor.execute(query, tuple(params))
+            conn.commit()
+            return cursor.rowcount > 0
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi cập nhật", f"Không thể cập nhật cơ sở dữ liệu: {err}")
+            return False
+        finally:
+            cursor.close()
+            self.close()

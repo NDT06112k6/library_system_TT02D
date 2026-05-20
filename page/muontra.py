@@ -1,274 +1,255 @@
 import customtkinter as ctk
+import tkinter as tk
 from tkinter import messagebox, ttk
-from datetime import datetime
+from datetime import datetime, timedelta
 from query.muontra import MuonTraData
-from query.books import BookData
+from query.books import BookData  # Cần import để cập nhật số lượng sách khi duyệt
+from common.theme import Colors, Fonts, Spacing
 
-from common.button import CustomButton
 
 class MuonTraPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
         self.muontra_data = MuonTraData()
-        self.book_data = BookData()
+        self.book_data = BookData()  # Khởi tạo lớp dữ liệu sách
         self.config()
         self.view()
         self.load_phieu()
 
     def config(self):
-        self.master.title("Quản lý mượn/trả sách")
-        self.master.geometry("900x550")
+        self.master.title("🔄 Quản Lý Mượn Trả Sách")
+        self.master.geometry("1000x650")
+        self.master.configure(fg_color=Colors.BG_MAIN)
         ctk.set_appearance_mode("light")
-        ctk.set_default_color_theme("blue")
 
     def view(self):
-        # ===== Tiêu đề =====
-        ctk.CTkLabel(
-            self.master,
-            text="Quản lý mượn/trả sách",
-            font=("Segoe UI", 24, "bold")
-        ).pack(pady=15)
+        main_frame = ctk.CTkFrame(self.master, fg_color=Colors.BG_MAIN)
+        main_frame.pack(fill="both", expand=True)
 
-        # ===== Thanh tìm kiếm =====
-        search_frame = ctk.CTkFrame(self.master, fg_color="transparent")
-        search_frame.pack(pady=5, padx=20, fill="x")
+        # Header
+        header = ctk.CTkFrame(main_frame, fg_color=Colors.PRIMARY, corner_radius=0)
+        header.pack(fill="x")
+        
+        title_text = "🔄 LỊCH SỬ MƯỢN TRẢ SÁCH" if self.app_manager.current_role == "Sinh viên" else "🔄 QUẢN LÝ MƯỢN TRẢ SÁCH"
+        ctk.CTkLabel(header, text=title_text, font=Fonts.HEADER, text_color=Colors.WHITE).pack(pady=Spacing.MD)
 
-        ctk.CTkLabel(search_frame, text="Tìm kiếm:", font=("Segoe UI", 12)).pack(side="left", padx=(0, 10))
+        # Table Frame
+        table_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
+        table_frame.pack(expand=True, fill="both", padx=20, pady=15)
 
-        self.entry_search = ctk.CTkEntry(
-            search_frame,
-            height=40,
-            placeholder_text="Tìm theo username, mã sách hoặc trạng thái...",
-            corner_radius=8,
-            border_width=2
-        )
-        self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
-        self.entry_search.bind("<Return>", lambda event: self.search_phieu())
-        self.entry_search.bind("<KeyRelease>", lambda event: self.search_phieu())
-
-        CustomButton(
-            search_frame,
-            text="Tìm kiếm",
-            command=self.search_phieu,
-            style_type="info"
-        ).pack(side="left")
-
-        # ===== Bộ lọc trạng thái =====
-        filter_frame = ctk.CTkFrame(self.master, fg_color="transparent")
-        filter_frame.pack(pady=5, padx=20, fill="x")
-
-        ctk.CTkLabel(filter_frame, text="Lọc:", font=("Segoe UI", 12)).pack(side="left", padx=(0, 10))
-
-        self.filter_var = ctk.StringVar(value="tat_ca")
-        options = [("Tất cả", "tat_ca"), ("Đang mượn", "dang_muon"), ("Đã trả", "da_tra")]
-        for text, value in options:
-            ctk.CTkRadioButton(
-                filter_frame, text=text,
-                variable=self.filter_var, value=value,
-                command=self.load_phieu
-            ).pack(side="left", padx=10)
-
-        # ===== Nút chức năng =====
-        button_frame = ctk.CTkFrame(self.master, fg_color="transparent")
-        button_frame.pack(pady=10, padx=20, fill="x")
-
-        left_frame = ctk.CTkFrame(button_frame, fg_color="transparent")
-        left_frame.pack(side="left")
-
-        right_frame = ctk.CTkFrame(button_frame, fg_color="transparent")
-        right_frame.pack(side="right")
-
-        CustomButton(left_frame, text="Làm mới", command=self.load_phieu, style_type="info").pack(side="left", padx=5)
-        CustomButton(left_frame, text="Tạo phiếu mượn", command=self.tao_muon, style_type="success").pack(side="left", padx=5)
-        CustomButton(left_frame, text="Xác nhận trả", command=self.xac_nhan_tra, style_type="warning").pack(side="left", padx=5)
-        CustomButton(left_frame, text="Xóa phiếu", command=self.xoa_phieu, style_type="danger").pack(side="left", padx=5)
-
-        CustomButton(right_frame, text="Quay lại", command=self.back, style_type="secondary").pack(side="right", padx=5)
-
-        # ===== Bảng danh sách phiếu =====
-        table_frame = ctk.CTkFrame(self.master, corner_radius=10)
-        table_frame.pack(expand=True, fill="both", padx=20, pady=10)
-
+        # Style Treeview
         style = ttk.Style()
-        style.theme_use("default")
-        style.configure("Treeview", rowheight=30, font=("Segoe UI", 11), borderwidth=0)
-        style.configure("Treeview.Heading", font=("Segoe UI", 12, "bold"))
+        style.theme_use("clam")
+        style.configure("Treeview", 
+                        background=Colors.BG_SECONDARY, 
+                        foreground=Colors.TEXT_PRIMARY,
+                        fieldbackground=Colors.BG_SECONDARY,
+                        rowheight=35, 
+                        font=Fonts.REGULAR, 
+                        borderwidth=0)
+        style.configure("Treeview.Heading", background=Colors.PRIMARY, foreground=Colors.WHITE, font=Fonts.SMALL_BOLD, borderwidth=0)
+        style.map("Treeview", background=[('selected', Colors.BG_HOVER)], foreground=[('selected', Colors.PRIMARY)])
 
-        columns = ("STT", "Mã phiếu", "Username", "Mã sách", "Ngày mượn", "Ngày trả", "Trạng thái")
-        self.phieu_tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=15)
-
-        col_configs = {
-            "STT":        (40,  "center"),
-            "Mã phiếu":   (90,  "center"),
-            "Username":   (120, "center"),
-            "Mã sách":    (90,  "center"),
-            "Ngày mượn":  (120, "center"),
-            "Ngày trả":   (120, "center"),
-            "Trạng thái": (100, "center"),
-        }
-        for col, (width, anchor) in col_configs.items():
+        # Định nghĩa các cột
+        columns = ("STT", "Mã Phiếu", "Người Mượn", "Mã Sách", "Ngày Mượn", "Hạn Trả", "Tiền Phạt", "Trạng Thái")
+        self.phieu_tree = ttk.Treeview(table_frame, columns=columns, show="headings")
+        
+        for col in columns:
             self.phieu_tree.heading(col, text=col)
-            self.phieu_tree.column(col, width=width, anchor=anchor)
+            if col in ["STT", "Mã Phiếu", "Mã Sách", "Ngày Mượn", "Hạn Trả", "Trạng Thái"]:
+                self.phieu_tree.column(col, width=110, anchor="center")
+            elif col == "Tiền Phạt":
+                self.phieu_tree.column(col, width=100, anchor="e")
+            else:
+                self.phieu_tree.column(col, width=140, anchor="w")
 
-        # Màu khác nhau cho 2 trạng thái
-        self.phieu_tree.tag_configure("dang_muon", foreground="#e65c00")
-        self.phieu_tree.tag_configure("da_tra", foreground="#28a745")
+        # Cấu hình màu sắc nhãn trạng thái (Tags)
+        self.phieu_tree.tag_configure("cho_duyet", foreground="#e67e22", font=Fonts.REGULAR) # Màu cam chờ duyệt
+        self.phieu_tree.tag_configure("dang_muon", foreground="#2980b9", font=Fonts.REGULAR) # Màu xanh đang mượn
+        self.phieu_tree.tag_configure("da_tra", foreground="#27ae60", font=Fonts.REGULAR)   # Màu xanh lá đã trả
 
-        scrollbar = ctk.CTkScrollbar(table_frame, command=self.phieu_tree.yview)
+        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.phieu_tree.yview)
         self.phieu_tree.configure(yscrollcommand=scrollbar.set)
-
         self.phieu_tree.pack(side="left", expand=True, fill="both", padx=5, pady=5)
         scrollbar.pack(side="right", fill="y")
 
-        # ===== Thanh trạng thái =====
-        self.status_label = ctk.CTkLabel(self.master, text="Sẵn sàng", anchor="w")
-        self.status_label.pack(fill="x", padx=10, pady=5)
+        # Action Frame Buttons
+        action_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
+        action_frame.pack(fill="x", padx=Spacing.LG, pady=Spacing.LG)
 
-    # ===== LOGIC =====
+        self.status_label = ctk.CTkLabel(action_frame, text="Sẵn sàng", font=Fonts.SMALL, text_color=Colors.TEXT_SECONDARY)
+        self.status_label.pack(side="left", padx=Spacing.MD)
+
+        btns_container = ctk.CTkFrame(action_frame, fg_color="transparent")
+        btns_container.pack(side="right", padx=Spacing.MD, pady=Spacing.SM)
+
+        current_role = str(self.app_manager.current_role).strip()
+
+        # Phân quyền hiển thị nút bấm điều khiển
+        if current_role in ["Admin", "Quản lý", "Thủ thư"]:
+            # Nút Phê duyệt yêu cầu mượn sách từ sinh viên gửi lên
+            ctk.CTkButton(btns_container, text="✅ Duyệt Mượn", fg_color=Colors.SUCCESS, font=Fonts.SMALL_BOLD, command=self.duyet_yeu_cau).pack(side="left", padx=5)
+            # Nút Tạo phiếu trực tiếp (Cho trường hợp mượn trực tiếp tại quầy)
+            ctk.CTkButton(btns_container, text="➕ Tạo Phiếu", fg_color=Colors.PRIMARY, font=Fonts.SMALL_BOLD, command=self.tao_phieu).pack(side="left", padx=5)
+            # Nút Nhận sách trả
+            ctk.CTkButton(btns_container, text="🔄 Xác Nhận Trả", fg_color=Colors.INFO, font=Fonts.SMALL_BOLD, command=self.xac_nhan_tra).pack(side="left", padx=5)
+        else:
+            # Nếu là Sinh viên thì không hiện các nút xử lý trên, có thể thêm nhãn ghi chú nhỏ
+            ctk.CTkLabel(btns_container, text="📌 Hãy mang theo thẻ Sinh viên khi đến nhận sách mang về.", font=Fonts.SMALL, text_color="gray").pack(side="left", padx=10)
+
+        # Nút Quay lại
+        ctk.CTkButton(btns_container, text="← Quay Lại", fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, font=Fonts.SMALL_BOLD, command=self.back).pack(side="left", padx=5)
 
     def load_phieu(self):
-        """Tải danh sách phiếu, lọc theo trạng thái"""
-        self.entry_search.delete(0, "end")
-        self.entry_search.insert(0, "Tìm theo username, mã sách hoặc trạng thái...")
-        self.entry_search.configure(text_color="gray")
-        all_phieu = self.muontra_data.get_all()
-        filter_val = self.filter_var.get()
-
-        if filter_val == "tat_ca":
-            filtered = all_phieu
-        else:
-            filtered = [p for p in all_phieu if p[5] == filter_val]
-
-        # Xóa dữ liệu cũ
+        """Tải danh sách phiếu mượn có áp dụng bộ lọc phân quyền người dùng"""
         for item in self.phieu_tree.get_children():
             self.phieu_tree.delete(item)
 
-        for idx, row in enumerate(filtered, 1):
-            trang_thai_display = "Đang mượn" if row[6] == "dang_muon" else "Đã trả"
-            tag = row[6]
-            # Xử lý ngày trả: nếu chưa trả thì hiển thị "Chưa trả"
-            ngay_tra_display = "Chưa trả" if str(row[5]).strip() in ["", "nan", "None"] else row[5]
-            self.phieu_tree.insert("", "end",
-                values=(idx, row[1], row[2], row[3], row[4], ngay_tra_display, trang_thai_display),
-                tags=(tag,)
-            )
+        try:
+            all_phieu = self.muontra_data.get_all()
+            current_user = self.app_manager.current_user
+            current_role = self.app_manager.current_role
 
-        self.status_label.configure(text=f"Tổng: {len(filtered)} phiếu")
+            count = 0
+            for row in all_phieu:
+                # Ép dạng cấu trúc dữ liệu tuple/list từ DB MySQL
+                ma_phieu = row[1]
+                username = row[2]
+                ma_sach = row[3]
+                ngay_muon = row[4] if row[4] else "Đang chờ..."
+                han_tra = row[5] if row[5] else "Chờ phê duyệt"
+                tien_phat = f"{int(row[6]):,}" if row[6] else "0"
+                trang_thai_raw = row[7]
 
-    def tao_muon(self):
+                # ─── BỘ LỌC BẢO MẬT: Sinh viên chỉ xem được phiếu của chính mình ───
+                if current_role == "Sinh viên" and username != current_user:
+                    continue
+
+                count += 1
+                # Định dạng chuỗi hiển thị trạng thái thân thiện hơn
+                if trang_thai_raw == "cho_duyet":
+                    trang_thai_display = "⏳ Chờ Duyệt"
+                    tag = "cho_duyet"
+                elif trang_thai_raw == "dang_muon":
+                    trang_thai_display = "📖 Đang Mượn"
+                    tag = "dang_muon"
+                else:
+                    trang_thai_display = "✅ Đã Trả"
+                    tag = "da_tra"
+
+                self.phieu_tree.insert("", "end", values=(count, ma_phieu, username, ma_sach, ngay_muon, han_tra, tien_phat, trang_thai_display), tags=(tag,))
+            
+            self.status_label.configure(text=f"Tổng số: {count} bản ghi")
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể tải dữ liệu phiếu mượn: {str(e)}")
+
+    def duyet_yeu_cau(self):
+        """Thủ thư phê duyệt yêu cầu của sinh viên"""
+        selected = self.phieu_tree.selection()
+        if not selected:
+            messagebox.showwarning("Cảnh báo", "Vui lòng chọn một yêu cầu mượn cần duyệt từ bảng!")
+            return
+
+        values = self.phieu_tree.item(selected[0], "values")
+        ma_phieu = values[1]
+        trang_thai_hien_tai = values[7]
+        ma_sach = values[3]
+
+        if "Chờ Duyệt" not in trang_thai_hien_tai:
+            messagebox.showerror("Lỗi", "Phiếu này đã được duyệt hoặc đã trả xong, không thể duyệt lại!")
+            return
+
+        if messagebox.askyesno("Xác nhận phê duyệt", f"Phê duyệt cấp sách cho mã phiếu {ma_phieu}?"):
+            try:
+                # Tính toán thời gian thực: Mượn hôm nay, hạn trả mặc định sau 14 ngày
+                now = datetime.now()
+                ngay_muon_str = now.strftime("%Y-%m-%d")
+                han_tra_str = (now + timedelta(days=14)).strftime("%Y-%m-%d")
+
+                # 1. Gọi hàm cập nhật MySQL đổi trạng thái sang 'dang_muon'
+                self.muontra_data.approve_borrow_request(ma_phieu, ngay_muon_str, han_tra_str)
+
+                # 2. Khấu trừ tự động bớt 1 cuốn sách trong kho dữ liệu sách
+                self.book_data.update_quantity(ma_sach, delta=-1)
+
+                messagebox.showinfo("Thành công", f"Đã duyệt thành công phiếu {ma_phieu}!\nSách đã chính thức xuất kho.")
+                self.load_phieu()
+            except Exception as e:
+                messagebox.showerror("Lỗi hệ thống", f"Không thể duyệt phiếu: {str(e)}")
+
+    def tao_phieu(self):
+        """Chuyển hướng sang giao diện tạo phiếu mượn (Dành cho Thủ thư làm việc trực tiếp tại quầy)"""
         self.app_manager.show_taomuon_page()
 
     def xac_nhan_tra(self):
-        """Xử lý logic xác nhận trả sách cho phiếu đang được chọn trong bảng."""
-        """Xác nhận trả sách cho phiếu được chọn"""
+        """Thủ thư xác nhận sinh viên trả sách, tự động cập nhật ngày trả và trả số lượng về kho"""
         selected = self.phieu_tree.selection()
         if not selected:
-            messagebox.showwarning("Cảnh báo", "Vui lòng chọn phiếu cần xác nhận trả")
+            messagebox.showwarning("Cảnh báo", "Vui lòng chọn phiếu mượn cần xác nhận trả từ danh sách!")
             return
 
+        # Lấy thông tin dòng được chọn
         values = self.phieu_tree.item(selected[0], "values")
         ma_phieu = values[1]
-        trang_thai = values[6]
+        ma_sach = values[3]
+        trang_thai_hien_tai = values[7]
 
-        if trang_thai == "Đã trả":
-            messagebox.showinfo("Thông báo", "Phiếu này đã được trả rồi")
+        # Kiểm tra xem sách đã được trả từ trước chưa
+        if "Đã Trả" in trang_thai_hien_tai:
+            messagebox.showinfo("Thông báo", f"Phiếu mượn '{ma_phieu}' này đã được xác nhận trả từ trước!")
+            return
+            
+        if "Chờ Duyệt" in trang_thai_hien_tai:
+            messagebox.showwarning("Cảnh báo", "Phiếu này chưa được duyệt cấp sách, không thể thực hiện chức năng trả sách!")
             return
 
-        if not messagebox.askyesno("Xác nhận", f"Xác nhận trả sách cho phiếu '{ma_phieu}'?"):
-            return
+        if messagebox.askyesno("Xác nhận nhận sách", f"Xác nhận nhận lại sách cho mã phiếu '{ma_phieu}'?"):
+            try:
+                now = datetime.now()
+                ngay_tra_str = now.strftime("%Y-%m-%d")
+                
+                # 1. Đọc thông tin phiếu từ database để kiểm tra trễ hạn và tính tiền phạt
+                query_check = "SELECT han_tra FROM muontra WHERE ma_phieu = %s"
+                res = self.muontra_data.execute_query(query_check, (ma_phieu,))
+                
+                tien_phat_chuan = 0
+                if res and len(res) > 0:
+                    han_tra_dt = res[0].get("han_tra")
+                    
+                    # Nếu có hạn trả và ngày trả thực tế vượt quá hạn trả
+                    if han_tra_dt:
+                        if type(han_tra_dt).__name__ == "str":
+                            han_tra_dt = datetime.strptime(han_tra_dt[:10], "%Y-%m-%d").date()
+                        elif type(han_tra_dt).__name__ == "datetime":
+                            han_tra_dt = han_tra_dt.date()
+                            
+                        if now.date() > han_tra_dt:
+                            so_ngay_tre = (now.date() - han_tra_dt).days
+                            tien_phat_chuan = so_ngay_tre * 2000 # Phạt 2,000đ/ngày trễ
 
-        try:
-            ma_sach = values[3]
-            ngay_tra = datetime.now().strftime("%d/%m/%Y")
+                # 2. Cập nhật trạng thái phiếu mượn thành 'da_tra' trong MySQL
+                data_update = {
+                    "ngay_tra": ngay_tra_str,
+                    "tien_phat": tien_phat_chuan,
+                    "trang_thai": "da_tra"
+                }
+                self.muontra_data.update("ma_phieu", ma_phieu, data_update)
 
-            self.muontra_data.confirm_return(ma_phieu, ngay_tra)
-            self.book_data.update_quantity(ma_sach, delta=1)
+                # 3. Hoàn trả số lượng sách tồn kho (+1 cuốn lại vào kho sách)
+                self.book_data.update_quantity(ma_sach, delta=1)
 
-            self.load_phieu()
-            messagebox.showinfo("Thành công", "Đã xác nhận trả sách thành công")
-        except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể cập nhật: {str(e)}")
-
-    def search_phieu(self):
-        """Tìm kiếm phiếu mượn/trả dựa trên từ khóa và bộ lọc trạng thái."""
-        """Tìm kiếm phiếu theo username, mã sách hoặc trạng thái"""
-        keyword = self.entry_search.get().strip()
-        if keyword == "Tìm theo username, mã sách hoặc trạng thái...":
-            keyword = ""
-        if not keyword:
-            self.load_phieu()
-            return
-
-        try:
-            # Sử dụng method đã được định nghĩa trong MuonTraData
-            result_list = self.muontra_data.search_muon_tra(keyword)
-
-            # Lọc thêm theo trạng thái nếu đang filter
-            filter_val = self.filter_var.get()
-
-            # Xóa dữ liệu cũ
-            for item in self.phieu_tree.get_children():
-                self.phieu_tree.delete(item)
-
-            for idx, row in enumerate(result_list, 1):
-                if filter_val != "tat_ca" and row[5] != filter_val:
-                    continue
-                trang_thai_display = "Đang mượn" if row[5] == "dang_muon" else "Đã trả"
-                tag = row[5]
-                # Xử lý ngày trả: nếu chưa trả thì hiển thị "Chưa trả"
-                ngay_tra_display = "Chưa trả" if str(row[4]).strip() in ["", "nan"] else row[4]
-                self.phieu_tree.insert("", "end",
-                    values=(idx, row[0], row[1], row[2], row[3], ngay_tra_display, trang_thai_display),
-                    tags=(tag,)
-                )
-            self.status_label.configure(text=f"Tìm kiếm hoàn tất")
-        except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
+                # Hiển thị thông báo kết quả trả sách
+                if tien_phat_chuan > 0:
+                    messagebox.showwarning("Thành công (Có phạt)", f"Đã nhận lại sách thành công cho phiếu {ma_phieu}!\n⚠️ Sinh viên trả trễ hạn, số tiền phạt cần thu: {tien_phat_chuan:,}đ")
+                else:
+                    messagebox.showinfo("Thành công", f"Đã xác nhận trả sách thành công cho phiếu {ma_phieu}.\nSách đã được hoàn trả về kho!")
+                
+                # Tải lại bảng dữ liệu
+                self.load_phieu()
+                
+            except Exception as e:
+                messagebox.showerror("Lỗi hệ thống", f"Không thể xử lý trả sách: {str(e)}")
 
     def back(self):
-        self.app_manager.show_quanlytk_page()
-
-    # ===== HÀM HỖ TRỢ =====
-
-    def _read_all_phieu(self):
-        """Đọc toàn bộ phiếu từ CSV"""
-        try:
-            return self.muontra_data.get_all()
-        except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể đọc dữ liệu: {str(e)}")
-            return []
-
-    def _cap_nhat_tra(self, ma_phieu, ngay_tra):
-        """Cập nhật ngày trả và trạng thái"""
-        self.muontra_data.confirm_return(ma_phieu, ngay_tra)
-
-    def _cap_nhat_so_luong_sach(self, ma_sach, delta):
-        """Cộng hoặc trừ số lượng sách"""
-        self.book_data.update_quantity(ma_sach, delta)
-
-    def xoa_phieu(self):
-        """Xử lý xóa phiếu mượn được chọn khỏi hệ thống."""
-        """Xóa phiếu mượn"""
-        selected = self.phieu_tree.selection()
-        if not selected:
-            messagebox.showwarning("Cảnh báo", "Vui lòng chọn phiếu cần xóa")
-            return
-
-        values = self.phieu_tree.item(selected[0], "values")
-        ma_phieu = values[1]
-
-        if not messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa phiếu '{ma_phieu}'?"):
-            return
-
-        try:
-            # Nếu đang mượn thì cộng lại số lượng sách
-            if values[6] == "Đang mượn":
-                ma_sach = values[3]
-                self._cap_nhat_so_luong_sach(ma_sach, delta=+1)
-
-            self.muontra_data.delete("ma_phieu", ma_phieu)
-            self.load_phieu()
-            messagebox.showinfo("Thành công", "Đã xóa phiếu thành công")
-        except Exception as e:
-            messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")
+        self.app_manager.show_main_page()

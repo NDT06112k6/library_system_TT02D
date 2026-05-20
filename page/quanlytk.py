@@ -5,19 +5,8 @@ from query.taikhoan import AccountData
 
 
 class QuanLyTKPage:
-    """
-    Trang quản lý tài khoản.
 
-    Hiển thị danh sách tài khoản và cho phép thêm, sửa, xóa.
-    """
     def __init__(self, master, app_manager):
-        """
-        Khởi tạo QuanLyTKPage.
-
-        Args:
-            master: Cửa sổ chính
-            app_manager: Quản lý ứng dụng
-        """
         self.master = master
         self.app_manager = app_manager
         self.account_data = AccountData()
@@ -26,27 +15,19 @@ class QuanLyTKPage:
         self.load_accounts()
 
     def config(self):
-        """
-        Cấu hình cửa sổ quản lý tài khoản.
-        """
         self.master.title("👤 Quản lý tài khoản")
-        self.master.geometry("900x500")
+        self.master.geometry("1000x600")
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
     def view(self):
-        """
-        Vẽ giao diện quản lý tài khoản.
-        """
-        # ===== Title =====
         title_label = ctk.CTkLabel(
             self.master,
-            text="👤Quản lý tài khoản",
+            text="👤 Quản lý tài khoản",
             font=("Segoe UI", 24, "bold")
         )
         title_label.pack(pady=15)
 
-                # ===== Thanh tìm kiếm =====
         search_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         search_frame.pack(pady=5, padx=20, fill="x")
 
@@ -59,7 +40,6 @@ class QuanLyTKPage:
         self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
         self.entry_search.configure(text_color="gray")
 
-        # Manual placeholder behavior
         def on_focus_in(event):
             if self.entry_search.get() == "Tìm theo tên đăng nhập...":
                 self.entry_search.delete(0, "end")
@@ -86,10 +66,8 @@ class QuanLyTKPage:
             style_type="info"
         ).pack(side="left")
 
-        # Bind Enter key to search
         self.entry_search.bind("<Return>", lambda event: self.search_account())
 
-        # ===== Button Frame =====
         button_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         button_frame.pack(pady=10, padx=20, fill="x")
 
@@ -99,55 +77,49 @@ class QuanLyTKPage:
         right_frame = ctk.CTkFrame(button_frame, fg_color="transparent")
         right_frame.pack(side="right")
 
-        CustomButton(left_frame, text="🔄Làm mới",           command=self.load_accounts,                    style_type="info").pack(side="left", padx=5)
-        CustomButton(left_frame, text="🗑️Xóa",              command=self.delete_account,                   style_type="danger").pack(side="left", padx=5)
-        CustomButton(left_frame, text="✏️Sửa",              command=self.edit_account,                     style_type="warning").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📖Quản lý sách",      command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📚Mượn/Trả sách",     command=lambda: self.app_manager.show_muontra_page(),    style_type="primary").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📊Thống kê",           command=lambda: self.app_manager.show_thongke_page(), style_type="info").pack(side="left", padx=5)
+        CustomButton(left_frame, text="🔄 Làm mới", command=self.load_accounts, style_type="info").pack(side="left", padx=5)
+        CustomButton(left_frame, text="🗑️ Xóa", command=self.delete_account, style_type="danger").pack(side="left", padx=5)
+        CustomButton(left_frame, text="✏️ Sửa", command=self.edit_account, style_type="warning").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📖 Quản lý sách", command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📚 Mượn/Trả sách", command=lambda: self.app_manager.show_muontra_page(), style_type="primary").pack(side="left", padx=5)
+        CustomButton(left_frame, text="📊 Thống kê", command=lambda: self.app_manager.show_thongke_page(), style_type="info").pack(side="left", padx=5)
 
-        # Nút Đăng xuất thay cho Quay lại
-        CustomButton(right_frame, text="🚪 Đăng xuất", command=self.dang_xuat, style_type="secondary").pack(side="right", padx=5)
+        CustomButton(right_frame, text="← Quay Lại", command=self.back, style_type="secondary").pack(side="right", padx=5)
 
-        # ===== Table Frame =====
         table_frame = ctk.CTkFrame(self.master, corner_radius=10)
         table_frame.pack(expand=True, fill="both", padx=20, pady=10)
 
         style = ttk.Style()
         style.theme_use("default")
         style.configure("Treeview",
-                        rowheight=30,
+                        rowheight=32,
                         font=("Segoe UI", 11),
                         borderwidth=0)
         style.configure("Treeview.Heading",
                         font=("Segoe UI", 12, "bold"))
 
-        # Treeview – các cột mới
-        columns = ("STT", "Username", "Password", "HoTen", "SDT", "ChucVu", "Gmail", "HanhDong")
+        columns = ("STT", "Username", "Password", "HoTen", "SDT", "ChucVu", "Gmail")
         self.account_tree = ttk.Treeview(
             table_frame,
             columns=columns,
-            show="headings",
-            height=15
+            show="headings"
         )
 
-        self.account_tree.heading("STT",      text="STT")
+        self.account_tree.heading("STT", text="STT")
         self.account_tree.heading("Username", text="Tên đăng nhập")
         self.account_tree.heading("Password", text="Mật khẩu")
-        self.account_tree.heading("HoTen",    text="Họ tên")
-        self.account_tree.heading("SDT",      text="SĐT")
-        self.account_tree.heading("ChucVu",   text="Chức vụ")
-        self.account_tree.heading("Gmail",    text="Gmail")
-        self.account_tree.heading("HanhDong", text="Hành động")
+        self.account_tree.heading("HoTen", text="Họ tên")
+        self.account_tree.heading("SDT", text="SĐT")
+        self.account_tree.heading("ChucVu", text="Chức vụ")
+        self.account_tree.heading("Gmail", text="Gmail")
 
-        self.account_tree.column("STT",      width=40,  anchor="center", stretch=False)
-        self.account_tree.column("Username", width=120, anchor="center", stretch=True)
-        self.account_tree.column("Password", width=100, anchor="center", stretch=True)
-        self.account_tree.column("HoTen",    width=150, anchor="center", stretch=True)
-        self.account_tree.column("SDT",      width=100, anchor="center", stretch=False)
-        self.account_tree.column("ChucVu",   width=100, anchor="center", stretch=False)
-        self.account_tree.column("Gmail",    width=180, anchor="center", stretch=True)
-        self.account_tree.column("HanhDong", width=80,  anchor="center", stretch=False)
+        self.account_tree.column("STT", width=50, anchor="center", stretch=False)
+        self.account_tree.column("Username", width=130, anchor="center", stretch=True)
+        self.account_tree.column("Password", width=110, anchor="center", stretch=True)
+        self.account_tree.column("HoTen", width=180, anchor="center", stretch=True)
+        self.account_tree.column("SDT", width=110, anchor="center", stretch=False)
+        self.account_tree.column("ChucVu", width=110, anchor="center", stretch=False)
+        self.account_tree.column("Gmail", width=200, anchor="center", stretch=True)
 
         scrollbar = ctk.CTkScrollbar(table_frame, command=self.account_tree.yview)
         self.account_tree.configure(yscrollcommand=scrollbar.set)
@@ -155,7 +127,6 @@ class QuanLyTKPage:
         self.account_tree.pack(side="left", expand=True, fill="both", padx=5, pady=5)
         scrollbar.pack(side="right", fill="y")
 
-        # ===== Status Bar =====
         self.status_label = ctk.CTkLabel(
             self.master,
             text="Sẵn sàng",
@@ -163,10 +134,7 @@ class QuanLyTKPage:
         )
         self.status_label.pack(fill="x", padx=10, pady=5)
 
-    # ====== LOGIC ======
-
     def load_accounts(self):
-        """Tải toàn bộ tài khoản"""
         self.entry_search.delete(0, "end")
         self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
         self.entry_search.configure(text_color="gray")
@@ -178,9 +146,6 @@ class QuanLyTKPage:
             self.status_label.configure(text="Lỗi tải dữ liệu")
 
     def delete_account(self):
-        """
-        Xóa tài khoản được chọn.
-        """
         selected_item = self.account_tree.selection()
         if not selected_item:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn tài khoản cần xóa")
@@ -197,15 +162,12 @@ class QuanLyTKPage:
                 messagebox.showerror("Lỗi", f"Không thể xóa tài khoản: {str(e)}")
 
     def edit_account(self):
-        """
-        Chỉnh sửa tài khoản được chọn.
-        """
         selected_item = self.account_tree.selection()
         if not selected_item:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn tài khoản cần sửa")
             return
 
-        item_values  = self.account_tree.item(selected_item[0], "values")
+        item_values = self.account_tree.item(selected_item[0], "values")
         old_username = item_values[1]
         old_password = item_values[2]
         old_hoten = item_values[3]
@@ -215,22 +177,17 @@ class QuanLyTKPage:
 
         self.app_manager.show_suatk_page(old_username, old_password, old_hoten, old_sdt, old_chucvu, old_email)
 
-    def dang_xuat(self):
-        """Hỏi xác nhận trước khi đăng xuất"""
-        if messagebox.askyesno("Xác nhận đăng xuất", "Bạn có chắc chắn muốn đăng xuất không?"):
-            self.app_manager.show_login_page()
+    def back(self):
+        self.app_manager.show_main_page()
 
     def search_account(self):
-        """Tìm kiếm tài khoản theo tên đăng nhập"""
         keyword = self.entry_search.get().strip()
         if keyword == "Tìm theo tên đăng nhập...":
             keyword = ""
         try:
             if not keyword:
-                # Nếu không có từ khóa, tải tất cả
                 self.load_accounts()
             else:
-                # Tìm kiếm một phần theo tên đăng nhập
                 rows = self.account_data.search_accounts(keyword)
                 self._populate_tree(rows)
                 self.status_label.configure(text=f"Tìm thấy {len(rows)} tài khoản")
@@ -239,21 +196,18 @@ class QuanLyTKPage:
             self.status_label.configure(text="Lỗi tìm kiếm")
 
     def _populate_tree(self, data):
-        """Điền dữ liệu vào Treeview"""
-        # Xóa dữ liệu cũ
         for item in self.account_tree.get_children():
             self.account_tree.delete(item)
         
-        # Dữ liệu truyền vào bây giờ là list of lists
         for idx, row in enumerate(data, 1):
-            self.account_tree.insert("", "end", values=(
-                idx, 
-                row[1], # Username (index 0 là ID)
-                row[2], # Password
-                row[3], # HoTen
-                row[4], # SDT
-                row[5], # ChucVu
-                row[6], # Email
-                "Sửa/Xóa"
-            ))
-    
+            if len(row) >= 7:
+                self.account_tree.insert("", "end", values=(
+                    idx, 
+                    row[1], 
+                    row[2], 
+                    row[3], 
+                    row[4], 
+                    row[5], 
+                    row[6]
+                ))
+        self.status_label.configure(text=f"Tổng số: {len(data)} tài khoản")

@@ -4,6 +4,7 @@ from datetime import datetime
 from query.books import BookData
 from query.muontra import MuonTraData
 from query.taikhoan import AccountData
+from datetime import datetime, timedelta
 
 
 class TaoMuonPage:
@@ -11,7 +12,7 @@ class TaoMuonPage:
         self.master = master
         self.app_manager = app_manager
         
-        # Sử dụng các lớp dữ liệu chuyên biệt
+        # Sử dụng các lớp dữ liệu kết nối MySQL
         self.book_data = BookData()
         self.muontra_data = MuonTraData()
         self.account_data = AccountData()
@@ -38,7 +39,7 @@ class TaoMuonPage:
         form_frame = ctk.CTkFrame(self.master, fg_color="white")
         form_frame.pack(fill="x", padx=20)
 
-        # Mã phiếu (tự sinh, không cho sửa)
+        # Mã phiếu (Tự động sinh mã)
         row1 = ctk.CTkFrame(form_frame, fg_color="transparent")
         row1.pack(fill="x", padx=20, pady=8)
         ctk.CTkLabel(row1, text="Mã phiếu:", font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
@@ -55,7 +56,7 @@ class TaoMuonPage:
                                            placeholder_text="Nhập username người mượn...")
         self.entry_username.pack(side="right", fill="x", expand=True)
 
-        # Ngày mượn (tự động lấy ngày hiện tại)
+        # Ngày mượn (Mặc định lấy ngày hiện tại định dạng Việt Nam để hiển thị)
         row3 = ctk.CTkFrame(form_frame, fg_color="transparent")
         row3.pack(fill="x", padx=20, pady=8)
         ctk.CTkLabel(row3, text="Ngày mượn:", font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
@@ -99,7 +100,7 @@ class TaoMuonPage:
         self.sach_tree.pack(side="left", expand=True, fill="both", padx=5, pady=5)
         scrollbar.pack(side="right", fill="y")
 
-        # Nút bấm
+        # Nút bấm chức năng
         btn_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         btn_frame.pack(pady=15)
 
@@ -115,54 +116,75 @@ class TaoMuonPage:
             command=self.cancel
         ).pack(side="left", padx=10)
 
-    # ===== LOGIC =====
+    # ===== LOGIC XỬ LÝ =====
 
     def load_sach_available(self):
-        """Chỉ hiển thị sách còn số lượng > 0"""
+        """Chỉ hiển thị những đầu sách có số lượng lớn hơn 0"""
         try:
             books = self.book_data.get_all()
             for row in books:
-                if int(row[5]) > 0: # Index 5 là so_luong trong DB (id=0, ma_sach=1, ..., so_luong=5)
+                if int(row[5]) > 0:  # Cột số lượng nằm ở row[5]
                     self.sach_tree.insert("", "end", values=(row[0], row[1], row[2], row[3], row[5]))
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải danh sách sách: {str(e)}")
 
     def save(self):
-        """Lưu phiếu mượn vào CSV"""
+        """Xử lý tạo phiếu mượn sách và chuẩn hóa ngày tháng lưu vào MySQL"""
         username = self.entry_username.get().strip()
         if not username:
             messagebox.showerror("Lỗi", "Vui lòng nhập username người mượn")
             return
 
-        # Kiểm tra username tồn tại trong tk.csv
+        # Kiểm tra sự tồn tại của tài khoản
         if not self.account_data.check_exists(username):
             messagebox.showerror("Lỗi", f"Username '{username}' không tồn tại")
             return
 
-        # Kiểm tra đã chọn sách chưa
+        # Kiểm tra xem đã chọn dòng sách nào trên bảng chưa
         selected = self.sach_tree.selection()
         if not selected:
             messagebox.showerror("Lỗi", "Vui lòng chọn sách cần mượn")
             return
         
-        # Kiểm tra user đã mượn sách này chưa (chưa trả)
         values = self.sach_tree.item(selected[0], "values")
-        ma_sach = values[1] # Cột Mã sách hiện ở index 1
+        ma_sach = values[1]
+        
+        # Kiểm tra xem tài khoản này có đang mượn cuốn sách này mà chưa trả không
         if self.muontra_data.is_currently_borrowing(username, ma_sach):
             messagebox.showerror("Lỗi", f"'{username}' đang mượn sách này rồi, chưa trả!")
             return
 
+        # Thêm timedelta vào đầu file nếu chưa có: from datetime import datetime, timedelta
+
         ma_phieu = self.entry_maphieu.get()
-        ngay_muon = self.entry_ngaymuon.get()
+        ngay_muon_raw = self.entry_ngaymuon.get()
 
         try:
-            # Ghi phiếu mượn
-            self.muontra_data.create([ma_phieu, username, ma_sach, ngay_muon, "", "dang_muon"])
+            # 1. Chuẩn hóa ngày mượn cho MySQL (YYYY-MM-DD)
+            ngay_muon_date = datetime.strptime(ngay_muon_raw, "%d/%m/%Y")
+            ngay_muon_chuan_mysql = ngay_muon_date.strftime("%Y-%m-%d")
 
-            # Trừ 1 số lượng sách
+            # 2. TỰ ĐỘNG TÍNH HẠN TRẢ: Cộng thêm 14 ngày
+            han_tra_date = ngay_muon_date + timedelta(days=14)
+            han_tra_chuan_mysql = han_tra_date.strftime("%Y-%m-%d")
+
+            # 3. Ghi phiếu mượn xuống database bao gồm cả han_tra và tien_phat mặc định bằng 0
+            # Cấu trúc mảng truyền vào: [ma_phieu, username, ma_sach, ngay_muon, han_tra, ngay_tra, tien_phat, trang_thai]
+            self.muontra_data.create([
+                ma_phieu, 
+                username, 
+                ma_sach, 
+                ngay_muon_chuan_mysql, 
+                han_tra_chuan_mysql, 
+                None,  # ngay_tra ban đầu là None
+                0,     # tien_phat ban đầu là 0
+                "dang_muon"
+            ])
+
+            # Khấu trừ số lượng tồn kho của sách đi 1 đơn vị
             self.book_data.update_quantity(ma_sach, delta=-1)
 
-            messagebox.showinfo("Thành công", f"Đã tạo phiếu mượn '{ma_phieu}' thành công")
+            messagebox.showinfo("Thành công", f"Đã tạo phiếu mượn '{ma_phieu}' với hạn trả là {han_tra_date.strftime('%d/%m/%Y')}")
             self.app_manager.show_muontra_page()
 
         except Exception as e:

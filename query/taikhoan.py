@@ -1,3 +1,5 @@
+import email
+
 from .base import Query
 import pandas as pd
 import re
@@ -118,3 +120,4 @@ class AccountData(Query):
         if self.check_exists(username):
             raise DuplicateEntryError(f"Tên đăng nhập '{username}' đã tồn tại")
         return self.create(data)
+    

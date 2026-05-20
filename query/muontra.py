@@ -3,10 +3,20 @@ import pandas as pd
 
 class MuonTraData(Query):
     """Lớp quản lý dữ liệu mượn/trả từ MySQL"""
-    
+
     def __init__(self):
-        # Khởi tạo với table_name = "muontra"
-        super().__init__("muontra", ["id", "ma_phieu", "username", "ma_sach", "ngay_muon", "ngay_tra", "trang_thai"])
+        # KHỚP ĐÚNG 100% THỨ TỰ CỘT TRONG MYSQL DOCKER
+        super().__init__("muontra", [
+            "id", 
+            "ma_phieu", 
+            "username", 
+            "ma_sach", 
+            "ngay_muon", 
+            "han_tra",     
+            "ngay_tra", 
+            "tien_phat",   
+            "trang_thai"
+        ])
 
     def get_all(self):
         """Lấy tất cả phiếu mượn/trả dưới dạng list."""
@@ -130,3 +140,19 @@ class MuonTraData(Query):
             return [(item['ma_sach'], item['count']) for item in results]
         except Exception:
             return []
+
+    def create_borrow_request(self, username, ma_sach):
+        """Sinh viên gửi yêu cầu mượn sách"""
+        ma_phieu = self.generate_new_id()
+        # Đối với yêu cầu, chưa có ngày mượn và hạn trả (sẽ có khi duyệt)
+        data = [ma_phieu, username, ma_sach, None, None, None, 0, "cho_duyet"]
+        return self.create(data)
+
+    def approve_borrow_request(self, ma_phieu, ngay_muon, han_tra):
+        """Thủ thư duyệt yêu cầu, chuyển sang trạng thái đang mượn"""
+        data_update = {
+            "ngay_muon": ngay_muon,
+            "han_tra": han_tra,
+            "trang_thai": "dang_muon"
+        }
+        return self.update("ma_phieu", ma_phieu, data_update)

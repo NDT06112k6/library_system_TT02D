@@ -1,8 +1,8 @@
 import customtkinter as ctk
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox, filedialog, ttk
 from query.books import BookData
-from common.button import CustomButton
+from query.muontra import MuonTraData  # Thêm kết nối dữ liệu mượn trả
 from common.theme import Colors, Fonts, Spacing
 
 
@@ -10,8 +10,8 @@ class QuanLySachPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
-        # Khởi tạo Query cho file quản lý sách
         self.book_data = BookData()
+        self.muontra_data = MuonTraData()  # Khởi tạo lớp dữ liệu mượn trả
         self.config()
         self.view()
         self.load_books()
@@ -23,26 +23,24 @@ class QuanLySachPage:
         ctk.set_appearance_mode("light")
 
     def view(self):
-        # Master frame lấp đầy window
         main_frame = ctk.CTkFrame(self.master, fg_color=Colors.BG_MAIN)
         main_frame.pack(fill="both", expand=True)
 
-        # ===== HEADER =====
         header = ctk.CTkFrame(main_frame, fg_color=Colors.PRIMARY, corner_radius=0)
         header.pack(fill="x")
         
+        # Đổi tiêu đề động theo vai trò đăng nhập để tăng trải nghiệm người dùng
+        page_title = "📚 KHO SÁCH THƯ VIỆN" if self.app_manager.current_role == "Sinh viên" else "📚 QUẢN LÝ KHO SÁCH"
         ctk.CTkLabel(
             header,
-            text="📚 QUẢN LÝ KHO SÁCH",
+            text=page_title,
             font=Fonts.HEADER,
             text_color=Colors.WHITE
         ).pack(pady=Spacing.MD)
 
-        # ===== SEARCH & FILTER SECTION =====
         search_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
         search_frame.pack(fill="x", padx=Spacing.LG, pady=Spacing.LG)
 
-        # Search box bên trái
         left_search = ctk.CTkFrame(search_frame, fg_color="transparent")
         left_search.pack(side="left", fill="x", expand=True, padx=Spacing.MD, pady=Spacing.MD)
 
@@ -60,12 +58,11 @@ class QuanLySachPage:
         ctk.CTkButton(left_search, text="Tìm", width=70, height=35, font=Fonts.SMALL_BOLD, command=self.search_books).pack(side="left", padx=2)
         ctk.CTkButton(left_search, text="Reset", width=70, height=35, font=Fonts.SMALL_BOLD, fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, hover_color=Colors.BORDER_DARK, command=self.load_books).pack(side="left", padx=2)
 
-        # Filter bên phải
         right_filter = ctk.CTkFrame(search_frame, fg_color="transparent")
         right_filter.pack(side="right", padx=Spacing.MD)
 
         all_books = self.book_data.get_all()
-        categories = sorted(list(set([b[3] for b in all_books])))
+        categories = sorted(list(set([b[3] for b in all_books if len(b) > 3])))
         categories.insert(0, "Tất cả thể loại")
 
         self.filter_category = ctk.CTkOptionMenu(
@@ -82,11 +79,9 @@ class QuanLySachPage:
         self.filter_category.pack(side="right")
         ctk.CTkLabel(right_filter, text="📂 Thể loại:", font=Fonts.SMALL_BOLD).pack(side="right", padx=5)
 
-        # ===== TABLE SECTION =====
         table_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
         table_frame.pack(expand=True, fill="both", padx=20, pady=10)
 
-        # Styling Treeview to match the theme
         style = ttk.Style()
         style.theme_use("clam")
         style.configure("Treeview", 
@@ -106,16 +101,28 @@ class QuanLySachPage:
         columns = ("STT", "Mã sách", "Tên sách", "Tác giả", "Thể loại", "Số lượng", "Giá")
         self.book_tree = ttk.Treeview(table_frame, columns=columns, show="headings")
         
-        # Config columns... (như cũ)
+        self.book_tree.heading("STT", text="STT")
+        self.book_tree.heading("Mã sách", text="Mã Sách")
+        self.book_tree.heading("Tên sách", text="Tên Sách")
+        self.book_tree.heading("Tác giả", text="Tác Giả")
+        self.book_tree.heading("Thể loại", text="Thể Loại")
+        self.book_tree.heading("Số lượng", text="Số Lượng")
+        self.book_tree.heading("Giá", text="Giá Bán")
 
-        # Scrollbar
+        self.book_tree.column("STT", width=50, minwidth=50, anchor="center")
+        self.book_tree.column("Mã sách", width=100, minwidth=100, anchor="center")
+        self.book_tree.column("Tên sách", width=250, minwidth=200, anchor="w")
+        self.book_tree.column("Tác giả", width=150, minwidth=120, anchor="w")
+        self.book_tree.column("Thể loại", width=120, minwidth=100, anchor="center")
+        self.book_tree.column("Số lượng", width=90, minwidth=80, anchor="center")
+        self.book_tree.column("Giá", width=100, minwidth=90, anchor="e")
+
         scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.book_tree.yview)
         self.book_tree.configure(yscrollcommand=scrollbar.set)
 
         self.book_tree.pack(side="left", expand=True, fill="both", padx=5, pady=5)
         scrollbar.pack(side="right", fill="y")
 
-        # ===== ACTION BUTTONS SECTION =====
         action_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
         action_frame.pack(fill="x", padx=Spacing.LG, pady=Spacing.LG)
 
@@ -125,36 +132,81 @@ class QuanLySachPage:
         btns_container = ctk.CTkFrame(action_frame, fg_color="transparent")
         btns_container.pack(side="right", padx=Spacing.MD, pady=Spacing.SM)
 
-        ctk.CTkButton(btns_container, text="➕ Thêm Mới", fg_color=Colors.SUCCESS, font=Fonts.SMALL_BOLD, command=self.them_sach).pack(side="left", padx=5)
-        ctk.CTkButton(btns_container, text="✏️ Sửa", fg_color=Colors.INFO, font=Fonts.SMALL_BOLD, command=self.sua_sach).pack(side="left", padx=5)
-        ctk.CTkButton(btns_container, text="🗑️ Xóa", fg_color=Colors.ERROR, font=Fonts.SMALL_BOLD, command=self.xoa_sach).pack(side="left", padx=5)
+        # ─── PHÂN QUYỀN NÚT CHỨC NĂNG (ROLE-BASED AUTHORIZATION) ───
+        current_role = str(self.app_manager.current_role).strip()
+
+        if current_role in ["Admin", "Quản lý", "Thủ thư"]:
+            # Hiển thị các nút Quản trị nếu là nhân viên quản lý
+            ctk.CTkButton(btns_container, text="➕ Thêm Mới", fg_color=Colors.SUCCESS, font=Fonts.SMALL_BOLD, command=self.them_sach).pack(side="left", padx=5)
+            ctk.CTkButton(btns_container, text="✏️ Sửa", fg_color=Colors.INFO, font=Fonts.SMALL_BOLD, command=self.sua_sach).pack(side="left", padx=5)
+            ctk.CTkButton(btns_container, text="🗑️ Xóa", fg_color=Colors.ERROR, font=Fonts.SMALL_BOLD, command=self.xoa_sach).pack(side="left", padx=5)
+        else:
+            # TỰ ĐỘNG THAY THẾ: Nút đăng ký mượn dành riêng cho Sinh viên/Độc giả
+            ctk.CTkButton(
+                btns_container, 
+                text="📖 Đăng ký mượn", 
+                fg_color="#28a745", 
+                hover_color="#218838", 
+                font=Fonts.SMALL_BOLD, 
+                command=self.gui_yeu_cau_muon
+            ).pack(side="left", padx=5)
+
+        # Nút Quay lại dùng chung cho tất cả mọi người
         ctk.CTkButton(btns_container, text="← Quay Lại", fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, font=Fonts.SMALL_BOLD, command=self.back).pack(side="left", padx=5)
 
-    # ===== LOGIC =====
+    # ─── LOGIC YÊU CẦU MƯỢN SÁCH DÀNH CHO SINH VIÊN ───
+    def gui_yeu_cau_muon(self):
+        """Xử lý gửi yêu cầu đặt sách chờ phê duyệt dưới MySQL Docker"""
+        selected = self.book_tree.selection()
+        if not selected:
+            messagebox.showwarning("Cảnh báo", "Vui lòng chọn cuốn sách bạn muốn đăng ký mượn!")
+            return
+        
+        values = self.book_tree.item(selected[0], "values")
+        ma_sach = values[1]
+        ten_sach = values[2]
+        so_luong_con = int(values[5])
 
+        # 1. Kiểm tra tồn kho thời gian thực
+        if so_luong_con <= 0:
+            messagebox.showerror("Lỗi", f"Sách '{ten_sach}' hiện tại đã hết hàng trong kho!")
+            return
+
+        # 2. Kiểm tra xem sinh viên này có đang gửi yêu cầu hoặc đang mượn cuốn này rồi không
+        username_hien_tai = self.app_manager.current_user
+        if self.muontra_data.is_currently_borrowing(username_hien_tai, ma_sach):
+            messagebox.showerror("Lỗi", "Bạn đang mượn hoặc có yêu cầu chờ duyệt với cuốn sách này rồi!")
+            return
+
+        # 3. Tiến hành gửi yêu cầu phê duyệt lên hệ thống
+        if messagebox.askyesno("Xác nhận", f"Bạn có chắc chắn muốn gửi yêu cầu mượn cuốn sách:\n'{ten_sach}'?"):
+            try:
+                # Gọi hàm lưu trạng thái 'cho_duyet' vừa bổ sung vào tầng query
+                self.muontra_data.create_borrow_request(username_hien_tai, ma_sach)
+                messagebox.showinfo("Thành công", "Gửi yêu cầu thành công!\nVui lòng đến quầy thư viện để nhận sách và duyệt phiếu.")
+                self.load_books()
+            except Exception as e:
+                messagebox.showerror("Lỗi hệ thống", f"Không thể gửi yêu cầu mượn: {str(e)}")
+
+    # ─── LOGIC DỮ LIỆU CŨ CỦA BẠN ───
     def load_books(self):
-        """Tải toàn bộ danh sách sách từ CSV"""
         self.entry_search.delete(0, "end")
         self.filter_category.set("Tất cả thể loại")
         self._populate_tree(self._read_all_books())
 
     def filter_by_category(self, category):
-        """Lọc sách theo thể loại"""
         all_books = self._read_all_books()
         if category == "Tất cả thể loại":
             self._populate_tree(all_books)
         else:
-            filtered = [b for b in all_books if b[3] == category]
+            filtered = [b for b in all_books if len(b) > 3 and b[3] == category]
             self._populate_tree(filtered)
 
     def search_books(self):
-        """Thực hiện tìm kiếm sách theo từ khóa từ ô nhập liệu."""
-        """Lọc sách theo tên hoặc tác giả"""
         keyword = self.entry_search.get().strip()
         if not keyword:
             self.load_books()
             return
-
         try:
             result = self.book_data.search_books(keyword)
             self._populate_tree(result)
@@ -169,9 +221,7 @@ class QuanLySachPage:
         if not selected:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn sách cần sửa")
             return
-
         values = self.book_tree.item(selected[0], "values")
-        # values: (STT, ma_sach, ten_sach, tac_gia, the_loai, so_luong, gia)
         self.app_manager.show_suasach_page(values[1])
 
     def xoa_sach(self):
@@ -179,14 +229,12 @@ class QuanLySachPage:
         if not selected:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn sách cần xóa")
             return
-
         values = self.book_tree.item(selected[0], "values")
         ma_sach = values[1]
         ten_sach = values[2]
 
         if not messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa sách '{ten_sach}'?"):
             return
-
         try:
             self._remove_book_from_file(ma_sach)
             self.load_books()
@@ -195,12 +243,9 @@ class QuanLySachPage:
             messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")
 
     def back(self):
-        self.app_manager.show_quanlytk_page()
-
-    # ===== HÀM HỖ TRỢ =====
+        self.app_manager.show_main_page()
 
     def _read_all_books(self):
-        """Đọc toàn bộ sách từ CSV"""
         try:
             return self.book_data.get_all()
         except Exception as e:
@@ -208,19 +253,42 @@ class QuanLySachPage:
             return []
 
     def _populate_tree(self, rows):
-        """Đổ dữ liệu vào Treeview"""
-        # Xóa dữ liệu cũ
+        """Hiển thị dữ liệu sách lên Treeview tự động nhận diện kiểu dữ liệu"""
         for item in self.book_tree.get_children():
             self.book_tree.delete(item)
-
+        
         for idx, row in enumerate(rows, 1):
-            if len(row) >= 6:
-                # Format giá: thêm dấu phẩy (VD: 120,000)
-                gia = f"{int(row[5]):,}"
-                self.book_tree.insert("", "end", values=(idx, row[0], row[1], row[2], row[3], row[4], gia))
-
+            try:
+                if isinstance(row, dict):
+                    gia_raw = row.get("gia") or row.get("giaban") or 0
+                    gia = f"{int(float(gia_raw)):,}"
+                    ma_sach = row.get("masach") or row.get("ma_sach")
+                    ten_sach = row.get("tensach") or row.get("ten_sach")
+                    tac_gia = row.get("tacgia") or row.get("tac_gia")
+                    the_loai = row.get("theloai") or row.get("the_loai")
+                    so_luong = row.get("soluong") or row.get("so_luong")
+                    self.book_tree.insert("", "end", values=(idx, ma_sach, ten_sach, tac_gia, the_loai, so_luong, gia))
+                else:
+                    if len(row) >= 7:
+                        gia = f"{int(float(row[6])):,}" if row[6] else "0"
+                        self.book_tree.insert("", "end", values=(idx, row[1], row[2], row[3], row[4], row[5], gia))
+                    else:
+                        gia = f"{int(float(row[5])):,}" if row[5] else "0"
+                        self.book_tree.insert("", "end", values=(idx, row[0], row[1], row[2], row[3], row[4], gia))
+            except Exception as e:
+                print(f"Lỗi hiển thị hàng số {idx}: {e}")
+                continue
+                
         self.status_label.configure(text=f"Tổng: {len(rows)} sách")
 
     def _remove_book_from_file(self, ma_sach_xoa):
-        """Xóa sách khỏi CSV theo mã sách"""
-        self.book_data.delete("ma_sach", ma_sach_xoa)
+        try:
+            from query.muontra import MuonTraData
+            muon_tra_data = MuonTraData()
+            query = "DELETE FROM muontra WHERE ma_sach = %s"
+            muon_tra_data.execute_query(query, (ma_sach_xoa,))
+            self.book_data.delete("ma_sach", ma_sach_xoa)
+            return True
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")
+            return False

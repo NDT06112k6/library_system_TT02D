@@ -1,10 +1,9 @@
 import customtkinter as ctk
 from tkinter import messagebox, ttk
-from datetime import datetime
+from datetime import datetime, timedelta
 from query.books import BookData
 from query.muontra import MuonTraData
 from query.taikhoan import AccountData
-from datetime import datetime, timedelta
 
 
 class TaoMuonPage:
@@ -123,7 +122,8 @@ class TaoMuonPage:
         try:
             books = self.book_data.get_all()
             for row in books:
-                if int(row[5]) > 0:  # Cột số lượng nằm ở row[5]
+                so_luong_ton = int(row[5])
+                if so_luong_ton > 0:
                     self.sach_tree.insert("", "end", values=(row[0], row[1], row[2], row[3], row[5]))
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải danh sách sách: {str(e)}")
@@ -131,18 +131,21 @@ class TaoMuonPage:
     def save(self):
         """Xử lý tạo phiếu mượn sách và chuẩn hóa ngày tháng lưu vào MySQL"""
         username = self.entry_username.get().strip()
-        if not username:
+        
+        # Kiểm tra trống tường minh
+        if username == "":
             messagebox.showerror("Lỗi", "Vui lòng nhập username người mượn")
             return
 
         # Kiểm tra sự tồn tại của tài khoản
-        if not self.account_data.check_exists(username):
+        exists_account = self.account_data.check_exists(username)
+        if exists_account == False:
             messagebox.showerror("Lỗi", f"Username '{username}' không tồn tại")
             return
 
         # Kiểm tra xem đã chọn dòng sách nào trên bảng chưa
         selected = self.sach_tree.selection()
-        if not selected:
+        if len(selected) == 0:
             messagebox.showerror("Lỗi", "Vui lòng chọn sách cần mượn")
             return
         
@@ -150,13 +153,23 @@ class TaoMuonPage:
         ma_sach = values[1]
         
         # Kiểm tra xem tài khoản này có đang mượn cuốn sách này mà chưa trả không
-        if self.muontra_data.is_currently_borrowing(username, ma_sach):
+        is_borrowing = self.muontra_data.is_currently_borrowing(username, ma_sach)
+        if is_borrowing == True:
             messagebox.showerror("Lỗi", f"'{username}' đang mượn sách này rồi, chưa trả!")
             return
 
-        # Thêm timedelta vào đầu file nếu chưa có: from datetime import datetime, timedelta
-
         ma_phieu = self.entry_maphieu.get()
+        
+        # CƠ CHẾ CHẶN LỖI 1062 DUPLICATE ENTRY TRƯỚC KHI INSERT
+        query_check_id = "SELECT COUNT(*) as total FROM muontra WHERE ma_phieu = %s"
+        check_result = self.muontra_data.execute_query(query_check_id, (ma_phieu,))
+        
+        if check_result:
+            total_matches = check_result[0]['total']
+            if total_matches > 0:
+                messagebox.showerror("Lỗi thêm", f"Mã phiếu '{ma_phieu}' đã tồn tại dưới Database! Vui lòng kiểm tra lại bộ sinh mã.")
+                return
+
         ngay_muon_raw = self.entry_ngaymuon.get()
 
         try:
@@ -169,7 +182,6 @@ class TaoMuonPage:
             han_tra_chuan_mysql = han_tra_date.strftime("%Y-%m-%d")
 
             # 3. Ghi phiếu mượn xuống database bao gồm cả han_tra và tien_phat mặc định bằng 0
-            # Cấu trúc mảng truyền vào: [ma_phieu, username, ma_sach, ngay_muon, han_tra, ngay_tra, tien_phat, trang_thai]
             self.muontra_data.create([
                 ma_phieu, 
                 username, 

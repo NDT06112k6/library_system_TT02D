@@ -30,7 +30,12 @@ class QuanLySachPage:
         header.pack(fill="x")
         
         # Đổi tiêu đề động theo vai trò đăng nhập để tăng trải nghiệm người dùng
-        page_title = "📚 KHO SÁCH THƯ VIỆN" if self.app_manager.current_role == "Sinh viên" else "📚 QUẢN LÝ KHO SÁCH"
+        # Sử dụng cấu trúc if-else truyền thống thay vì ternary
+        if self.app_manager.current_role == "Sinh viên":
+            page_title = "📚 KHO SÁCH THƯ VIỆN"
+        else:
+            page_title = "📚 QUẢN LÝ KHO SÁCH"
+
         ctk.CTkLabel(
             header,
             text=page_title,
@@ -62,7 +67,14 @@ class QuanLySachPage:
         right_filter.pack(side="right", padx=Spacing.MD)
 
         all_books = self.book_data.get_all()
-        categories = sorted(list(set([b[3] for b in all_books if len(b) > 3])))
+        
+        temp_categories = []
+        for b in all_books:
+            if len(b) > 3:
+                temp_categories.append(b[3])
+        
+        unique_categories = list(set(temp_categories))
+        categories = sorted(unique_categories)
         categories.insert(0, "Tất cả thể loại")
 
         self.filter_category = ctk.CTkOptionMenu(
@@ -132,7 +144,7 @@ class QuanLySachPage:
         btns_container = ctk.CTkFrame(action_frame, fg_color="transparent")
         btns_container.pack(side="right", padx=Spacing.MD, pady=Spacing.SM)
 
-        # ─── PHÂN QUYỀN NÚT CHỨC NĂNG (ROLE-BASED AUTHORIZATION) ───
+        #  PHÂN QUYỀN NÚT CHỨC NĂNG (ROLE-BASED AUTHORIZATION)
         current_role = str(self.app_manager.current_role).strip()
 
         if current_role in ["Admin", "Quản lý", "Thủ thư"]:
@@ -188,7 +200,6 @@ class QuanLySachPage:
             except Exception as e:
                 messagebox.showerror("Lỗi hệ thống", f"Không thể gửi yêu cầu mượn: {str(e)}")
 
-    # ─── LOGIC DỮ LIỆU CŨ CỦA BẠN ───
     def load_books(self):
         self.entry_search.delete(0, "end")
         self.filter_category.set("Tất cả thể loại")
@@ -260,20 +271,47 @@ class QuanLySachPage:
         for idx, row in enumerate(rows, 1):
             try:
                 if isinstance(row, dict):
-                    gia_raw = row.get("gia") or row.get("giaban") or 0
-                    gia = f"{int(float(gia_raw)):,}"
-                    ma_sach = row.get("masach") or row.get("ma_sach")
-                    ten_sach = row.get("tensach") or row.get("ten_sach")
-                    tac_gia = row.get("tacgia") or row.get("tac_gia")
-                    the_loai = row.get("theloai") or row.get("the_loai")
-                    so_luong = row.get("soluong") or row.get("so_luong")
+                    # Xử lý lấy giá trị từ Dictionary một cách an toàn
+                    if "gia" in row:
+                        gia_raw = row["gia"]
+                    elif "giaban" in row:
+                        gia_raw = row["giaban"]
+                    else:
+                        gia_raw = 0
+                    
+                    # Định dạng tiền tệ
+                    gia = "{:,}".format(int(float(gia_raw)))
+                    
+                    # Lấy mã sách
+                    if "ma_sach" in row:
+                        ma_sach = row["ma_sach"]
+                    else:
+                        ma_sach = row.get("masach", "N/A")
+
+                    # Lấy tên sách
+                    if "ten_sach" in row:
+                        ten_sach = row["ten_sach"]
+                    else:
+                        ten_sach = row.get("tensach", "N/A")
+                    
+                    # Các trường còn lại tương tự
+                    tac_gia = row.get("tac_gia", "N/A")
+                    the_loai = row.get("the_loai", "N/A")
+                    so_luong = row.get("so_luong", 0)
+
                     self.book_tree.insert("", "end", values=(idx, ma_sach, ten_sach, tac_gia, the_loai, so_luong, gia))
                 else:
                     if len(row) >= 7:
-                        gia = f"{int(float(row[6])):,}" if row[6] else "0"
+                        if row[6]:
+                            gia = "{:,}".format(int(float(row[6])))
+                        else:
+                            gia = "0"
                         self.book_tree.insert("", "end", values=(idx, row[1], row[2], row[3], row[4], row[5], gia))
                     else:
-                        gia = f"{int(float(row[5])):,}" if row[5] else "0"
+                        if row[5]:
+                            gia = "{:,}".format(int(float(row[5])))
+                        else:
+                            gia = "0"
                         self.book_tree.insert("", "end", values=(idx, row[0], row[1], row[2], row[3], row[4], gia))
             except Exception as e:
                 print(f"Lỗi hiển thị hàng số {idx}: {e}")
@@ -292,3 +330,4 @@ class QuanLySachPage:
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")
             return False
+    

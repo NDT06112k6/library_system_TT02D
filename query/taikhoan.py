@@ -1,29 +1,16 @@
 import email
-
 from .base import Query
 import pandas as pd
 import re
-from page.constants import PATH_ACCOUNTS, COL_ACCOUNTS
 from page.exceptions import DuplicateEntryError
 
 class AccountData(Query):
-    """Lớp quản lý dữ liệu tài khoản từ MySQL"""
-    
     def __init__(self):
-        # Khởi tạo với table_name = "taikhoan"
+        """Khởi tạo thực thể quản lý dữ liệu tài khoản thư viện"""
         super().__init__("taikhoan", ["id", "taikhoan", "matkhau", "hoten", "sdt", "chucvu", "email"])
 
     def authenticate(self, username, password):
-        """
-        Xác thực đăng nhập người dùng.
-        
-        Args:
-            username (str): Tên đăng nhập
-            password (str): Mật khẩu
-            
-        Returns:
-            dict: Thông tin tài khoản nếu thành công, None nếu thất bại
-        """
+        """Xác thực thông tin đăng nhập của người dùng"""
         try:
             res = self.search("taikhoan", username, exact=True)
             if not res.empty and res.iloc[0]["matkhau"] == password:
@@ -33,21 +20,10 @@ class AccountData(Query):
         return None
 
     def search_accounts(self, keyword):
-        """
-        Tìm kiếm tài khoản theo tên đăng nhập hoặc họ tên.
-        
-        Args:
-            keyword (str): Từ khóa tìm kiếm
-            
-        Returns:
-            list: Danh sách tài khoản khớp
-        """
+        """Tìm kiếm danh sách tài khoản theo từ khóa đầu vào"""
         try:
-            # Tìm kiếm theo taikhoan
             by_username = self.search("taikhoan", keyword, exact=False)
-            # Tìm kiếm theo hoten
             by_hoten = self.search("hoten", keyword, exact=False)
-            # Gộp và loại bỏ trùng lặp
             result = pd.concat([by_username, by_hoten]).drop_duplicates()
             return result.values.tolist()
         except Exception as e:
@@ -55,7 +31,7 @@ class AccountData(Query):
             return []
 
     def get_all_accounts(self):
-        """Lấy tất cả tài khoản dưới dạng list."""
+        """Truy vấn toàn bộ danh sách tài khoản hệ thống"""
         try:
             return self.list_all()
         except Exception as e:
@@ -63,27 +39,11 @@ class AccountData(Query):
             return []
 
     def delete_account(self, username):
-        """
-        Xóa tài khoản theo username.
-        
-        Args:
-            username (str): Tên đăng nhập cần xóa
-            
-        Returns:
-            bool: True nếu xóa thành công
-        """
+        """Thực hiện xóa một tài khoản ra khỏi hệ thống"""
         return self.delete("taikhoan", username)
 
     def check_exists(self, username):
-        """
-        Kiểm tra tài khoản có tồn tại không.
-        
-        Args:
-            username (str): Tên đăng nhập
-            
-        Returns:
-            bool: True nếu tồn tại
-        """
+        """Kiểm tra trạng thái tồn tại của một tên đăng nhập"""
         try:
             result = self.search("taikhoan", username, exact=True)
             return not result.empty
@@ -91,33 +51,13 @@ class AccountData(Query):
             return False
 
     def is_valid_gmail(self, email: str) -> bool:
-        """
-        Kiểm tra email có đúng định dạng @gmail.com không.
-        
-        Args:
-            email (str): Email cần kiểm tra
-            
-        Returns:
-            bool: True nếu hợp lệ
-        """
+        """Kiểm tra tính hợp lệ định dạng thư điện tử Gmail"""
         pattern = r'^[a-zA-Z0-9._%+\-]+@gmail\.com$'
         return bool(re.match(pattern, email))
 
     def validate_and_create(self, data: list):
-        """
-        Kiểm tra tính hợp lệ trước khi tạo tài khoản.
-        
-        Args:
-            data (list): [taikhoan, matkhau, hoten, sdt, chucvu, email]
-            
-        Returns:
-            bool: True nếu tạo thành công
-            
-        Raises:
-            DuplicateEntryError: Nếu tên đăng nhập đã tồn tại
-        """
+        """Kiểm tra điều kiện ràng buộc dữ liệu trước khi tiến hành tạo tài khoản mới"""
         username = data[0]
         if self.check_exists(username):
             raise DuplicateEntryError(f"Tên đăng nhập '{username}' đã tồn tại")
         return self.create(data)
-    

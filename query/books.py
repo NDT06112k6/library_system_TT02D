@@ -1,36 +1,24 @@
-from .base import Query
 import pandas as pd
+from .base import Query
 
 class BookData(Query):
-    """Lớp quản lý dữ liệu sách từ MySQL"""
-    
     def __init__(self):
-        # Khởi tạo với table_name = "books" và danh sách cột
+        """Khởi tạo thực thể quản lý kho dữ liệu sách từ cơ sở dữ liệu"""
         super().__init__("books", ["id", "ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia"])
 
     def get_all(self):
-        """Lấy tất cả sách dưới dạng list."""
+        """Truy vấn lấy toàn bộ danh sách sách hiện có trong hệ thống"""
         try:
-            results = self.list_all()
-            return results
+            return self.list_all()
         except Exception as e:
             print(f"Lỗi lấy tất cả sách: {e}")
             return []
 
     def search_books(self, keyword):
-        """
-        Tìm kiếm sách theo tên hoặc tác giả.
-        
-        Args:
-            keyword (str): Từ khóa tìm kiếm
-            
-        Returns:
-            list: Danh sách sách tìm được
-        """
+        """Tìm kiếm thông tin sách dựa theo tên sách hoặc tên tác giả"""
         try:
             by_ten = self.search("ten_sach", keyword, exact=False)
             by_tac_gia = self.search("tac_gia", keyword, exact=False)
-            # Gộp kết quả và loại bỏ trùng lặp
             result = pd.concat([by_ten, by_tac_gia]).drop_duplicates()
             return result.values.tolist()
         except Exception as e:
@@ -38,15 +26,7 @@ class BookData(Query):
             return []
 
     def check_exists(self, ma_sach):
-        """
-        Kiểm tra mã sách có tồn tại không.
-        
-        Args:
-            ma_sach (str): Mã sách
-            
-        Returns:
-            bool: True nếu tồn tại
-        """
+        """Kiểm tra sự tồn tại của đầu sách thông qua mã sách định danh"""
         try:
             result = self.search("ma_sach", ma_sach, exact=True)
             return len(result) > 0
@@ -54,39 +34,25 @@ class BookData(Query):
             return False
 
     def update_quantity(self, ma_sach, delta):
-        """
-        Cập nhật số lượng sách (tăng/giảm).
-        
-        Args:
-            ma_sach (str): Mã sách
-            delta (int): Số lượng thay đổi (âm để giảm, dương để tăng)
-        """
+        """Cập nhật thay đổi số lượng kho sách (tăng hoặc giảm)"""
         try:
-            # Lấy thông tin sách hiện tại
             result = self.search("ma_sach", ma_sach, exact=True)
             if not result.empty:
                 sach = result.iloc[0]
-                # Tính số lượng mới (đảm bảo ≥ 0)
                 new_qty = max(0, int(sach["so_luong"]) + delta)
-                # Cập nhật toàn bộ cột (theo thứ tự self.columns)
-                self.update("ma_sach", ma_sach, [
-                    ma_sach,
-                    sach["ten_sach"],
-                    sach["tac_gia"],
-                    sach["the_loai"],
-                    new_qty,
-                    sach["gia"]
-                ])
+                new_data = {
+                    "ten_sach": sach["ten_sach"],
+                    "tac_gia": sach["tac_gia"],
+                    "the_loai": sach["the_loai"],
+                    "so_luong": new_qty,
+                    "gia": sach["gia"]
+                }
+                self.update("ma_sach", ma_sach, new_data)
         except Exception as e:
             print(f"Lỗi cập nhật số lượng: {e}")
 
     def get_total_count(self):
-        """
-        Lấy tổng số đầu sách.
-        
-        Returns:
-            int: Số đầu sách
-        """
+        """Thống kê tổng số lượng đầu sách đang quản lý"""
         try:
             results = self.list_all()
             return len(results)

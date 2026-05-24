@@ -11,12 +11,6 @@ class MySQLHandler:
                  password: str = "root", database: str = "library_system"):
         """
         Khởi tạo MySQL Handler.
-        
-        Args:
-            host (str): Địa chỉ MySQL server
-            user (str): Username MySQL
-            password (str): Password MySQL
-            database (str): Tên database
         """
         self.host = host
         self.user = user
@@ -27,9 +21,6 @@ class MySQLHandler:
     def connect(self) -> bool:
         """
         Kết nối tới MySQL database.
-        
-        Returns:
-            bool: True nếu kết nối thành công, False nếu thất bại
         """
         try:
             self.connection = mysql.connector.connect(
@@ -61,13 +52,6 @@ class MySQLHandler:
     def execute_query(self, query: str, params: tuple = None) -> bool:
         """
         Thực thi query INSERT, UPDATE, DELETE.
-        
-        Args:
-            query (str): SQL query
-            params (tuple): Tham số query (nếu có)
-            
-        Returns:
-            bool: True nếu thành công, False nếu thất bại
         """
         try:
             cursor = self.connection.cursor()
@@ -86,13 +70,6 @@ class MySQLHandler:
     def fetch_one(self, query: str, params: tuple = None) -> Optional[tuple]:
         """
         Lấy 1 bản ghi.
-        
-        Args:
-            query (str): SQL query
-            params (tuple): Tham số query (nếu có)
-            
-        Returns:
-            tuple: Bản ghi đầu tiên hoặc None
         """
         try:
             cursor = self.connection.cursor()
@@ -110,13 +87,6 @@ class MySQLHandler:
     def fetch_all(self, query: str, params: tuple = None) -> List[tuple]:
         """
         Lấy tất cả bản ghi.
-        
-        Args:
-            query (str): SQL query
-            params (tuple): Tham số query (nếu có)
-            
-        Returns:
-            list: Danh sách bản ghi
         """
         try:
             cursor = self.connection.cursor()
@@ -134,13 +104,6 @@ class MySQLHandler:
     def fetch_all_as_dict(self, query: str, params: tuple = None) -> List[Dict]:
         """
         Lấy tất cả bản ghi dạng dictionary.
-        
-        Args:
-            query (str): SQL query
-            params (tuple): Tham số query (nếu có)
-            
-        Returns:
-            list: Danh sách dict {column: value}
         """
         try:
             cursor = self.connection.cursor(dictionary=True)
@@ -158,12 +121,6 @@ class MySQLHandler:
     def get_column_names(self, table: str) -> List[str]:
         """
         Lấy danh sách tên cột của bảng.
-        
-        Args:
-            table (str): Tên bảng
-            
-        Returns:
-            list: Danh sách tên cột
         """
         try:
             cursor = self.connection.cursor()

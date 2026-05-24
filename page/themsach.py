@@ -17,11 +17,11 @@ class ThemSachPage:
         self.master.resizable(True, True)
 
     def view(self):
-        # Master Frame
+        # Khung chính
         main_frame = ctk.CTkFrame(self.master, fg_color=Colors.BG_MAIN)
         main_frame.pack(fill="both", expand=True)
 
-        # Header
+        # Tiêu đề
         header = ctk.CTkFrame(main_frame, fg_color=Colors.PRIMARY, corner_radius=0)
         header.pack(fill="x")
         ctk.CTkLabel(
@@ -31,12 +31,12 @@ class ThemSachPage:
             text_color=Colors.WHITE
         ).pack(pady=Spacing.MD)
 
-        # Form frame
+        # Khung Form
         form_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
         form_frame.pack(fill="both", expand=True, padx=Spacing.LG, pady=Spacing.LG)
 
+        # Hàm hỗ trợ tạo ô nhập liệu
         def create_form_field(parent, label_text, placeholder=""):
-            """Tạo form field chuẩn"""
             label = ctk.CTkLabel(parent, text=label_text, font=Fonts.SMALL_BOLD, text_color=Colors.TEXT_PRIMARY)
             label.pack(anchor="w", padx=Spacing.MD, pady=(Spacing.MD, Spacing.XS))
             
@@ -48,13 +48,14 @@ class ThemSachPage:
             entry.pack(fill="x", padx=Spacing.MD, pady=(0, Spacing.MD))
             return entry
 
+        # Khởi tạo các ô nhập liệu
         self.entries = {}
         self.entries["ma_sach"] = create_form_field(form_frame, "📝 Mã Sách (VD: S001)", "Nhập mã sách...")
         self.entries["ten_sach"] = create_form_field(form_frame, "📖 Tên Sách", "Nhập tên sách...")
         self.entries["tac_gia"] = create_form_field(form_frame, "✍️ Tác Giả", "Nhập tên tác giả...")
         self.entries["the_loai"] = create_form_field(form_frame, "📂 Thể Loại", "Nhập thể loại...")
 
-        # Row: số lượng & giá
+        # Hàng chứa Số lượng & Giá
         row_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
         row_frame.pack(fill="x", padx=Spacing.MD, pady=Spacing.MD)
 
@@ -70,7 +71,7 @@ class ThemSachPage:
         self.entries["gia"] = ctk.CTkEntry(right_col, height=40, font=Fonts.REGULAR, fg_color=Colors.BG_MAIN, border_color=Colors.BORDER)
         self.entries["gia"].pack(fill="x")
 
-        # Button frame
+        # Nút chức năng
         btn_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
         btn_frame.pack(fill="x", padx=Spacing.MD, pady=Spacing.MD)
 
@@ -85,16 +86,18 @@ class ThemSachPage:
         ).pack(side="left", fill="x", expand=True)
 
     def validate(self):
-        """Kiểm tra dữ liệu đầu vào"""
-        data = {k: v.get().strip() for k, v in self.entries.items()}
+        # Thu thập dữ liệu
+        data = {}
+        for k, v in self.entries.items():
+            data[k] = v.get().strip()
 
         # Kiểm tra trống
         for key, val in data.items():
-            if not val:
+            if val == "":
                 messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ thông tin")
                 return None
 
-        # Kiểm tra số lượng phải là số nguyên dương
+        # Kiểm tra số lượng
         try:
             so_luong = int(data["so_luong"])
             if so_luong <= 0:
@@ -104,41 +107,38 @@ class ThemSachPage:
             messagebox.showerror("Lỗi", "Số lượng phải là số nguyên")
             return None
 
-        # Kiểm tra giá là số dương (cho phép thập phân) và không quá lớn
+        # Kiểm tra giá
         try:
             gia = float(data["gia"])
             if gia <= 0:
                 messagebox.showerror("Lỗi", "Giá tiền phải lớn hơn 0")
                 return None
-            if gia > 999999999:  # Max DECIMAL(15,2)
+            if gia > 999999999:
                 messagebox.showerror("Lỗi", "Giá tiền quá lớn (max 999,999,999)")
                 return None
         except ValueError:
             messagebox.showerror("Lỗi", "Giá tiền phải là số")
             return None
 
-        # Kiểm tra mã sách trùng
-        if self.book_data.check_exists(data["ma_sach"]):
+        # Kiểm tra mã trùng
+        if self.book_data.check_exists(data["ma_sach"]) == True:
             messagebox.showerror("Lỗi", f"Mã sách '{data['ma_sach']}' đã tồn tại")
             return None
 
         return data
 
     def save(self):
-        """Xử lý logic khi người dùng nhấn nút 'Thêm sách'."""
         data = self.validate()
-        if data is None:
+        if data == None:
             return
-
+        
         try:
             self.book_data.create([
                 data["ma_sach"], data["ten_sach"], data["tac_gia"],
                 data["the_loai"], data["so_luong"], data["gia"]
             ])
-
             messagebox.showinfo("Thành công", "Đã thêm sách thành công")
             self.app_manager.show_quanlysach_page()
-
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể lưu: {str(e)}")
 

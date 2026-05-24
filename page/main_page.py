@@ -22,7 +22,7 @@ class MainPage:
         ctk.set_appearance_mode("light")
 
     def view(self):
-        # CONTAINER CHÍNH CHIA LÀM 2 VÙNG: BANEL TRÁI (SIDEBAR) & PANEL PHẢI (CONTENT)
+        # CONTAINER CHÍNH CHIA LÀM 2 VÙNG: PANEL TRÁI (SIDEBAR) & PANEL PHẢI (CONTENT)
         main_container = ctk.CTkFrame(self.master, fg_color="transparent")
         main_container.pack(fill="both", expand=True)
 
@@ -56,13 +56,19 @@ class MainPage:
             command=lambda: self.app_manager.show_thongke_page()
         ).pack(fill="x", padx=10, pady=5)
 
+        # Đã cập nhật gọi đúng hàm show_quanlytk_page trong AppManager của bạn
+        ctk.CTkButton(
+            sidebar, text="👤 Quản Lý Tài Khoản", fg_color="transparent", text_color="#cbd5e1",
+            hover_color="#334155", font=("Segoe UI", 13, "bold"), anchor="w", height=40,
+            command=lambda: self.app_manager.show_quanlytk_page()
+        ).pack(fill="x", padx=10, pady=5)
+
         # Nút Đăng xuất ở cuối thanh bên
         ctk.CTkButton(
             sidebar, text="🚪 Đăng Xuất", fg_color="#ef4444", text_color="white",
             hover_color="#dc2626", font=("Segoe UI", 13, "bold"), height=35,
-            command=lambda: self.app_manager.show_login_page()
+            command=self.xac_nhan_dang_xuat
         ).pack(side="bottom", fill="x", padx=15, pady=20)
-
 
         # 2. ─── VÙNG KHÔNG GIAN BÊN PHẢI (LẤP ĐẦY KHOẢNG TRỐNG) ───
         content_area = ctk.CTkFrame(main_container, fg_color="#f8fafc", corner_radius=0)
@@ -151,43 +157,86 @@ class MainPage:
         style.configure("Treeview", rowheight=28, font=("Segoe UI", 11))
         style.configure("Treeview.Heading", font=("Segoe UI", 11, "bold"), background="#f1f5f9")
 
+    # THÊM MỚI HÀM NÀY VÀO TRONG CLASS MainPage:
+    def xac_nhan_dang_xuat(self):
+        """Hiển thị hộp thoại yêu cầu xác nhận trước khi đăng xuất hệ thống."""
+        from tkinter import messagebox
+        ans = messagebox.askyesno("Xác nhận đăng xuất", "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?")
+        if ans == True:
+            self.app_manager.show_login_page()
+
     # ================= LOGIC ĐỌC DỮ LIỆU TỪ MYSQL DOCKER =================
     
     def load_dashboard_data(self):
         """Đổ dữ liệu thời gian thực từ database lên các Card và 2 bảng thông báo nhanh"""
         try:
-            # 1. Đếm và cập nhật số liệu lên các khối Card
+            # 1. Đếm và cập nhật số liệu lên khối Card Tổng Sách
             query_total_books = "SELECT COUNT(*) as total FROM books"
             res_books = self.book_data.execute_query(query_total_books)
-            self.lbl_tong_sach.configure(text=str(res_books[0]['total'] if res_books else 0))
+            
+            if res_books:
+                first_row_books = res_books[0]
+                tong_s = first_row_books['total']
+            else:
+                tong_s = 0
+                
+            self.lbl_tong_sach.configure(text=str(tong_s))
 
+            # 2. Đếm và cập nhật số liệu lên khối Card Đang Mượn Ngoài
             query_active_borrows = "SELECT COUNT(*) as total FROM muontra WHERE trang_thai = 'dang_muon'"
             res_borrows = self.book_data.execute_query(query_active_borrows)
-            self.lbl_dang_muon.configure(text=str(res_borrows[0]['total'] if res_borrows else 0))
+            
+            if res_borrows:
+                first_row_borrows = res_borrows[0]
+                dang_m = first_row_borrows['total']
+            else:
+                dang_m = 0
+                
+            self.lbl_dang_muon.configure(text=str(dang_m))
 
+            # 3. Đếm và cập nhật số liệu lên khối Card Yêu Cầu Chờ Duyệt
             query_pending = "SELECT COUNT(*) as total FROM muontra WHERE trang_thai = 'cho_duyet'"
             res_pending = self.book_data.execute_query(query_pending)
-            self.lbl_cho_duyet.configure(text=str(res_pending[0]['total'] if res_pending else 0))
+            
+            if res_pending:
+                first_row_pending = res_pending[0]
+                cho_d = first_row_pending['total']
+            else:
+                cho_d = 0
+                
+            self.lbl_cho_duyet.configure(text=str(cho_d))
 
-            # 2. Đổ dữ liệu vào bảng "YÊU CẦU CHỜ DUYỆT" (Trạng thái == 'cho_duyet')
-            for item in self.tree_new_requests.get_children(): self.tree_new_requests.delete(item)
+            # 4. Làm mới dữ liệu bảng "YÊU CẦU CHỜ DUYỆT"
+            danh_sach_cu_req = self.tree_new_requests.get_children()
+            for item in danh_sach_cu_req:
+                self.tree_new_requests.delete(item)
+
             query_req_list = "SELECT username, ma_sach FROM muontra WHERE trang_thai = 'cho_duyet' ORDER BY id DESC LIMIT 5"
             req_data = self.book_data.execute_query(query_req_list)
+            
             if req_data:
                 for row in req_data:
-                    self.tree_new_requests.insert("", "end", values=(row['username'], row['ma_sach']))
+                    reader_name = row['username']
+                    book_id = row['ma_sach']
+                    self.tree_new_requests.insert("", "end", values=(reader_name, book_id))
 
-            # 3. Đổ dữ liệu vào bảng "CẢNH BÁO QUÁ HẠN" (Đang mượn ngoài và ngày hiện tại lớn hơn hạn trả)
-            for item in self.tree_overdue.get_children(): self.tree_overdue.delete(item)
+            # 5. Làm mới dữ liệu bảng "CẢNH BÁO QUÁ HẠN"
+            danh_sach_cu_overdue = self.tree_overdue.get_children()
+            for item in danh_sach_cu_overdue:
+                self.tree_overdue.delete(item)
+
             query_overdue_list = """
                 SELECT username, han_tra FROM muontra 
                 WHERE trang_thai = 'dang_muon' AND CURDATE() > STR_TO_DATE(han_tra, '%Y-%m-%d')
                 ORDER BY han_tra ASC LIMIT 5
             """
             overdue_data = self.book_data.execute_query(query_overdue_list)
+            
             if overdue_data:
                 for row in overdue_data:
-                    self.tree_overdue.insert("", "end", values=(row['username'], row['han_tra']))
+                    overdue_reader = row['username']
+                    return_deadline = row['han_tra']
+                    self.tree_overdue.insert("", "end", values=(overdue_reader, return_deadline))
 
         except Exception as e:
             print(f"Lỗi khi tải dữ liệu cho bảng điều khiển Dashboard: {e}")

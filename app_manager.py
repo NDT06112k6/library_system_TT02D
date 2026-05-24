@@ -11,6 +11,7 @@ from page.muontra import MuonTraPage
 from page.taomuon import TaoMuonPage
 from page.thongke import ThongKePage
 from page.main_page import MainPage
+from page.docgia import DocGiaPage
 
 
 class AppManager:
@@ -40,14 +41,19 @@ class AppManager:
             widget.destroy()
         self.current_page = None
 
-    def login_success(self, username, chucvu):
+    def login_success(self, username, chucvu, hoten=None):
         """
         Hàm trung gian bắt buộc gọi từ trang LoginPage khi người dùng đăng nhập đúng.
         Nạp thông tin phiên làm việc và chuyển vào trang Dashboard chính.
+        Route theo chức vụ: Độc giả → DocGiaPage, còn lại → MainPage (admin).
         """
-        self.current_user = username
-        self.current_role = chucvu  # Đọc trực tiếp chữ "Sinh viên", "Quản lý" từ DB lên đây
-        self.show_main_page(username)
+        self.current_user  = username
+        self.current_role  = chucvu
+        self.current_hoten = hoten or username
+        if chucvu and chucvu.strip() in ("Độc giả", "Sinh viên", "docgia"):
+            self.show_docgia_page()
+        else:
+            self.show_main_page(username)
 
     def show_login_page(self):
         """Hiển thị trang đăng nhập"""
@@ -69,6 +75,10 @@ class AppManager:
         self.clear_current_page()
         self.root.geometry("420x650")
         self.current_page = TaoTKPage(self.root, self)
+    
+    def show_register_page(self):
+        """Hàm bổ trợ đồng bộ luồng gọi chuyển từ LoginPage sang trang Đăng Ký"""
+        self.show_taotk_page()
 
     def show_quanlytk_page(self):
         """Hiển thị trang quản lý tài khoản"""
@@ -118,6 +128,12 @@ class AppManager:
         self.root.geometry("900x600")
         self.current_page = ThongKePage(self.root, self)
     
+    def show_docgia_page(self):
+        """Hiển thị giao diện dành cho Độc giả"""
+        self.clear_current_page()
+        self.root.geometry("1200x750")
+        self.current_page = DocGiaPage(self.root, self)
+
     def run(self):
         """Kích hoạt vòng lặp chạy ứng dụng"""
         self.root.mainloop()

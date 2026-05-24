@@ -1,42 +1,24 @@
-from .base import Query
 import pandas as pd
+from .base import Query
 
 class MuonTraData(Query):
-    """Lớp quản lý dữ liệu mượn/trả từ MySQL"""
-
     def __init__(self):
-        # KHỚP ĐÚNG 100% THỨ TỰ CỘT TRONG MYSQL DOCKER
+        """Khởi tạo thực thể quản lý dữ liệu phiếu mượn/trả thư viện"""
         super().__init__("muontra", [
-            "id", 
-            "ma_phieu", 
-            "username", 
-            "ma_sach", 
-            "ngay_muon", 
-            "han_tra",     
-            "ngay_tra", 
-            "tien_phat",   
-            "trang_thai"
+            "id", "ma_phieu", "username", "ma_sach", 
+            "ngay_muon", "han_tra", "ngay_tra", "tien_phat", "trang_thai"
         ])
 
     def get_all(self):
-        """Lấy tất cả phiếu mượn/trả dưới dạng list."""
+        """Truy vấn tất cả các bản ghi phiếu mượn trả từ cơ sở dữ liệu"""
         try:
-            results = self.list_all()
-            return results
+            return self.list_all()
         except Exception as e:
             print(f"Lỗi lấy tất cả phiếu: {e}")
             return []
 
     def search_muon_tra(self, keyword):
-        """
-        Tìm kiếm phiếu mượn/trả theo username hoặc ma_sach.
-        
-        Args:
-            keyword (str): Từ khóa tìm kiếm
-            
-        Returns:
-            list: Danh sách phiếu khớp
-        """
+        """Tìm kiếm thông tin phiếu mượn trả theo tên người dùng hoặc mã sách"""
         try:
             by_user = self.search("username", keyword, exact=False)
             by_sach = self.search("ma_sach", keyword, exact=False)
@@ -47,61 +29,57 @@ class MuonTraData(Query):
             return []
     
     def confirm_return(self, ma_phieu, ngay_tra):
-        """
-        Xác nhận trả sách - cập nhật trạng thái và ngày trả.
-        
-        Args:
-            ma_phieu (str): Mã phiếu
-            ngay_tra (str): Ngày trả (YYYY-MM-DD)
-        """
+        """Xác nhận hoàn trả sách và cập nhật ngày trả cho phiếu mượn"""
         try:
-            # Lấy thông tin phiếu hiện tại
             phieu_df = self.search("ma_phieu", ma_phieu, exact=True)
             if not phieu_df.empty:
                 phieu = phieu_df.iloc[0]
-                # Cập nhật với trạng thái "da_tra"
-                new_row = [
-                    ma_phieu,
-                    phieu["username"],
-                    phieu["ma_sach"],
-                    phieu["ngay_muon"],
-                    ngay_tra,
-                    "da_tra"
-                ]
-                self.update("ma_phieu", ma_phieu, new_row)
+                new_data = {
+                    "username": phieu["username"],
+                    "ma_sach": phieu["ma_sach"],
+                    "ngay_muon": phieu["ngay_muon"],
+                    "ngay_tra": ngay_tra,
+                    "trang_thai": "da_tra"
+                }
+                self.update("ma_phieu", ma_phieu, new_data)
         except Exception as e:
             print(f"Lỗi xác nhận trả: {e}")
 
     def generate_new_id(self):
-        """
-        Sinh mã phiếu mới theo định dạng MT001, MT002, ...
-        
-        Returns:
-            str: Mã phiếu mới
-        """
+        """Hàm sinh mã phiếu mượn mới tăng dần tường minh"""
         try:
-            max_val = self.get_max_value("ma_phieu")
-            if not max_val or pd.isna(max_val):
-                return "MT001"
-            # Lấy số từ max_val (ví dụ: "MT003" → 3)
-            so = int(str(max_val)[2:]) + 1
-            return f"MT{str(so).zfill(3)}"
-        except Exception:
-            return "MT001"
-
-    def is_currently_borrowing(self, username, ma_sach):
-        """
-        Kiểm tra xem người dùng có đang mượn sách này không.
-        
-        Args:
-            username (str): Tên đăng nhập
-            ma_sach (str): Mã sách
+            # 1. Truy vấn lấy mã phiếu của lượt mượn cuối cùng nhất trong database
+            query = "SELECT ma_phieu FROM muontra ORDER BY id DESC LIMIT 1"
+            result = self.execute_query(query)
             
-        Returns:
-            bool: True nếu đang mượn
-        """
-        try:
-            # Query để tìm phiếu đang mượn
+            # 2. Kiểm tra xem database đã có dữ liệu phiếu nào chưa
+            if result != None:
+                if len(result) > 0:
+                    # Lấy mã phiếu lớn nhất hiện tại (Ví dụ: "MT001")
+                    last_id = result[0]['ma_phieu'] 
+                    
+                    # Cắt bỏ 2 ký tự đầu "MT" để lấy phần số phía sau (Ví dụ: "001")
+                    number_part = last_id[2:] 
+                    
+                    # Chuyển chuỗi số thành số nguyên và cộng thêm 1 đơn vị
+                    next_number = int(number_part) + 1 
+                    
+                    # Định dạng lại thành chuỗi có 3 chữ số (Ví dụ: số 2 thành "002")
+                    new_id = "MT" + "{:03d}".format(next_number)
+                    return new_id
+                else:
+                    # Nếu danh sách kết quả bằng 0 (chưa có phiếu nào)
+                    return "MT001"
+            else:
+                # Nếu kết quả trả về rỗng (Database trống)
+                return "MT001"
+                
+        except Exception:
+            # Nếu xảy ra lỗi bất kỳ trong quá trình quét dữ liệu
+            return "MT001"
+    def is_currently_borrowing(self, username, ma_sach):
+        """Kiểm tra xem độc giả có đang mượn cuốn sách cụ thể nào đó hay không"""
+        try:    
             query = "SELECT * FROM muontra WHERE username = %s AND ma_sach = %s AND trang_thai = 'dang_muon'"
             results = self.db.fetch_all_as_dict(query, (username, ma_sach))
             return len(results) > 0
@@ -109,47 +87,31 @@ class MuonTraData(Query):
             return False
 
     def get_status_counts(self):
-        """
-        Thống kê số lượng phiếu theo trạng thái.
-        
-        Returns:
-            dict: {'da_tra': count, 'dang_muon': count}
-        """
+        """Thống kê tổng số lượng phiếu phân loại theo từng trạng thái"""
         try:
             query = "SELECT trang_thai, COUNT(*) as count FROM muontra GROUP BY trang_thai"
             results = self.db.fetch_all_as_dict(query)
-            # Chuyển thành dict {trang_thai: count}
             return {item['trang_thai']: item['count'] for item in results}
         except Exception:
             return {}
 
     def get_top_borrowed_books(self, limit=5):
-        """
-        Lấy top N sách được mượn nhiều nhất.
-        
-        Args:
-            limit (int): Số sách top (mặc định 5)
-            
-        Returns:
-            list: [(ma_sach, count), ...] - sorted by count descending
-        """
+        """Thống kê danh sách sách được độc giả mượn nhiều nhất"""
         try:
             query = f"SELECT ma_sach, COUNT(*) as count FROM muontra GROUP BY ma_sach ORDER BY count DESC LIMIT %s"
             results = self.db.fetch_all_as_dict(query, (limit,))
-            # Chuyển thành list of tuples (ma_sach, count)
             return [(item['ma_sach'], item['count']) for item in results]
         except Exception:
             return []
 
     def create_borrow_request(self, username, ma_sach):
-        """Sinh viên gửi yêu cầu mượn sách"""
+        """Ghi nhận yêu cầu mượn sách mới từ độc giả với trạng thái chờ duyệt"""
         ma_phieu = self.generate_new_id()
-        # Đối với yêu cầu, chưa có ngày mượn và hạn trả (sẽ có khi duyệt)
         data = [ma_phieu, username, ma_sach, None, None, None, 0, "cho_duyet"]
         return self.create(data)
 
     def approve_borrow_request(self, ma_phieu, ngay_muon, han_tra):
-        """Thủ thư duyệt yêu cầu, chuyển sang trạng thái đang mượn"""
+        """Cập nhật trạng thái phiếu từ chờ duyệt sang đang mượn kèm thời hạn"""
         data_update = {
             "ngay_muon": ngay_muon,
             "han_tra": han_tra,

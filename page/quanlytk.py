@@ -16,30 +16,42 @@ class QuanLyTKPage:
 
     def config(self):
         self.master.title("👤 Quản lý tài khoản")
-        self.master.geometry("1000x600")
+        self.master.geometry("1100x650")  # Tăng không gian hiển thị cho bố cục Trái - Phải
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
     def view(self):
-        title_label = ctk.CTkLabel(
-            self.master,
-            text="👤 Quản lý tài khoản",
-            font=("Segoe UI", 24, "bold")
-        )
-        title_label.pack(pady=15)
+        # ==========================================
+        # 1. SIDEBAR PANEL (KHUNG PANEL BÊN TRÁI)
+        # ==========================================
+        sidebar_frame = ctk.CTkFrame(self.master, width=280, corner_radius=15, fg_color="#F2F4F7")
+        sidebar_frame.pack(side="left", fill="y", padx=15, pady=15)
+        sidebar_frame.pack_propagate(False)  # Cố định độ rộng cho Sidebar
 
-        search_frame = ctk.CTkFrame(self.master, fg_color="transparent")
-        search_frame.pack(pady=5, padx=20, fill="x")
+        # Tiêu đề trang quản lý
+        title_label = ctk.CTkLabel(
+            sidebar_frame,
+            text="👤 QUẢN LÝ\nTÀI KHOẢN",
+            font=("Segoe UI", 20, "bold"),
+            text_color="#1A2530",
+            justify="center"
+        )
+        title_label.pack(pady=(25, 20))
+
+        # Khung Tìm kiếm tích hợp trong Sidebar
+        search_group = ctk.CTkFrame(sidebar_frame, fg_color="transparent")
+        search_group.pack(fill="x", padx=15, pady=10)
 
         self.entry_search = ctk.CTkEntry(
-            search_frame,
+            search_group,
             height=35,
             corner_radius=8
         )
-        self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        self.entry_search.pack(fill="x", pady=(0, 8))
         self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
         self.entry_search.configure(text_color="gray")
 
+        # Logic sự kiện Focus của Entry (giữ nguyên các liên kết hàm của bạn)
         def on_focus_in(event):
             if self.entry_search.get() == "Tìm theo tên đăng nhập...":
                 self.entry_search.delete(0, "end")
@@ -58,52 +70,55 @@ class QuanLyTKPage:
         self.entry_search.bind("<FocusIn>", on_focus_in)
         self.entry_search.bind("<FocusOut>", on_focus_out)
         self.entry_search.bind("<Key>", on_key_press)
-
-        CustomButton(
-            search_frame,
-            text="Tìm kiếm",
-            command=self.search_account,
-            style_type="info"
-        ).pack(side="left")
-
         self.entry_search.bind("<Return>", lambda event: self.search_account())
 
-        button_frame = ctk.CTkFrame(self.master, fg_color="transparent")
-        button_frame.pack(pady=10, padx=20, fill="x")
+        # Nút Tìm kiếm
+        CustomButton(
+            search_group,
+            text="🔍 Tìm kiếm",
+            command=self.search_account,
+            style_type="info"
+        ) .pack(fill="x")
 
-        left_frame = ctk.CTkFrame(button_frame, fg_color="transparent")
-        left_frame.pack(side="left")
+        # Đường phân cách trang trí
+        separator = ctk.CTkFrame(sidebar_frame, height=2, fg_color="#D1D5DB")
+        separator.pack(fill="x", padx=15, pady=15)
 
-        right_frame = ctk.CTkFrame(button_frame, fg_color="transparent")
-        right_frame.pack(side="right")
+        # Cụm nút bấm chức năng chính xếp dọc
+        CustomButton(sidebar_frame, text="🔄 Làm mới dữ liệu", command=self.load_accounts, style_type="info").pack(fill="x", padx=15, pady=5)
+        CustomButton(sidebar_frame, text="✏️ Chỉnh sửa tài khoản", command=self.edit_account, style_type="warning").pack(fill="x", padx=15, pady=5)
+        CustomButton(sidebar_frame, text="🗑️ Xóa tài khoản", command=self.delete_account, style_type="danger").pack(fill="x", padx=15, pady=5)
+        
+        # Nút Quay lại đặt cố định dưới đáy thanh công cụ
+        CustomButton(sidebar_frame, text="← Quay Lại Hệ Thống", command=self.back, style_type="secondary").pack(side="bottom", fill="x", padx=15, pady=20)
 
-        CustomButton(left_frame, text="🔄 Làm mới", command=self.load_accounts, style_type="info").pack(side="left", padx=5)
-        CustomButton(left_frame, text="🗑️ Xóa", command=self.delete_account, style_type="danger").pack(side="left", padx=5)
-        CustomButton(left_frame, text="✏️ Sửa", command=self.edit_account, style_type="warning").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📖 Quản lý sách", command=lambda: self.app_manager.show_quanlysach_page(), style_type="success").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📚 Mượn/Trả sách", command=lambda: self.app_manager.show_muontra_page(), style_type="primary").pack(side="left", padx=5)
-        CustomButton(left_frame, text="📊 Thống kê", command=lambda: self.app_manager.show_thongke_page(), style_type="info").pack(side="left", padx=5)
+        # ==========================================
+        # 2. MAIN DATA PANEL (KHUNG HIỂN THỊ BẢNG BÊN PHẢI)
+        # ==========================================
+        main_frame = ctk.CTkFrame(self.master, fg_color="transparent")
+        main_frame.pack(side="right", expand=True, fill="both", padx=(0, 15), pady=15)
 
-        CustomButton(right_frame, text="← Quay Lại", command=self.back, style_type="secondary").pack(side="right", padx=5)
+        table_frame = ctk.CTkFrame(main_frame, corner_radius=12, fg_color="white")
+        table_frame.pack(expand=True, fill="both")
 
-        table_frame = ctk.CTkFrame(self.master, corner_radius=10)
-        table_frame.pack(expand=True, fill="both", padx=20, pady=10)
-
+        # Cấu hình phong cách bảng Treeview
         style = ttk.Style()
         style.theme_use("default")
         style.configure("Treeview",
-                        rowheight=32,
+                        rowheight=35,
                         font=("Segoe UI", 11),
+                        background="white",
+                        fieldbackground="white",
                         borderwidth=0)
         style.configure("Treeview.Heading",
-                        font=("Segoe UI", 12, "bold"))
+                        font=("Segoe UI", 12, "bold"),
+                        background="#E5E7EB",
+                        foreground="#1F2937")
+        style.map("Treeview", background=[("selected", "#3B82F6")], foreground=[("selected", "white")])
 
+        # Tạo bảng và các cột dữ liệu
         columns = ("STT", "Username", "Password", "HoTen", "SDT", "ChucVu", "Gmail")
-        self.account_tree = ttk.Treeview(
-            table_frame,
-            columns=columns,
-            show="headings"
-        )
+        self.account_tree = ttk.Treeview(table_frame, columns=columns, show="headings")
 
         self.account_tree.heading("STT", text="STT")
         self.account_tree.heading("Username", text="Tên đăng nhập")
@@ -114,25 +129,29 @@ class QuanLyTKPage:
         self.account_tree.heading("Gmail", text="Gmail")
 
         self.account_tree.column("STT", width=50, anchor="center", stretch=False)
-        self.account_tree.column("Username", width=130, anchor="center", stretch=True)
+        self.account_tree.column("Username", width=120, anchor="center", stretch=True)
         self.account_tree.column("Password", width=110, anchor="center", stretch=True)
-        self.account_tree.column("HoTen", width=180, anchor="center", stretch=True)
-        self.account_tree.column("SDT", width=110, anchor="center", stretch=False)
-        self.account_tree.column("ChucVu", width=110, anchor="center", stretch=False)
-        self.account_tree.column("Gmail", width=200, anchor="center", stretch=True)
+        self.account_tree.column("HoTen", width=160, anchor="w", stretch=True)
+        self.account_tree.column("SDT", width=100, anchor="center", stretch=False)
+        self.account_tree.column("ChucVu", width=100, anchor="center", stretch=False)
+        self.account_tree.column("Gmail", width=180, anchor="w", stretch=True)
 
+        # Thanh cuộn
         scrollbar = ctk.CTkScrollbar(table_frame, command=self.account_tree.yview)
         self.account_tree.configure(yscrollcommand=scrollbar.set)
 
-        self.account_tree.pack(side="left", expand=True, fill="both", padx=5, pady=5)
-        scrollbar.pack(side="right", fill="y")
+        self.account_tree.pack(side="left", expand=True, fill="both", padx=10, pady=10)
+        scrollbar.pack(side="right", fill="y", padx=(0, 5), pady=10)
 
+        # Nhãn hiển thị trạng thái dưới đáy bảng
         self.status_label = ctk.CTkLabel(
-            self.master,
+            main_frame,
             text="Sẵn sàng",
+            font=("Segoe UI", 10, "italic"),
+            text_color="gray",
             anchor="w"
         )
-        self.status_label.pack(fill="x", padx=10, pady=5)
+        self.status_label.pack(fill="x", padx=10, pady=(5, 0))
 
     def load_accounts(self):
         self.entry_search.delete(0, "end")

@@ -95,20 +95,35 @@ class LoginPage:
         )
         checkbox.pack(anchor="w", padx=Spacing.XL, pady=Spacing.MD)
 
+        # ========== KHU VỰC ĐIỀU KHIỂN NÚT BẤM (ĐÃ THÊM NÚT ĐĂNG KÝ) ==========
         btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-        btn_frame.pack(fill="x", padx=Spacing.XL, pady=Spacing.XL)
+        btn_frame.pack(fill="x", padx=Spacing.XL, pady=(Spacing.MD, Spacing.XL))
 
         self.login_button = ctk.CTkButton(
             btn_frame,
             text="🔓 Đăng Nhập",
             command=self.login,
-            height=45,
+            height=42,
             font=Fonts.BOLD,
             fg_color=Colors.PRIMARY,
             hover_color=Colors.PRIMARY_HOVER,
             text_color=Colors.WHITE
         )
-        self.login_button.pack(fill="x", expand=True)
+        self.login_button.pack(fill="x", pady=(0, 10))
+
+        self.register_button = ctk.CTkButton(
+            btn_frame,
+            text="📝 Đăng Ký Tài Khoản",
+            command=self.go_to_register,
+            height=40,
+            font=Fonts.SMALL_BOLD,
+            fg_color="transparent",
+            border_width=1,
+            border_color=Colors.PRIMARY,
+            text_color=Colors.PRIMARY,
+            hover_color=Colors.BG_HOVER
+        )
+        self.register_button.pack(fill="x")
 
     def load_remembered_account(self):
         try:
@@ -142,8 +157,12 @@ class LoginPage:
         except Exception:
             pass
 
+    def go_to_register(self):
+        """Chuyển hướng người dùng sang giao diện đăng ký tài khoản độc giả"""
+        self.app_manager.show_register_page()
+
     def login(self):
-        """Xử lý đăng nhập, lấy chức vụ từ kết quả MySQL để phân quyền hệ thống"""
+        """Xử lý đăng nhập và điều hướng theo chức vụ"""
         try:
             username = self.entry_username.get().strip()
             password = self.entry_password.get().strip()
@@ -155,31 +174,24 @@ class LoginPage:
                 messagebox.showerror("Lỗi", "Vui lòng nhập password")
                 return
 
-            # Xác thực tài khoản với database MySQL
             user = self.account_data.authenticate(username, password)
             
             if user:
-                # 1. Quản lý lưu file ghi nhớ mật khẩu cục bộ
                 if self.remember_var.get():
                     self.save_remember(username, password)
                 else:
                     self.clear_remember()
 
-                # 2. PHÂN TÍCH QUYỀN HẠN (ROLE CHUCVU)
-                chuc_vu = "Sinh viên"  # Vai trò mặc định phòng trường hợp lỗi
-                
+                chuc_vu = "Sinh viên"
                 if isinstance(user, dict):
-                    # Nếu AccountData trả về dạng dữ liệu Từ điển
                     chuc_vu = user.get("chucvu") or user.get("chuc_vu") or "Sinh viên"
                 elif isinstance(user, (list, tuple)) and len(user) > 0:
-                    # Nếu AccountData trả về hàng dữ liệu dạng List/Tuple (ID=0, TK=1, MK=2, HT=3, SDT=4, CV=5...)
-                    # Thông thường nếu câu lệnh SELECT * FROM taikhoan thì cột chucvu nằm ở index 4 hoặc 5
                     chuc_vu = user[4] if len(user) == 6 else user[5]
 
                 messagebox.showinfo("Thông báo", f"Đăng nhập thành công!\nChức vụ: {chuc_vu}")
                 
-                # 3. ĐỒNG BỘ: Gọi hàm login_success của AppManager để nạp quyền toàn hệ thống
-                self.master.after(10, lambda: self.app_manager.login_success(username, str(chuc_vu).strip()))
+                hoten = user.get("hoten", username) if isinstance(user, dict) else username
+                self.master.after(10, lambda: self.app_manager.login_success(username, str(chuc_vu).strip(), hoten))
                 return
 
             messagebox.showerror("Thông báo", "Đăng nhập thất bại! Sai tài khoản hoặc mật khẩu.")

@@ -30,32 +30,35 @@ class SuaTKPage:
             return ""
 
     def config(self):
-        self.master.title("Sửa tài khoản")
-        self.master.geometry("550x750")
-        self.master.resizable(True, True)
+        self.master.title("👤 Cập nhật tài khoản")
+        self.master.geometry("580x750")  # Tăng nhẹ chiều rộng để form nhập liệu không bị gò bó
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("blue")
 
     def view(self):
-        # Title
+        # Title chính
         ctk.CTkLabel(
-            self.master, text="Sửa thông tin tài khoản",
-            font=("Segoe UI", 24, "bold"), text_color='#0066cc'
-        ).pack(pady=15)
+            self.master, 
+            text="✏️ SỬA THÔNG TIN TÀI KHOẢN",
+            font=("Segoe UI", 20, "bold"), 
+            text_color='#1E3A8A'
+        ).pack(pady=(20, 15))
 
-        # Canvas + Scrollbar di chuyển
+        # Canvas + Scrollbar (Giữ nguyên cấu trúc cuộn mượt gốc để dự phòng dữ liệu tràn)
         canvas = tk.Canvas(self.master, bg='white', highlightthickness=0)
         scrollbar = ctk.CTkScrollbar(self.master, command=canvas.yview)
         
         canvas.configure(yscrollcommand=scrollbar.set)
-        canvas.pack(side="left", fill="both", expand=True, padx=20, pady=(0, 10))
-        scrollbar.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True, padx=(20, 0), pady=(0, 10))
+        scrollbar.pack(side="right", fill="y", padx=(0, 10))
 
-        # Tạo frame bên trong canvas
+        # Khung chứa chính bên trong Canvas
         main_frame = ctk.CTkFrame(canvas, fg_color='white')
         canvas_window = canvas.create_window((0, 0), window=main_frame, anchor="nw")
 
         def on_frame_configure(event=None):
             canvas.configure(scrollregion=canvas.bbox("all"))
-            canvas.itemconfig(canvas_window, width=canvas.winfo_width())
+            canvas.itemconfig(canvas_window, width=canvas.winfo_width() - 15)
         
         main_frame.bind("<Configure>", on_frame_configure)
         canvas.bind("<Configure>", lambda e: canvas.itemconfig(canvas_window, width=e.width))
@@ -65,47 +68,71 @@ class SuaTKPage:
         
         canvas.bind_all("<MouseWheel>", on_mousewheel)
 
-        # ─── Thông tin hiện tại ───────────────────────────────────────────
+        # ─── SECTION 1: THÔNG TIN HIỆN TẠI (Giao diện phẳng xám nhạt) ───
         ctk.CTkLabel(
-            main_frame, text="Thông tin hiện tại",
-            font=("Segoe UI", 14, "bold"), text_color='#004080'
-        ).pack(anchor="w", padx=20, pady=(0, 10))
+            main_frame, 
+            text="📌 Thông tin tài khoản hiện tại",
+            font=("Segoe UI", 13, "bold"), 
+            text_color='#4B5563'
+        ).pack(anchor="w", padx=10, pady=(5, 8))
 
-        old_frame = ctk.CTkFrame(main_frame, fg_color='#cce7ff', border_width=1)
-        old_frame.pack(fill="x", pady=(0, 20))
+        old_frame = ctk.CTkFrame(main_frame, fg_color='#F3F4F6', corner_radius=10, border_width=0)
+        old_frame.pack(fill="x", padx=5, pady=(0, 20))
 
-        ctk.CTkLabel(old_frame, text=f"Tên đăng nhập: {self.old_username}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
-        ctk.CTkLabel(old_frame, text=f"Mật khẩu: {self.old_password}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
-        ctk.CTkLabel(old_frame, text=f"Họ tên: {self.old_hoten}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
-        ctk.CTkLabel(old_frame, text=f"SĐT: {self.old_sdt}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
-        ctk.CTkLabel(old_frame, text=f"Chức vụ: {self.old_chucvu}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
-        ctk.CTkLabel(old_frame, text=f"Email: {self.old_email}", font=("Segoe UI", 12)).pack(anchor="w", padx=20, pady=8)
+        # Hiển thị thông tin cũ dạng lưới 2 cột ngay ngắn để cân bằng thị giác
+        info_labels = [
+            (f"Tên đăng nhập: {self.old_username}", f"Mật khẩu: {self.old_password}"),
+            (f"Họ tên: {self.old_hoten}", f"SĐT: {self.old_sdt}"),
+            (f"Chức vụ: {self.old_chucvu}", f"Email: {self.old_email}")
+        ]
+        for r_idx, (col1, col2) in enumerate(info_labels):
+            ctk.CTkLabel(old_frame, text=col1, font=("Segoe UI", 11), text_color="#374151").grid(row=r_idx, column=0, sticky="w", padx=20, pady=6)
+            ctk.CTkLabel(old_frame, text=col2, font=("Segoe UI", 11), text_color="#374151").grid(row=r_idx, column=1, sticky="w", padx=40, pady=6)
 
-        # ─── Thông tin mới ────────────────────────────────────────────────
+        # ─── SECTION 2: THÔNG TIN MỚI (CHIA LAYOUT CỘT ĐỂ LẤP KHOẢNG TRỐNG) ───
         ctk.CTkLabel(
-            main_frame, text="Thông tin mới",
-            font=("Segoe UI", 14, "bold"), text_color='#004080'
-        ).pack(anchor="w", padx=20, pady=(0, 10))
+            main_frame, 
+            text="📝 Nhập thông tin chỉnh sửa mới",
+            font=("Segoe UI", 13, "bold"), 
+            text_color='#1E3A8A'
+        ).pack(anchor="w", padx=10, pady=(0, 8))
 
-        new_frame = ctk.CTkFrame(main_frame, fg_color='#cce7ff', border_width=1)
-        new_frame.pack(fill="x", padx=0, pady=10)
+        # Khung bọc lớn bên ngoài cho phần nhập liệu mới
+        new_frame = ctk.CTkFrame(main_frame, fg_color='#F9FAFB', corner_radius=12, border_width=1, border_color="#E5E7EB")
+        new_frame.pack(fill="both", expand=True, padx=5, pady=(0, 10))
 
-        def make_row(parent, label_text, show=""):
+        # Chia new_frame làm 2 cột chính bên trong bằng cấu hình Grid hệ thống
+        new_frame.columnconfigure(0, weight=1, uniform="group1")
+        new_frame.columnconfigure(1, weight=1, uniform="group1")
+
+        # Khung cột Trái (Tài khoản & Mật khẩu)
+        left_column = ctk.CTkFrame(new_frame, fg_color="transparent")
+        left_column.grid(row=0, column=0, sticky="nsew", padx=(10, 5), pady=10)
+
+        # Khung cột Phải (Thông tin liên hệ & chức vụ)
+        right_column = ctk.CTkFrame(new_frame, fg_color="transparent")
+        right_column.grid(row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
+
+        # Hàm dựng ô nhập liệu theo từng hàng độc lập trong mỗi cột
+        def make_column_row(parent, label_text, show=""):
             row = ctk.CTkFrame(parent, fg_color='transparent')
-            row.pack(fill="x", padx=20, pady=8)
-            ctk.CTkLabel(row, text=label_text, font=("Segoe UI", 12), width=160, anchor="w").pack(side="left")
-            entry = ctk.CTkEntry(row, font=("Segoe UI", 12), show=show)
-            entry.pack(side="right", fill="x", expand=True)
+            # Thêm fill="both", expand=True và tăng pady để giãn đều
+            row.pack(fill="both", expand=True, padx=10, pady=12) 
+            ctk.CTkLabel(row, text=label_text, font=("Segoe UI", 12, "bold"), text_color="#4B5563").pack(anchor="w", pady=(0, 4))
+            entry = ctk.CTkEntry(row, font=("Segoe UI", 12), show=show, height=35, corner_radius=8)
+            entry.pack(fill="x")
             return entry
 
-        self.entry_username = make_row(new_frame, "Tên đăng nhập mới:")
-        self.entry_password = make_row(new_frame, "Mật khẩu mới:", show="*")
-        self.entry_hoten    = make_row(new_frame, "Họ tên mới:")
-        self.entry_sdt      = make_row(new_frame, "SĐT mới:")
-        self.entry_chucvu   = make_row(new_frame, "Chức vụ mới:")
-        self.entry_email    = make_row(new_frame, "Email mới (Gmail):")
+        # Sắp xếp các ô nhập liệu vào 2 cột song song
+        self.entry_username = make_column_row(left_column, "Tên đăng nhập mới:")
+        self.entry_password = make_column_row(left_column, "Mật khẩu mới:", show="*")
+        self.entry_chucvu   = make_column_row(left_column, "Chức vụ:")
 
-        # Điền giá trị ban đầu vào form
+        self.entry_hoten    = make_column_row(right_column, "Họ tên mới:")
+        self.entry_sdt      = make_column_row(right_column, "Số điện thoại mới:")
+        self.entry_email    = make_column_row(right_column, "Email mới (Gmail):")
+
+        # Điền lại giá trị mặc định vào Form (giữ nguyên logic gốc của bạn)
         self.entry_username.insert(0, self.old_username)
         self.entry_password.insert(0, self.old_password)
         self.entry_hoten.insert(0, self.old_hoten)
@@ -113,34 +140,79 @@ class SuaTKPage:
         self.entry_chucvu.insert(0, self.old_chucvu)
         self.entry_email.insert(0, self.old_email)
 
-        # Hộp kiểm hiển thị mật khẩu
+        # --- THÊM: KHÓA KHÔNG CHO SỬA CHỮ ĐỘC GIẢ ---
+        if self.old_chucvu == "Độc giả":
+            self.entry_chucvu.configure(
+                state="disabled",
+                fg_color="#A5AAB1",
+                text_color="#D0D8E6"
+            )
+        # --------------------------------------------
+
+        # Thanh hiển thị mật khẩu và Lưu ý đưa xuống hàng dưới cùng của Grid (bọc toàn bộ bề ngang)
+        # --- ĐOẠN ĐƯỢC SỬA: CHUYỂN LƯU Ý SANG GÓC PHẢI ĐỂ LẤP KHOẢNG TRỐNG ---
+        # Đưa nút hiển thị mật khẩu độc lập sang góc dưới bên trái (Hàng 1, Cột 0)
         self.show_password = tk.BooleanVar()
-        tk.Checkbutton(
-            new_frame, text="Hiển thị mật khẩu",
-            variable=self.show_password, command=self.toggle_password,
-            font=("Segoe UI", 12), bg='#cce7ff'
-        ).pack(pady=4)
+        chk_pass = ctk.CTkCheckBox(
+            new_frame, 
+            text="Hiển thị mật khẩu công khai",
+            variable=self.show_password, 
+            command=self.toggle_password,
+            font=("Segoe UI", 11),
+            checkbox_width=18,
+            checkbox_height=18,
+            corner_radius=4
+        )
+        chk_pass.grid(row=1, column=0, sticky="nw", padx=20, pady=(10, 15))
 
+        # Đưa khung Lưu ý độc lập sang góc dưới bên phải (Hàng 1, Cột 1) - Điểm bạn khoanh đỏ
+        bottom_info_frame = ctk.CTkFrame(new_frame, fg_color="transparent")
+        bottom_info_frame.grid(row=1, column=1, sticky="ew", padx=10, pady=(0, 15))
+
+        hint_frame = ctk.CTkFrame(bottom_info_frame, fg_color="#EFF6FF", corner_radius=6)
+        hint_frame.pack(fill="x", expand=True)
         ctk.CTkLabel(
-            new_frame,
-            text="• Tên đăng nhập không được trùng\n• Gmail phải đúng định dạng @gmail.com",
-            font=("Segoe UI", 10), text_color="gray"
-        ).pack(pady=8)
+            hint_frame,
+            text="⚠️ Tên đăng nhập không được trùng lặp.\n⚠️ Hệ thống chỉ nhận đuôi @gmail.com",
+            font=("Segoe UI", 10, "italic"), 
+            text_color="#1D4ED8",
+            justify="left"
+        ).pack(pady=8, padx=10, anchor="w")
+        # ---------------------------------------------------------------------
 
-        # ─── Nút chức năng ────────────────────────────────────────────────
-        button_frame = ctk.CTkFrame(self.master, fg_color='transparent')
-        button_frame.pack(pady=10)
+        # ─── SECTION 3: CỤM NÚT ĐIỀU KHIỂN ───
+        button_frame = ctk.CTkFrame(main_frame, fg_color='transparent')
+        # Loại bỏ side="bottom" để nó bám ngay dưới khung thông tin
+        button_frame.pack(pady=(20, 30), fill="x", padx=30) 
 
-        ctk.CTkButton(button_frame, text="Lưu thay đổi", fg_color="#28a745", command=self.save_changes).pack(side="left", padx=10)
-        ctk.CTkButton(button_frame, text="Hủy bỏ", fg_color="#6c757d", command=self.cancel).pack(side="left", padx=10)
-        ctk.CTkButton(button_frame, text="Khôi phục", fg_color="#ffc107", command=self.reset_form).pack(side="left", padx=10)
+        # Chia đều 3 cột với tỷ lệ chuẩn
+        button_frame.columnconfigure((0, 1, 2), weight=1, uniform="group")
+
+        ctk.CTkButton(
+            button_frame, text="💾 Lưu thay đổi", fg_color="#10B981", hover_color="#059669", 
+            font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.save_changes
+        ).grid(row=0, column=0, padx=6, sticky="ew")
+
+        ctk.CTkButton(
+            button_frame, text="🔄 Khôi phục", fg_color="#F59E0B", hover_color="#D97706", 
+            font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.reset_form
+        ).grid(row=0, column=1, padx=6, sticky="ew")
+
+        ctk.CTkButton(
+            button_frame, text="❌ Hủy bỏ", fg_color="#EF4444", hover_color="#DC2626", 
+            font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.cancel
+        ).grid(row=0, column=2, padx=6, sticky="ew")
 
     # ── Chức năng Logic ──────────────────────────────────────────────────────
 
     def toggle_password(self):
         self.entry_password.configure(show="" if self.show_password.get() else "*")
+        
 
     def reset_form(self):
+
+        self.entry_chucvu.configure(state="normal")
+
         for entry, val in [
             (self.entry_username, self.old_username),
             (self.entry_password, self.old_password),
@@ -151,6 +223,10 @@ class SuaTKPage:
         ]:
             entry.delete(0, tk.END)
             entry.insert(0, val)
+
+         # Khóa lại nếu là Độc giả
+        if self.old_chucvu == "Độc giả":
+            self.entry_chucvu.configure(state="disabled")
 
     def username_exists(self, username: str) -> bool:
         """Kiểm tra tên đăng nhập tồn tại duy nhất"""

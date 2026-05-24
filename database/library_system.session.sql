@@ -35,7 +35,7 @@ CREATE TABLE muontra (
 
 INSERT INTO taikhoan (taikhoan, matkhau, hoten, sdt, chucvu, email) VALUES
 ('1', '1', 'Admin', '0999999999', 'Quản lý', '1'),
-('NDT06112k6', '01213322896', 'Nguyễn Đức Trường', '0123456789', 'Nhân viên', 'ductruong6116@gmail.com');
+('NDT06112k6', '01213322896', 'Nguyễn Đức Trường', '0123456789', 'Độc giả', 'ductruong6116@gmail.com');
 
 INSERT INTO books (ma_sach, ten_sach, tac_gia, the_loai, so_luong, gia) VALUES
 ('S001', 'Lap Trinh Python Co Ban', 'Nguyen Van A', 'Công nghệ', 8, 120000),

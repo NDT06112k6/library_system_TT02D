@@ -4,6 +4,7 @@ from tkinter import messagebox
 
 class Query:
     def __init__(self, table_name=None, fields=None):
+        """Khởi tạo cấu hình kết nối MySQL và các thông số bảng dữ liệu"""
         self.host = "localhost"
         self.user = "root"
         self.password = "root"
@@ -12,8 +13,9 @@ class Query:
         self.table_name = table_name
         self.fields = fields
 
-    def connect(self) :
-        try :
+    def connect(self):
+        """Thiết lập kết nối tới cơ sở dữ liệu MySQL"""
+        try:
             self.connection = mysql.connector.connect(
                 host=self.host,
                 user=self.user,
@@ -22,15 +24,17 @@ class Query:
                 charset="utf8mb4"
             )
             return self.connection
-        except mysql.connector.Error as err :
-            messagebox.showerror("Lỗi kết nối", f"Không thể kết nối cơ sở dữ liệu : {err}")
+        except mysql.connector.Error as err:
+            messagebox.showerror("Lỗi kết nối", f"Không thể kết nối cơ sở dữ liệu: {err}")
             return None
 
     def close(self):
+        """Đóng kết nối cơ sở dữ liệu nếu đang mở"""
         if self.connection and self.connection.is_connected():
             self.connection.close()
 
     def execute_query(self, query, params=None):
+        """Thực thi câu lệnh truy vấn SQL và trả về kết quả dưới dạng danh sách"""
         conn = self.connect()
         if not conn:
             return None
@@ -48,6 +52,7 @@ class Query:
             self.close()
 
     def search(self, column_name, keyword, exact=False):
+        """Tìm kiếm dữ liệu dựa trên cột và từ khóa chỉ định"""
         if exact:
             query = f"SELECT * FROM {self.table_name} WHERE {column_name} = %s"
             params = (keyword,)
@@ -61,6 +66,7 @@ class Query:
         return pd.DataFrame(columns=self.fields)
 
     def list_all(self):
+        """Truy vấn tất cả dữ liệu từ bảng đang quản lý"""
         query = f"SELECT * FROM {self.table_name}"
         result = self.execute_query(query)
         if result is not None:
@@ -68,6 +74,7 @@ class Query:
         return []
 
     def delete(self, column_name, value):
+        """Xóa bản ghi khỏi cơ sở dữ liệu theo điều kiện cột"""
         query = f"DELETE FROM {self.table_name} WHERE {column_name} = %s"
         conn = self.connect()
         if not conn:
@@ -85,6 +92,7 @@ class Query:
             self.close()
 
     def create(self, data):
+        """Thêm mới một bản ghi dữ liệu vào cơ sở dữ liệu"""
         columns = ", ".join(self.fields[1:])
         placeholders = ", ".join(["%s"] * len(data))
         query = f"INSERT INTO {self.table_name} ({columns}) VALUES ({placeholders})"
@@ -104,18 +112,13 @@ class Query:
             self.close()
         
     def update(self, key_column, key_value, update_data: dict):
-        """
-        Cập nhật dữ liệu động cho bất kỳ bảng nào.
-        update_data: dict dạng {"tên_cột": "giá_trị_mới"}
-        """
+        """Cập nhật dữ liệu động theo cặp khóa-giá trị"""
         if not update_data:
             return False
             
-        # Xây dựng mệnh đề SET của câu lệnh SQL (VD: hoten = %s, sdt = %s)
         set_clause = ", ".join([f"{col} = %s" for col in update_data.keys()])
         query = f"UPDATE {self.table_name} SET {set_clause} WHERE {key_column} = %s"
         
-        # Gộp các giá trị cần cập nhật kèm theo điều kiện WHERE ở cuối
         params = list(update_data.values()) + [key_value]
         
         conn = self.connect()

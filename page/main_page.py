@@ -152,8 +152,35 @@ class MainPage:
         self.tree_overdue.column("Hạn trả", width=100, anchor="center")
         self.tree_overdue.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
-        # Định dạng nhanh phong cách bảng Treeview cho đẹp và đồng bộ màu
         style = ttk.Style()
+        style.theme_use("clam")
+        
+        # 1. Cấu hình màu gốc cho Header
+        style.configure("Treeview.Heading", 
+                        background="#1E3A5F", 
+                        foreground="white", 
+                        font=("Segoe UI", 11, "bold"), 
+                        borderwidth=0)
+        
+        # 2. ÉP MÀU BẰNG MAP (ĐÂY LÀ CHÌA KHÓA)
+        # Bất kể trạng thái nào (hover hay bình thường), Header cũng phải có màu nền đậm
+        style.map("Treeview.Heading",
+                  background=[('active', '#2D5A8E'), ('!active', '#1E3A5F')],
+                  foreground=[('active', 'white'), ('!active', 'white')])
+        
+        # 3. Chỉnh nền các dòng dữ liệu bên dưới
+        style.configure("Treeview", 
+                        background="#FFFFFF", 
+                        fieldbackground="#FFFFFF", 
+                        foreground="#111827", 
+                        rowheight=35, 
+                        font=("Segoe UI", 11), 
+                        borderwidth=0)
+        
+        # 3. Chỉnh màu khi click chọn 1 dòng
+        style.map("Treeview", 
+                  background=[('selected', '#EBF4FF')], 
+                  foreground=[('selected', '#2563EB')])
         style.configure("Treeview", rowheight=28, font=("Segoe UI", 11))
         style.configure("Treeview.Heading", font=("Segoe UI", 11, "bold"), background="#f1f5f9")
 
@@ -240,3 +267,5 @@ class MainPage:
 
         except Exception as e:
             print(f"Lỗi khi tải dữ liệu cho bảng điều khiển Dashboard: {e}")
+
+    

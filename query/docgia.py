@@ -9,7 +9,7 @@ Lớp truy vấn dành riêng cho nghiệp vụ độc giả:
 from .base import Query
 from datetime import date, timedelta
 
-MAX_BORROW = 3          # Giới hạn số sách mượn đồng thời
+MAX_BORROW = 5          # Giới hạn số sách mượn đồng thời
 BORROW_DAYS = 14        # Số ngày cho phép mượn
 
 
@@ -124,25 +124,24 @@ class DocGiaQuery(Query):
 
     def create_borrow(self, username: str, ma_sach: str):
         """
-        Tạo phiếu mượn + giảm tồn kho trong 1 transaction.
-        Trả về (True, ma_phieu, han_tra) hoặc (False, error_message, None).
+        Tạo phiếu mượn với trạng thái 'cho_duyet'.
+        Tồn kho KHÔNG giảm ở đây — chỉ giảm khi quản lý duyệt.
+        Trả về (True, ma_phieu, None) hoặc (False, error_message, None).
         """
         # --- Kiểm tra điều kiện ---
         so_luong = self.get_book_quantity(ma_sach)
         if so_luong <= 0:
-            return False, "Sách đã hết, không thể mượn.", None
+            return False, "Sách đã hết, không thể gửi yêu cầu mượn.", None
 
         if self.is_borrowing_this_book(username, ma_sach):
-            return False, "Bạn đang mượn cuốn sách này rồi.", None
+            return False, "Bạn đã có yêu cầu hoặc đang mượn cuốn sách này rồi.", None
 
         active = self.count_active_borrows(username)
         if active >= MAX_BORROW:
-            return False, f"Bạn đang mượn {active}/{MAX_BORROW} sách. Hãy trả bớt trước.", None
+            return False, f"Bạn đang có {active}/{MAX_BORROW} yêu cầu/phiếu mượn. Hãy trả bớt trước.", None
 
-        # --- Thực hiện trong 1 connection ---
+        # --- Tạo phiếu chờ duyệt ---
         ma_phieu = self._next_ma_phieu()
-        ngay_muon = date.today()
-        han_tra   = ngay_muon + timedelta(days=BORROW_DAYS)
 
         conn = self.connect()
         if not conn:
@@ -151,16 +150,12 @@ class DocGiaQuery(Query):
         cursor = conn.cursor()
         try:
             cursor.execute(
-                """INSERT INTO muontra (ma_phieu, username, ma_sach, ngay_muon, ngay_tra, trang_thai)
-                   VALUES (%s, %s, %s, %s, %s, 'dang_muon')""",
-                (ma_phieu, username, ma_sach, ngay_muon, han_tra)
-            )
-            cursor.execute(
-                "UPDATE books SET so_luong = so_luong - 1 WHERE ma_sach = %s AND so_luong > 0",
-                (ma_sach,)
+                """INSERT INTO muontra (ma_phieu, username, ma_sach, trang_thai)
+                   VALUES (%s, %s, %s, 'cho_duyet')""",
+                (ma_phieu, username, ma_sach)
             )
             conn.commit()
-            return True, ma_phieu, han_tra
+            return True, ma_phieu, None
         except Exception as e:
             conn.rollback()
             return False, f"Lỗi tạo phiếu: {e}", None

@@ -9,6 +9,7 @@ Bố cục:
   │  Filters   │  BookGrid / BorrowList           │
   └────────────┴──────────────────────────────────┘
 """
+
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
@@ -36,9 +37,15 @@ class DocGiaPage:
 
         self._current_view    = self.VIEW_BOOKS
         self._search_after_id = None          # debounce ID
-        self._all_books       = []            # cache
+        self._all_books       = []            # cache toàn bộ
+        self._filtered_books  = []            # cache sau filter/search
         self._card_widgets    = []            # list BookCard hiện tại
         self._cols            = 3             # số cột lưới (tự tính lại)
+
+        # Pagination
+        self.BOOKS_PER_PAGE   = 12
+        self._current_page    = 1
+        self._total_pages     = 1
 
         self.master.title("📚 Thư Viện Quang Vinh — Độc Giả")
         self.master.geometry("1200x750")
@@ -52,6 +59,7 @@ class DocGiaPage:
 
         # Responsive: tính lại cột khi đổi kích thước cửa sổ
         self.master.bind("<Configure>", self._on_resize)
+        self._check_overdue_alert()
 
     # ═══════════════════════════════════════════════════
     #  1. XÂY DỰNG BỐ CỤC
@@ -64,11 +72,23 @@ class DocGiaPage:
         header.pack(fill="x", side="top")
         header.pack_propagate(False)
 
-        # Logo / tên
-        ctk.CTkLabel(
-            header, text="📚 Thư Viện Quang Vinh",
+        # Logo / tên — click để về trang chủ
+        def _go_home():
+            if self._current_view != self.VIEW_BOOKS:
+                self._current_view = self.VIEW_BOOKS
+                # Lấy text tùy theo tình trạng quá hạn
+                txt = "⚠️ Sách quá hạn!" if getattr(self, '_has_overdue', False) else "📋 Sách đã mượn"
+                self.btn_history.configure(text=txt)
+                self._apply_filters()
+
+        home_btn = ctk.CTkButton(
+            header, text="📚  Thư Viện Quang Vinh",
             font=(FONT_FAMILY, 18, "bold"), text_color="white",
-        ).pack(side="left", padx=20)
+            fg_color="transparent", hover_color="#2D5A8E",
+            cursor="hand2", anchor="w",
+            command=_go_home,
+        )
+        home_btn.pack(side="left", padx=(16, 4))
 
         # Nút bên phải header
         btn_logout = ctk.CTkButton(
@@ -98,21 +118,23 @@ class DocGiaPage:
         search_wrap = ctk.CTkFrame(header, fg_color="transparent")
         search_wrap.pack(expand=True)
 
-        self.search_var = tk.StringVar()
-        self.search_var.trace_add("write", self._on_search_type)
-
         search_box = ctk.CTkFrame(search_wrap, fg_color="white", corner_radius=20, height=36)
         search_box.pack(ipadx=4)
         search_box.pack_propagate(False)
 
         ctk.CTkLabel(search_box, text="🔍", font=(FONT_FAMILY, 13),
                      text_color=C["muted"]).pack(side="left", padx=(10, 0))
-        ctk.CTkEntry(
-            search_box, textvariable=self.search_var,
-            placeholder_text="Tìm tên sách, tác giả, thể loại…",
-            border_width=0, fg_color="transparent",
+        self.search_entry = ctk.CTkEntry(
+            search_box,
+            placeholder_text="Tìm theo tên sách, tác giả hoặc thể loại...",
+            placeholder_text_color="#9CA3AF",
+            border_width=0, fg_color="white", text_color="#111827",
             font=(FONT_FAMILY, 12), width=340,
-        ).pack(side="left", padx=(4, 10), pady=4)
+        )
+        self.search_entry.pack(side="left", padx=(4, 10), pady=4)
+
+        # Bắt sự kiện nhả phím (gõ xong) để gọi hàm tìm kiếm debounce
+        self.search_entry.bind("<KeyRelease>", self._on_search_type)
 
         # ── Body = Sidebar + Content ────────────────────
         body = ctk.CTkFrame(self.master, fg_color="transparent")
@@ -196,7 +218,19 @@ class DocGiaPage:
         self.scroll = ctk.CTkScrollableFrame(
             self.content_frame, fg_color=C["bg"], corner_radius=0,
         )
-        self.scroll.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+        self.scroll.pack(fill="both", expand=True, padx=10, pady=(0, 4))
+
+        # ── Thanh phân trang ──────────────────────────
+        self._pagination_bar = ctk.CTkFrame(
+            self.content_frame, fg_color="white",
+            height=48, corner_radius=0,
+            border_width=1, border_color=C["border"],
+        )
+        self._pagination_bar.pack(fill="x", side="bottom")
+        self._pagination_bar.pack_propagate(False)
+        # Các widget bên trong sẽ được dựng lại mỗi lần render
+        self._page_btn_container = ctk.CTkFrame(self._pagination_bar, fg_color="transparent")
+        self._page_btn_container.place(relx=0.5, rely=0.5, anchor="center")
 
     # ═══════════════════════════════════════════════════
     #  2. TẢI DỮ LIỆU
@@ -227,19 +261,114 @@ class DocGiaPage:
     def _apply_filters(self, *_):
         if self._current_view != self.VIEW_BOOKS:
             return
-        kw    = self.search_var.get().strip()
+        kw = self.search_entry.get().strip()
         cat   = self.cat_var.get()
         sort  = {"A–Z": "az", "Mới nhất": "newest",
                  "Phổ biến": "popular", "Còn sách": "available"
                 }.get(self.sort_var.get(), "az")
 
-        books = self.query.search_books(kw, cat, sort)
-        self.status_bar.configure(text=f"Tìm thấy {len(books)} cuốn sách")
-        self._render_grid(books)
+        self._filtered_books = self.query.search_books(kw, cat, sort)
+        self._current_page   = 1          # filter → về trang đầu
+        self._total_pages    = max(1, -(-len(self._filtered_books) // self.BOOKS_PER_PAGE))
+        self.status_bar.configure(
+            text=f"Tìm thấy {len(self._filtered_books)} cuốn sách"
+        )
+        self._render_current_page()
 
     # ═══════════════════════════════════════════════════
-    #  4. RENDER LƯỚI SÁCH
+    #  4. RENDER LƯỚI SÁCH + PAGINATION
     # ═══════════════════════════════════════════════════
+    def _render_current_page(self):
+        """Cắt slice theo trang hiện tại rồi render lưới + thanh trang."""
+        start = (self._current_page - 1) * self.BOOKS_PER_PAGE
+        end   = start + self.BOOKS_PER_PAGE
+        page_books = self._filtered_books[start:end]
+        self._render_grid(page_books)
+        self._render_pagination()
+
+    def _go_to_page(self, page: int):
+        """Chuyển sang trang chỉ định, cuộn lên đầu."""
+        self._current_page = max(1, min(page, self._total_pages))
+        self._render_current_page()
+        # Cuộn về đầu danh sách
+        try:
+            self.scroll._parent_canvas.yview_moveto(0)
+        except Exception:
+            pass
+
+    def _render_pagination(self):
+        """Vẽ lại thanh số trang bên dưới lưới."""
+        for w in self._page_btn_container.winfo_children():
+            w.destroy()
+
+        # Ẩn toàn bộ thanh nếu chỉ có 1 trang
+        if self._total_pages <= 1:
+            self._pagination_bar.pack_forget()
+            return
+        self._pagination_bar.pack(fill="x", side="bottom")
+
+        cp = self._current_page
+        tp = self._total_pages
+
+        def _btn(text, page, active=False, disabled=False):
+            fg  = C["primary"]     if active   else ("#E5E7EB" if disabled else "#F3F4F6")
+            txt = "white"           if active   else (C["muted"] if disabled else C["text"])
+            hov = C["primary_h"]   if active   else ("#E5E7EB" if disabled else "#E5E7EB")
+            b = ctk.CTkButton(
+                self._page_btn_container,
+                text=str(text), width=36, height=32,
+                fg_color=fg, hover_color=hov,
+                text_color=txt, corner_radius=6,
+                font=(FONT_FAMILY, 11, "bold" if active else "normal"),
+                state="disabled" if disabled else "normal",
+                command=(lambda p=page: self._go_to_page(p)) if not disabled else None,
+            )
+            b.pack(side="left", padx=2)
+
+        # Nút ◀ Trước
+        _btn("◀", cp - 1, disabled=(cp == 1))
+
+        # Dãy số trang — hiển thị tối đa 7 nút, dùng "…" khi cần
+        def visible_pages(current, total, window=2):
+            """Tính tập hợp số trang cần hiển thị."""
+            pages = set()
+            pages.add(1)
+            pages.add(total)
+            for p in range(max(2, current - window), min(total, current + window + 1)):
+                pages.add(p)
+            return sorted(pages)
+
+        prev = None
+        for p in visible_pages(cp, tp):
+            if prev is not None and p - prev > 1:
+                # Dấu "…"
+                ctk.CTkLabel(
+                    self._page_btn_container, text="…",
+                    font=(FONT_FAMILY, 11), text_color=C["muted"], width=20,
+                ).pack(side="left", padx=1)
+            _btn(p, p, active=(p == cp))
+            prev = p
+
+        # Nút ▶ Tiếp
+        _btn("▶", cp + 1, disabled=(cp == tp))
+
+        # Nhãn "Trang X / Y" ở đầu
+        ctk.CTkLabel(
+            self._pagination_bar,
+            text=f"Trang {cp} / {tp}",
+            font=(FONT_FAMILY, 10, "italic"),
+            text_color=C["muted"],
+        ).place(relx=0.02, rely=0.5, anchor="w")
+
+        # Nhãn tổng sách ở cuối
+        total_books = len(self._filtered_books)
+        ctk.CTkLabel(
+            self._pagination_bar,
+            text=f"{total_books} cuốn",
+            font=(FONT_FAMILY, 10),
+            text_color=C["muted"],
+        ).place(relx=0.98, rely=0.5, anchor="e")
+
     def _render_grid(self, books: list):
         # Xóa cũ
         for w in self.scroll.winfo_children():
@@ -271,7 +400,12 @@ class DocGiaPage:
             rows_frame.columnconfigure(c, weight=1)
 
     def _calc_cols(self) -> int:
-        w = self.scroll.winfo_width()
+        try:
+            if not self.scroll.winfo_exists():
+                return self._cols
+            w = self.scroll.winfo_width()
+        except Exception:
+            return self._cols
         if w < 600:  return 2
         if w < 900:  return 3
         return 4
@@ -279,10 +413,13 @@ class DocGiaPage:
     def _on_resize(self, event):
         if event.widget is not self.master:
             return
+        if not hasattr(self, 'scroll') or not self.scroll.winfo_exists():
+            return
         new_cols = self._calc_cols()
         if new_cols != self._cols:
             self._cols = new_cols
-            self._apply_filters()
+            if self._current_view == self.VIEW_BOOKS:
+                self._render_current_page()
 
     # ═══════════════════════════════════════════════════
     #  5. MƯỢN SÁCH
@@ -293,25 +430,30 @@ class DocGiaPage:
             messagebox.showerror("Lỗi", "Không tìm thấy thông tin sách.")
             return
 
-        ten  = book.get("ten_sach", ma_sach)
-        han  = date.today().strftime("%d/%m/%Y") + f"  →  " + \
-               (date.today().__add__(__import__("datetime").timedelta(BORROW_DAYS))).strftime("%d/%m/%Y")
+        ten = book.get("ten_sach", ma_sach)
 
+        # ── Xác nhận ──────────────────────────────────
         if not messagebox.askyesno(
-            "Xác nhận mượn sách",
-            f"Bạn muốn mượn:\n\n📖  {ten}\n\nThời hạn: {BORROW_DAYS} ngày\n\nXác nhận?"
+            "Xác nhận gửi yêu cầu mượn",
+            f"Bạn muốn gửi yêu cầu mượn:\n\n📖  {ten}\n\n"
+            f"Yêu cầu sẽ chờ quản lý xét duyệt.\n"
+            f"Sau khi duyệt, sách sẽ được tính thời hạn {BORROW_DAYS} ngày.\n\n"
+            f"Xác nhận?"
         ):
             return
 
-        ok, msg, han_tra = self.query.create_borrow(self.username, ma_sach)
+        # ── Gửi yêu cầu (tạo phiếu cho_duyet) ────────
+        ok, msg, _ = self.query.create_borrow(self.username, ma_sach)
         if ok:
             messagebox.showinfo(
-                "Mượn thành công ✅",
-                f"Đã tạo phiếu mượn cho:\n\n📖  {ten}\n\nHạn trả: {han_tra.strftime('%d/%m/%Y')}"
+                "Gửi yêu cầu thành công ✅",
+                f"Đã gửi yêu cầu mượn:\n\n📖  {ten}\n\n"
+                f"Trạng thái: ⏳ Chờ quản lý duyệt\n"
+                f"Vào \"Sách đã mượn\" để theo dõi."
             )
             self._refresh_books()
         else:
-            messagebox.showerror("Không thể mượn ❌", msg)
+            messagebox.showerror("Không thể gửi yêu cầu ❌", msg)
 
     # ═══════════════════════════════════════════════════
     #  6. CHI TIẾT SÁCH (popup)
@@ -359,7 +501,8 @@ class DocGiaPage:
         row("Giá bìa",   f"{int(book.get('gia',0)):,} ₫" if book.get("gia") else "—")
 
         ctk.CTkButton(
-            body, text="Mượn sách" if avail else "Hết sách",
+            body,
+            text="📨  Gửi yêu cầu mượn" if avail else "Hết sách",
             fg_color=C["primary"] if avail else "#D1D5DB",
             hover_color=C["primary_h"] if avail else "#D1D5DB",
             text_color="white" if avail else C["muted"],
@@ -381,7 +524,9 @@ class DocGiaPage:
             self._render_history()
         else:
             self._current_view = self.VIEW_BOOKS
-            self.btn_history.configure(text="📋 Sách đã mượn")
+            # Trả lại nút đỏ nếu có sách quá hạn
+            txt = "⚠️ Sách quá hạn!" if getattr(self, '_has_overdue', False) else "📋 Sách đã mượn"
+            self.btn_history.configure(text=txt)
             self._apply_filters()
 
     def _render_history(self):
@@ -400,8 +545,8 @@ class DocGiaPage:
         header = ctk.CTkFrame(self.scroll, fg_color="#E5E7EB", corner_radius=6, height=36)
         header.pack(fill="x", pady=(0, 2))
         header.pack_propagate(False)
-        for txt, w in [("STT",40),("Tên sách",200),("Tác giả",130),
-                       ("Ngày mượn",90),("Hạn trả",90),("Trạng thái",100)]:
+        for txt, w in [("STT", 40), ("Tên sách", 190), ("Tác giả", 120),
+                       ("Ngày mượn", 90), ("Hạn trả", 90), ("Trạng thái", 160)]:
             ctk.CTkLabel(header, text=txt, font=(FONT_FAMILY, 10, "bold"),
                          text_color=C["text_sub"], width=w, anchor="w").pack(side="left", padx=4)
 
@@ -409,9 +554,41 @@ class DocGiaPage:
             rec["_idx"] = idx
             BorrowRow(self.scroll, rec, idx).pack(fill="x", pady=1)
 
+    def _check_overdue_alert(self):
+        """Kiểm tra và đổi màu nút Header nếu độc giả có sách quá hạn"""
+        from datetime import date, datetime
+        records = self.query.get_my_borrows(self.username)
+        has_overdue = False
+        today = date.today()
+        
+        for rec in records:
+            if rec.get("trang_thai") == "dang_muon" and rec.get("han_tra"):
+                try:
+                    ht = rec["han_tra"]
+                    if isinstance(ht, str):
+                        ht = datetime.strptime(ht, "%Y-%m-%d").date()
+                    if today > ht:
+                        has_overdue = True
+                        break
+                except Exception:
+                    pass
+        
+        self._has_overdue = has_overdue
+        if has_overdue:
+            # Nếu có sách quá hạn -> Đổi thành màu Đỏ báo động
+            self.btn_history.configure(
+                fg_color="#DC2626", hover_color="#B91C1C", text="⚠️ Sách quá hạn!"
+            )
+        else:
+            # Trạng thái bình thường
+            self.btn_history.configure(
+                fg_color="#2563EB", hover_color="#1D4ED8", text="📋 Sách đã mượn"
+            )
+
     # ═══════════════════════════════════════════════════
     #  8. ĐĂNG XUẤT
     # ═══════════════════════════════════════════════════
     def _logout(self):
         if messagebox.askyesno("Đăng xuất", "Bạn có chắc muốn đăng xuất?"):
             self.app_manager.show_login_page()
+        

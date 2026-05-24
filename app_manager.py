@@ -134,6 +134,8 @@ class AppManager:
         self.root.geometry("1200x750")
         self.current_page = DocGiaPage(self.root, self)
 
+    
+
     def run(self):
         """Kích hoạt vòng lặp chạy ứng dụng"""
         self.root.mainloop()

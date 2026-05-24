@@ -15,16 +15,19 @@ class BookData(Query):
             return []
 
     def search_books(self, keyword):
-        """Tìm kiếm thông tin sách dựa theo tên sách hoặc tên tác giả"""
+        """Tìm kiếm thông tin sách dựa theo mã, tên, tác giả, thể loại"""
         try:
+            by_ma = self.search("ma_sach", keyword, exact=False)
             by_ten = self.search("ten_sach", keyword, exact=False)
             by_tac_gia = self.search("tac_gia", keyword, exact=False)
-            result = pd.concat([by_ten, by_tac_gia]).drop_duplicates()
+            by_the_loai = self.search("the_loai", keyword, exact=False)
+            
+            # Gom tất cả kết quả lại và loại bỏ các dòng trùng lặp
+            result = pd.concat([by_ma, by_ten, by_tac_gia, by_the_loai]).drop_duplicates()
             return result.values.tolist()
         except Exception as e:
             print(f"Lỗi tìm sách: {e}")
             return []
-
     def check_exists(self, ma_sach):
         """Kiểm tra sự tồn tại của đầu sách thông qua mã sách định danh"""
         try:

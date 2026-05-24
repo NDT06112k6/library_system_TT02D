@@ -27,7 +27,7 @@ class MuonTraData(Query):
         except Exception as e:
             print(f"Lỗi tìm kiếm mượn trả: {e}")
             return []
-    
+
     def confirm_return(self, ma_phieu, ngay_tra):
         """Xác nhận hoàn trả sách và cập nhật ngày trả cho phiếu mượn"""
         try:
@@ -48,59 +48,45 @@ class MuonTraData(Query):
     def generate_new_id(self):
         """Hàm sinh mã phiếu mượn mới tăng dần tường minh"""
         try:
-            # 1. Truy vấn lấy mã phiếu của lượt mượn cuối cùng nhất trong database
             query = "SELECT ma_phieu FROM muontra ORDER BY id DESC LIMIT 1"
             result = self.execute_query(query)
-            
-            # 2. Kiểm tra xem database đã có dữ liệu phiếu nào chưa
-            if result != None:
-                if len(result) > 0:
-                    # Lấy mã phiếu lớn nhất hiện tại (Ví dụ: "MT001")
-                    last_id = result[0]['ma_phieu'] 
-                    
-                    # Cắt bỏ 2 ký tự đầu "MT" để lấy phần số phía sau (Ví dụ: "001")
-                    number_part = last_id[2:] 
-                    
-                    # Chuyển chuỗi số thành số nguyên và cộng thêm 1 đơn vị
-                    next_number = int(number_part) + 1 
-                    
-                    # Định dạng lại thành chuỗi có 3 chữ số (Ví dụ: số 2 thành "002")
-                    new_id = "MT" + "{:03d}".format(next_number)
-                    return new_id
-                else:
-                    # Nếu danh sách kết quả bằng 0 (chưa có phiếu nào)
-                    return "MT001"
-            else:
-                # Nếu kết quả trả về rỗng (Database trống)
-                return "MT001"
-                
-        except Exception:
-            # Nếu xảy ra lỗi bất kỳ trong quá trình quét dữ liệu
+            if result is not None and len(result) > 0:
+                last_id = result[0]['ma_phieu']
+                next_number = int(last_id[2:]) + 1
+                return "MT" + "{:03d}".format(next_number)
             return "MT001"
+        except Exception:
+            return "MT001"
+
     def is_currently_borrowing(self, username, ma_sach):
         """Kiểm tra xem độc giả có đang mượn cuốn sách cụ thể nào đó hay không"""
-        try:    
-            query = "SELECT * FROM muontra WHERE username = %s AND ma_sach = %s AND trang_thai = 'dang_muon'"
-            results = self.db.fetch_all_as_dict(query, (username, ma_sach))
-            return len(results) > 0
+        try:
+            result = self.execute_query(
+                "SELECT COUNT(*) as cnt FROM muontra WHERE username = %s AND ma_sach = %s AND trang_thai = 'dang_muon'",
+                (username, ma_sach)
+            )
+            return result[0]["cnt"] > 0 if result else False
         except Exception:
             return False
 
     def get_status_counts(self):
         """Thống kê tổng số lượng phiếu phân loại theo từng trạng thái"""
         try:
-            query = "SELECT trang_thai, COUNT(*) as count FROM muontra GROUP BY trang_thai"
-            results = self.db.fetch_all_as_dict(query)
-            return {item['trang_thai']: item['count'] for item in results}
+            result = self.execute_query(
+                "SELECT trang_thai, COUNT(*) as count FROM muontra GROUP BY trang_thai"
+            )
+            return {item['trang_thai']: item['count'] for item in result} if result else {}
         except Exception:
             return {}
 
     def get_top_borrowed_books(self, limit=5):
         """Thống kê danh sách sách được độc giả mượn nhiều nhất"""
         try:
-            query = f"SELECT ma_sach, COUNT(*) as count FROM muontra GROUP BY ma_sach ORDER BY count DESC LIMIT %s"
-            results = self.db.fetch_all_as_dict(query, (limit,))
-            return [(item['ma_sach'], item['count']) for item in results]
+            result = self.execute_query(
+                "SELECT ma_sach, COUNT(*) as count FROM muontra GROUP BY ma_sach ORDER BY count DESC LIMIT %s",
+                (limit,)
+            )
+            return [(r['ma_sach'], r['count']) for r in result] if result else []
         except Exception:
             return []
 
@@ -118,3 +104,22 @@ class MuonTraData(Query):
             "trang_thai": "dang_muon"
         }
         return self.update("ma_phieu", ma_phieu, data_update)
+
+    def delete_phieu(self, ma_phieu):
+        """Xóa vĩnh viễn một phiếu mượn khỏi cơ sở dữ liệu."""
+        conn = self.connect()
+        if not conn:
+            return False, "Không thể kết nối CSDL."
+        cursor = conn.cursor()
+        try:
+            cursor.execute("DELETE FROM muontra WHERE ma_phieu = %s", (ma_phieu,))
+            conn.commit()
+            if cursor.rowcount > 0:
+                return True, "Đã xóa thành công."
+            return False, "Không tìm thấy phiếu cần xóa."
+        except Exception as e:
+            conn.rollback()
+            return False, f"Lỗi SQL: {e}"
+        finally:
+            cursor.close()
+            self.close()

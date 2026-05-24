@@ -3,6 +3,7 @@ from tkinter import messagebox
 import customtkinter as ctk
 from query.taikhoan import AccountData
 from common.validation import Validation
+from query.muontra import MuonTraData
 
 
 class SuaTKPage:
@@ -64,7 +65,12 @@ class SuaTKPage:
         canvas.bind("<Configure>", lambda e: canvas.itemconfig(canvas_window, width=e.width))
 
         def on_mousewheel(event):
-            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            # Thêm try...except để bỏ qua lỗi nếu canvas đã bị hủy khi chuyển trang
+            try:
+                if canvas.winfo_exists():
+                    canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+            except Exception:
+                pass
         
         canvas.bind_all("<MouseWheel>", on_mousewheel)
 
@@ -279,8 +285,27 @@ class SuaTKPage:
             messagebox.showinfo("Thông báo", "Không có thay đổi nào được thực hiện")
             return
 
+        # ─── BỘ LỌC THÔNG MINH: CHẶN TRƯỚC KHI GỌI DATABASE ───
+        if new_username != self.old_username:
+            try:
+                mt_data = MuonTraData()
+                # Tìm xem Tên đăng nhập cũ này có phiếu mượn/trả nào không
+                phieu_cu = mt_data.search("username", self.old_username, exact=True)
+                
+                if not phieu_cu.empty:
+                    messagebox.showwarning(
+                        "Không thể đổi Tên đăng nhập", 
+                        "Tài khoản này hiện đang có lịch sử mượn trả sách (chờ duyệt/đang mượn/đã trả).\n\nKhông thể thay đổi 'Tên đăng nhập' để đảm bảo tính toàn vẹn của dữ liệu thư viện!"
+                    )
+                    # Tự động gõ lại tên cũ vào ô để sửa sai cho người dùng
+                    self.entry_username.delete(0, tk.END)
+                    self.entry_username.insert(0, self.old_username)
+                    return  # Dừng hàm tại đây, không cho lưu tiếp
+            except Exception as e:
+                print(f"Lỗi kiểm tra ràng buộc: {e}")
+        # ────────────────────────────────────────────────────────
+
         try:
-            # SỬA TẠI ĐÂY: Đóng gói thành Dictionary thay vì mảng List để hết lỗi .keys()
             thong_tin_sua = {
                 "taikhoan": new_username,
                 "matkhau": new_password,
@@ -290,10 +315,10 @@ class SuaTKPage:
                 "email": new_email
             }
             
-            # Thực thi cập nhật dựa trên tên cột khóa chính 'taikhoan' và giá trị cũ self.old_username
             self.account_data.update("taikhoan", self.old_username, thong_tin_sua)
             messagebox.showinfo("Thành công", "Đã cập nhật tài khoản thành công")
             self.app_manager.show_quanlytk_page()
+            
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể cập nhật tài khoản: {str(e)}")
 

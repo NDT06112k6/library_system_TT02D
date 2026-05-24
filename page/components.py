@@ -7,6 +7,7 @@ Widget tái sử dụng cho giao diện độc giả:
 """
 import customtkinter as ctk
 
+
 # ─────────────────── Palette màu ───────────────────
 C = {
     "bg":          "#F0F4F8",
@@ -130,7 +131,7 @@ class BookCard(ctk.CTkFrame):
         ).grid(row=0, column=0, padx=(0, 4), sticky="ew")
 
         ctk.CTkButton(
-            btn_row, text="Mượn sách",
+            btn_row, text="Gửi yêu cầu",
             fg_color=C["primary"] if avail else "#D1D5DB",
             hover_color=C["primary_h"] if avail else "#D1D5DB",
             text_color="white" if avail else C["muted"],
@@ -156,10 +157,10 @@ class BookCard(ctk.CTkFrame):
 # ═══════════════════════════════════════════════════
 class BorrowRow(ctk.CTkFrame):
     STATUS_MAP = {
-        "dang_muon":  ("Đang mượn",  "#DCFCE7", "#16A34A"),
-        "cho_duyet":  ("Chờ duyệt",  "#FEF3C7", "#D97706"),
-        "da_tra":     ("Đã trả",     "#F3F4F6", "#6B7280"),
-        "qua_han":    ("Quá hạn",    "#FEE2E2", "#DC2626"),
+        "dang_muon":  ("✅ Đã duyệt – Đang mượn", "#DCFCE7", "#16A34A"),
+        "cho_duyet":  ("⏳ Chờ duyệt",             "#FEF3C7", "#D97706"),
+        "da_tra":     ("↩ Đã trả",                 "#F3F4F6", "#6B7280"),
+        "qua_han":    ("🚨 Quá hạn",               "#FEE2E2", "#DC2626"),
     }
 
     def __init__(self, master, row_data: dict, idx: int, **kwargs):
@@ -168,32 +169,52 @@ class BorrowRow(ctk.CTkFrame):
         self._build(row_data)
 
     def _build(self, d):
-        from datetime import date
-        cols_w = [40, 200, 130, 90, 90, 100]
+        from datetime import date, datetime
+        cols_w = [40, 190, 120, 90, 90, 160]
+        
+        # Sửa lại để lấy Hạn Trả thay vì Ngày Trả cho cột thứ 5
         cols = [
             str(d.get("_idx", "")),
             d.get("ten_sach", "")[:32],
             d.get("tac_gia",  "")[:18],
             str(d.get("ngay_muon", "—")),
-            str(d.get("ngay_tra",  "—")),
+            str(d.get("han_tra",  "—")),  # <--- Đã sửa ở đây
             d.get("trang_thai", ""),
         ]
 
-        # Kiểm tra quá hạn
+        # Kiểm tra quá hạn và tính số ngày
         status_key = d.get("trang_thai", "")
+        dynamic_label = None # Biến lưu text tùy chỉnh nếu có ngày trễ
+
         if status_key == "dang_muon":
-            try:
-                if d["ngay_tra"] < date.today():
-                    status_key = "qua_han"
-            except Exception:
-                pass
+            han_tra_str = d.get("han_tra")
+            if han_tra_str and han_tra_str != "—":
+                try:
+                    today = date.today()
+                    # Xử lý an toàn kiểu dữ liệu ngày tháng
+                    if isinstance(han_tra_str, str):
+                        han_tra_date = datetime.strptime(str(han_tra_str), "%Y-%m-%d").date()
+                    else:
+                        han_tra_date = han_tra_str
+
+                    if today > han_tra_date:
+                        status_key = "qua_han"
+                        so_ngay_tre = (today - han_tra_date).days
+                        dynamic_label = f"🚨 Quá hạn ({so_ngay_tre} ngày)" # <--- Chèn số ngày
+                except Exception:
+                    pass
 
         for i, (text, w) in enumerate(zip(cols, cols_w)):
             if i == 5:
                 label_txt, bg_color, fg_color = self.STATUS_MAP.get(
                     status_key, (text, "#F3F4F6", "#6B7280")
                 )
-                f = ctk.CTkFrame(self, fg_color=bg_color, corner_radius=5, height=22, width=90)
+                
+                # Nút ghi đè lại dòng chữ nếu bị trễ hạn
+                if status_key == "qua_han" and dynamic_label:
+                    label_txt = dynamic_label
+
+                f = ctk.CTkFrame(self, fg_color=bg_color, corner_radius=5, height=22, width=155)
                 f.pack(side="left", padx=4, pady=6)
                 f.pack_propagate(False)
                 ctk.CTkLabel(f, text=label_txt, font=(FONT_FAMILY, 9, "bold"),

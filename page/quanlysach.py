@@ -49,16 +49,18 @@ class QuanLySachPage:
         left_search = ctk.CTkFrame(search_frame, fg_color="transparent")
         left_search.pack(side="left", fill="x", expand=True, padx=Spacing.MD, pady=Spacing.MD)
 
-        ctk.CTkLabel(left_search, text="🔍 Tìm:", font=Fonts.SMALL_BOLD).pack(side="left", padx=(0, 5))
         self.entry_search = ctk.CTkEntry(
             left_search,
-            placeholder_text="Tìm theo tên sách hoặc tác giả...",
+            placeholder_text="Tìm theo mã sách, tên sách, tác giả, thể loại...",
             height=35,
             font=Fonts.REGULAR,
             fg_color=Colors.BG_MAIN,
             border_color=Colors.BORDER
         )
         self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
+        
+        # Thêm dòng này để thanh tìm kiếm tự động lọc mỗi khi bạn gõ phím (Realtime)
+        self.entry_search.bind("<KeyRelease>", lambda e: self.search_books())
 
         ctk.CTkButton(left_search, text="Tìm", width=70, height=35, font=Fonts.SMALL_BOLD, command=self.search_books).pack(side="left", padx=2)
         ctk.CTkButton(left_search, text="Reset", width=70, height=35, font=Fonts.SMALL_BOLD, fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, hover_color=Colors.BORDER_DARK, command=self.load_books).pack(side="left", padx=2)
@@ -70,8 +72,8 @@ class QuanLySachPage:
         
         temp_categories = []
         for b in all_books:
-            if len(b) > 3:
-                temp_categories.append(b[3])
+            if len(b) > 4:  # Sửa từ 3 thành 4
+                temp_categories.append(b[4])  # Sửa b[3] thành b[4] để lấy đúng Thể loại
         
         unique_categories = list(set(temp_categories))
         categories = sorted(unique_categories)
@@ -210,7 +212,8 @@ class QuanLySachPage:
         if category == "Tất cả thể loại":
             self._populate_tree(all_books)
         else:
-            filtered = [b for b in all_books if len(b) > 3 and b[3] == category]
+            # Sửa từ 3 thành 4 để khớp với dữ liệu Thể loại
+            filtered = [b for b in all_books if len(b) > 4 and b[4] == category]
             self._populate_tree(filtered)
 
     def search_books(self):

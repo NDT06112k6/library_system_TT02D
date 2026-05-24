@@ -1,7 +1,14 @@
+from email import header
+
 import customtkinter as ctk
 from tkinter import ttk
+from common.helpers import get_weather
 from query.muontra import MuonTraData
 from query.books import BookData
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # --- Bảng màu chuẩn đồng bộ với hệ thống ---
 C = {
@@ -107,6 +114,23 @@ class ThongKePage:
             col_idx = i % 4
             self.create_statistic_card(card_frame, title, str(val), color, icon).grid(row=row_idx, column=col_idx, padx=8, pady=8, sticky="ew")
 
+        # Tính trung bình số lượng sách
+        all_books = self.book_data.list_all()
+        quantities = [book[5] for book in all_books]
+        avg_qty = np.mean(quantities) if quantities else 0
+        median_qty = np.median(quantities) if quantities else 0
+        
+        if all_books:
+            quantities = [book[5] for book in all_books]
+            prices = [book[6] for book in all_books]
+            
+            stats = {
+                'Số sách TB': f"{np.mean(quantities):.0f}",
+                'Giá TB': f"{np.mean(prices):,.0f} đ",
+                'Sách đắt nhất': f"{np.max(prices):,.0f} đ",
+                'Sách rẻ nhất': f"{np.min(prices):,.0f} đ",
+                'Tổng giá trị': f"{np.sum(prices):,.0f} đ"
+            }
     def _build_tables(self):
         """Xây dựng 2 bảng thống kê bên dưới và LOẠI BỎ tài khoản quản lý (username = '1')."""
         table_frame = ctk.CTkFrame(self.scroll_view, fg_color="transparent")
@@ -218,6 +242,27 @@ class ThongKePage:
         except Exception as e:
             print(f"Lỗi khi đếm số phiếu mượn: {e}")
             return 0
+    
+    def draw_borrow_chart(self):
+        results = self.muontra_data.execute_query(
+            "SELECT MONTH(ngay_muon), COUNT(*) FROM muontra GROUP BY MONTH(ngay_muon)"
+        )
+        months = [r[0] for r in results]
+        counts = [r[1] for r in results]
+        
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.plot(months, counts, marker='o')
+        ax.set_xlabel('Tháng')
+        ax.set_ylabel('Số lượt mượn')
+        ax.set_title('Thống kê mượn sách theo tháng')
+        
+        canvas = FigureCanvasTkAgg(fig, master=self.chart_frame)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
+    
+    weather = get_weather()
+    if weather:
+        ctk.CTkLabel(header, text=f"🌡️ {weather['temperature']}°C").pack()
 
     def back_to_menu(self):
         """Trở về menu chính."""

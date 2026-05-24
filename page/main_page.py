@@ -2,6 +2,8 @@ import customtkinter as ctk
 from tkinter import ttk
 from query.muontra import MuonTraData
 from query.books import BookData
+import os
+import platform
 
 
 class MainPage:
@@ -267,5 +269,27 @@ class MainPage:
 
         except Exception as e:
             print(f"Lỗi khi tải dữ liệu cho bảng điều khiển Dashboard: {e}")
+    
+    def open_guide():
+        try:
+            if platform.system() == 'Windows':
+                os.startfile("guide.pdf")
+            else:
+                os.system(f"xdg-open guide.pdf")
+        except:
+            messagebox.showwarning("Lỗi", "Không tìm thấy guide.pdf")
+
+    ctk.CTkButton(sidebar, text="📖 Hướng Dẫn",
+                command=open_guide, ...).pack(fill="x", padx=10, pady=5)
+    
+    def show_about():
+        messagebox.showinfo("Về phần mềm",
+            "Hệ Thống Quản Lý Thư Viện\n"
+            "Version 1.0\n"
+            "© 2026 - Nhóm TT02D\n"
+            "Liên hệ: library@system.com")
+
+    ctk.CTkButton(main_content, text="ℹ️ About",
+              command=show_about, ...).pack()
 
     

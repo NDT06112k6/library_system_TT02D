@@ -1,6 +1,8 @@
 import mysql.connector
 import pandas as pd
 from tkinter import messagebox
+import csv
+from datetime import datetime
 
 class Query:
     def __init__(self, table_name=None, fields=None):
@@ -135,3 +137,29 @@ class Query:
         finally:
             cursor.close()
             self.close()
+        
+    def export_to_csv(self):
+        try:
+            results = self.list_all()
+            filename = f"{self.table_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            with open(filename, 'w', newline='', encoding='utf-8-sig') as f:
+                writer = csv.writer(f)
+                writer.writerow(self.fields)
+                writer.writerows(results)
+            messagebox.showinfo("Thành công", f"Xuất file {filename}")
+            return filename
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Export failed: {e}")
+            return None
+    
+    def import_from_csv(self, filepath):
+        try:
+            with open(filepath, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    self.create(list(row.values())[1:])
+            messagebox.showinfo("Thành công", "Import xong!")
+            return True
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Import failed: {e}")
+            return False

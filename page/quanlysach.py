@@ -2,9 +2,9 @@ import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, filedialog, ttk
 from query.books import BookData
-from query.muontra import MuonTraData  # Thêm kết nối dữ liệu mượn trả
+from query.muontra import MuonTraData  
 from common.theme import Colors, Fonts, Spacing
-
+import threading
 
 class QuanLySachPage:
     def __init__(self, master, app_manager):
@@ -333,4 +333,30 @@ class QuanLySachPage:
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")
             return False
+    
+    ctk.CTkButton(button_frame, text="📥 Export CSV",
+              command=self.book_data.export_to_csv).pack(side="left")
+
+    def import_csv():
+        file = filedialog.askopenfilename(filetypes=[("CSV", "*.csv")])
+        if file:
+            self.book_data.import_from_csv(file)
+
+    ctk.CTkButton(button_frame, text="📤 Import CSV",
+              command=import_csv).pack(side="left")
+    
+
+
+    `def load_data_async(self):
+        def heavy_task():
+            self.books = self.book_data.list_all()
+            self.root.after(0, self.load_table)  # Update UI từ main thread
+        
+        thread = threading.Thread(target=heavy_task, daemon=True)
+        thread.start()
+        self.show_loading_spinner()  # Hiển thị loading
+
+    def show_loading_spinner(self):
+        self.loading_label = ctk.CTkLabel(self.master, text="⏳ Đang tải...")
+        self.loading_label.pack()`
     

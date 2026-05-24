@@ -2,13 +2,13 @@
 from datetime import datetime
 
 class Validation:
-    """
-    Lớp chứa các phương thức kiểm tra dữ liệu.
-    """
+    """Lớp chứa các phương thức kiểm tra dữ liệu."""
+    # Kiểm tra dữ liệu có rỗng hay không
     @staticmethod
     def is_empty(value):
         return not value or not str(value).strip()
 
+# Kiểm tra username hợp lệ
     @staticmethod
     def is_valid_username(username):
         if Validation.is_empty(username):
@@ -19,12 +19,14 @@ class Validation:
             return False, "Username phải ≤ 20 ký tự"
         return True, ""
 
+# Kiểm tra email 
     @staticmethod
     def is_valid_email_simple(email):
         if '@' not in email or '.' not in email:
             return False, "Email không hợp lệ"
         return True, ""
 
+# Kiểm tra số điện thoại
     @staticmethod
     def is_valid_phone(phone):
         if not phone.isdigit() or len(phone) != 10:
@@ -32,7 +34,8 @@ class Validation:
         if not phone.startswith('0'):
             return False, "SĐT phải bắt đầu từ 0"
         return True, ""
-
+    
+# Kiểm tra số dương
     @staticmethod
     def is_positive_number(value, field_name="Giá trị"):
         try:
@@ -65,7 +68,7 @@ class Validation:
 
     @staticmethod
     def validate_required(value, field_name):
-        """"Kiểm tra trường bắt buộc"""
+        """"Kiểm tra trường bắt buộc nhập"""
         if not value or value.strip() == "":
             return False, f"{field_name} không được để trống"
         return True, ""

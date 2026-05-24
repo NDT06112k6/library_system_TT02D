@@ -31,7 +31,7 @@ class QuanLySachPage:
         
         # Đổi tiêu đề động theo vai trò đăng nhập để tăng trải nghiệm người dùng
         # Sử dụng cấu trúc if-else truyền thống thay vì ternary
-        if self.app_manager.current_role == "Sinh viên":
+        if self.app_manager.current_role == "Độc giả":
             page_title = "📚 KHO SÁCH THƯ VIỆN"
         else:
             page_title = "📚 QUẢN LÝ KHO SÁCH"

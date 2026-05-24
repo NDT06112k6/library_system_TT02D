@@ -4,14 +4,14 @@ from typing import List, Dict, Any, Optional
 
 class MySQLHandler:
     """
-    Lớp xử lý kết nối và thao tác với MySQL Database.
+    Lớp quản lý kết nối và thực hiện các thao tác CRUD với MySQL.
+    Attributes:
+        host, user, password, database: Thông tin xác thực kết nối.
+        connection: Đối tượng kết nối MySQL hiện tại.
     """
     
     def __init__(self, host: str = "localhost", user: str = "root", 
                  password: str = "root", database: str = "library_system"):
-        """
-        Khởi tạo MySQL Handler.
-        """
         self.host = host
         self.user = user
         self.password = password
@@ -19,9 +19,7 @@ class MySQLHandler:
         self.connection = None
     
     def connect(self) -> bool:
-        """
-        Kết nối tới MySQL database.
-        """
+        """Thiết lập kết nối tới cơ sở dữ liệu với cấu hình UTF-8."""
         try:
             self.connection = mysql.connector.connect(
                 host=self.host,
@@ -32,7 +30,7 @@ class MySQLHandler:
                 collation='utf8mb4_unicode_ci',
                 use_unicode=True
             )
-            # Đảm bảo session sử dụng utf8mb4 để tránh lỗi hiển thị ???
+            # Thiết lập session để hỗ trợ ký tự đặc biệt/tiếng Việt 
             cursor = self.connection.cursor()
             cursor.execute("SET NAMES utf8mb4")
             cursor.close()
@@ -44,14 +42,15 @@ class MySQLHandler:
             return False
     
     def disconnect(self) -> None:
-        """Ngắt kết nối MySQL."""
+        """Đóng kết nối nếu đang mở."""
         if self.connection and self.connection.is_connected():
             self.connection.close()
             print("✓ Đóng kết nối MySQL")
     
     def execute_query(self, query: str, params: tuple = None) -> bool:
         """
-        Thực thi query INSERT, UPDATE, DELETE.
+        Thực thi các lệnh thay đổi dữ liệu (INSERT, UPDATE, DELETE).
+        Tự động thực hiện commit hoặc rollback nếu có lỗi.
         """
         try:
             cursor = self.connection.cursor()
@@ -68,9 +67,7 @@ class MySQLHandler:
             return False
     
     def fetch_one(self, query: str, params: tuple = None) -> Optional[tuple]:
-        """
-        Lấy 1 bản ghi.
-        """
+        """Truy vấn lấy bản ghi duy nhất."""
         try:
             cursor = self.connection.cursor()
             if params:
@@ -85,9 +82,7 @@ class MySQLHandler:
             return None
     
     def fetch_all(self, query: str, params: tuple = None) -> List[tuple]:
-        """
-        Lấy tất cả bản ghi.
-        """
+        """Truy vấn lấy danh sách tất cả các bản ghi dạng Tuple."""
         try:
             cursor = self.connection.cursor()
             if params:
@@ -102,9 +97,7 @@ class MySQLHandler:
             return []
     
     def fetch_all_as_dict(self, query: str, params: tuple = None) -> List[Dict]:
-        """
-        Lấy tất cả bản ghi dạng dictionary.
-        """
+        """Truy vấn lấy dữ liệu dạng Dictionary (key là tên cột)."""
         try:
             cursor = self.connection.cursor(dictionary=True)
             if params:
@@ -119,13 +112,13 @@ class MySQLHandler:
             return []
     
     def get_column_names(self, table: str) -> List[str]:
-        """
-        Lấy danh sách tên cột của bảng.
-        """
+        """Lấy danh sách tên các cột của một bảng bằng lệnh DESCRIBE."""
         try:
             cursor = self.connection.cursor()
             cursor.execute(f"DESCRIBE {table}")
-            columns = [col[0] for col in cursor.fetchall()]
+            columns = []
+            for col in cursor.fetchall():
+                columns.append(col[0])
             cursor.close()
             return columns
         except Error as e:
@@ -133,5 +126,11 @@ class MySQLHandler:
             return []
     
     def is_connected(self) -> bool:
-        """Kiểm tra xem có kết nối MySQL không."""
-        return self.connection is not None and self.connection.is_connected()
+        """Kiểm tra trạng thái kết nối."""
+        if self.connection is not None:
+            if self.connection.is_connected():
+                return True
+            else:
+                return False
+        else:
+            return False

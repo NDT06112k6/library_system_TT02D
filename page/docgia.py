@@ -562,6 +562,13 @@ class DocGiaPage:
         today = date.today()
         
         for rec in records:
+            # ─── ĐÁNH LỪA GIAO DIỆN Ở ĐÂY ───
+            # Ép tất cả sách đang mượn thành hạn trả 01/05/2026
+            """if rec.get("trang_thai") == "dang_muon":
+                rec["han_tra"] = "2026-05-01" 
+            """
+            # ────────────────────────────────
+
             if rec.get("trang_thai") == "dang_muon" and rec.get("han_tra"):
                 try:
                     ht = rec["han_tra"]
@@ -575,16 +582,13 @@ class DocGiaPage:
         
         self._has_overdue = has_overdue
         if has_overdue:
-            # Nếu có sách quá hạn -> Đổi thành màu Đỏ báo động
             self.btn_history.configure(
                 fg_color="#DC2626", hover_color="#B91C1C", text="⚠️ Sách quá hạn!"
             )
         else:
-            # Trạng thái bình thường
             self.btn_history.configure(
                 fg_color="#2563EB", hover_color="#1D4ED8", text="📋 Sách đã mượn"
             )
-
     # ═══════════════════════════════════════════════════
     #  8. ĐĂNG XUẤT
     # ═══════════════════════════════════════════════════

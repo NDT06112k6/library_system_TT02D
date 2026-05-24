@@ -182,9 +182,9 @@ class LoginPage:
                 else:
                     self.clear_remember()
 
-                chuc_vu = "Sinh viên"
+                chuc_vu = "Độc giả"  # Mặc định nếu không tìm thấy trường chức vụ
                 if isinstance(user, dict):
-                    chuc_vu = user.get("chucvu") or user.get("chuc_vu") or "Sinh viên"
+                    chuc_vu = user.get("chucvu") or user.get("chuc_vu") or "Độc giả"
                 elif isinstance(user, (list, tuple)) and len(user) > 0:
                     chuc_vu = user[4] if len(user) == 6 else user[5]
 

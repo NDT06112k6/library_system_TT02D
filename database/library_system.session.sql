@@ -1,3 +1,4 @@
+-- Bảng lưu trữ thông tin người dùng
 CREATE TABLE taikhoan (
     id INT AUTO_INCREMENT PRIMARY KEY,
     taikhoan VARCHAR(100) UNIQUE NOT NULL,
@@ -9,6 +10,7 @@ CREATE TABLE taikhoan (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Bảng lưu trữ thông tin sách
 CREATE TABLE books (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ma_sach VARCHAR(50) UNIQUE NOT NULL,
@@ -20,6 +22,7 @@ CREATE TABLE books (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Bảng quản lý giao dịch mượn/trả
 CREATE TABLE muontra (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ma_phieu VARCHAR(50) UNIQUE NOT NULL,
@@ -33,14 +36,15 @@ CREATE TABLE muontra (
     FOREIGN KEY (username) REFERENCES taikhoan(taikhoan)
 );
 
+-- Thêm dữ liệu mẫu cho tài khoản
 INSERT INTO taikhoan (taikhoan, matkhau, hoten, sdt, chucvu, email) VALUES
 ('1', '1', 'Admin', '0999999999', 'Quản lý', '1'),
-('NDT06112k6', '01213322896', 'Nguyễn Đức Trường', '0123456789', 'Độc giả', 'ductruong6116@gmail.com');
+('NDT6116', '1', 'Nguyễn Đức Trường', '0123456789', 'Độc giả', 'ductruong6116@gmail.com');
 
+-- Thêm dữ liệu mẫu cho sách
 INSERT INTO books (ma_sach, ten_sach, tac_gia, the_loai, so_luong, gia) VALUES
 ('S001', 'Lap Trinh Python Co Ban', 'Nguyen Van A', 'Công nghệ', 8, 120000),
-('S002', 'Cấu Trúc Dữ Liệu & Giải Thuật', 'Tran Thi B', 'Công nghệ', 6, 150000);
 
+-- Thêm dữ liệu lịch sử mượn trả
 INSERT INTO muontra (ma_phieu, username, ma_sach, ngay_muon, ngay_tra, trang_thai) VALUES
 ('MT003', '1', 'S002', '2026-04-17', '2026-04-20', 'da_tra'),
-('MT004', '1', 'S002', '2026-04-17', NULL, 'dang_muon');

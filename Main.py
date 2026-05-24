@@ -2,10 +2,7 @@
 from app_manager import AppManager
 
 def main():
-    """
-    Hàm chính của chương trình.
-    Khởi tạo và chạy ứng dụng quản lý thư viện.
-    """
+    """ Hàm chính của chương trình. """
     print("Phần mềm đang khởi chạy")
     app = AppManager()
     

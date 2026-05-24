@@ -33,7 +33,7 @@ class MuonTraPage:
         header = ctk.CTkFrame(main_frame, fg_color=Colors.PRIMARY, corner_radius=0)
         header.pack(fill="x")
         
-        if self.app_manager.current_role == "Sinh viên":
+        if self.app_manager.current_role == "Độc giả":
             title = "🔄 LỊCH SỬ MƯỢN TRẢ SÁCH"
         else:
             title = "🔄 QUẢN LÝ MƯỢN TRẢ SÁCH"
@@ -109,7 +109,7 @@ class MuonTraPage:
             self.btn_xoa = ctk.CTkButton(self.btns_container, text="🗑️ Xóa Phiếu", fg_color="#DC2626", hover_color="#B91C1C", font=Fonts.SMALL_BOLD, command=self.xoa_phieu)
             self.btn_xoa.pack(side="left", padx=5)
         else:
-            ctk.CTkLabel(self.btns_container, text="📌 Hãy mang theo thẻ Sinh viên khi đến nhận sách.", font=Fonts.SMALL, text_color="gray").pack(side="left", padx=10)
+            ctk.CTkLabel(self.btns_container, text="📌 Hãy mang theo thẻ Độc giả khi đến nhận sách.", font=Fonts.SMALL, text_color="gray").pack(side="left", padx=10)
 
         ctk.CTkButton(self.btns_container, text="← Quay Lại", fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, font=Fonts.SMALL_BOLD, command=self.back).pack(side="left", padx=5)
 

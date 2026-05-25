@@ -162,7 +162,7 @@ class TaoMuonPage:
         
         # CƠ CHẾ CHẶN LỖI 1062 DUPLICATE ENTRY TRƯỚC KHI INSERT
         query_check_id = "SELECT COUNT(*) as total FROM muontra WHERE ma_phieu = %s"
-        check_result = self.muontra_data.execute_query(query_check_id, (ma_phieu,))
+        check_result = self.muontra_data.thuc_thi_query(query_check_id, (ma_phieu,))
         
         if check_result:
             total_matches = check_result[0]['total']
@@ -188,8 +188,8 @@ class TaoMuonPage:
                 ma_sach, 
                 ngay_muon_chuan_mysql, 
                 han_tra_chuan_mysql, 
-                None,  # ngay_tra ban đầu là None
-                0,     # tien_phat ban đầu là 0
+                None,  
+                0,     
                 "dang_muon"
             ])
 

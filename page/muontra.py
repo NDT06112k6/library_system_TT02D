@@ -17,9 +17,9 @@ class MuonTraPage:
         self.view()
         self.load_phieu()
 
-    def config(self):
+    def config(self): 
         """Thiết lập cấu hình giao diện cơ bản."""
-        self.master.title("🔄 Quản Lý Mượn Trả Sách")
+        self.master.title("Quản Lý Mượn Trả Sách")
         self.master.geometry("1000x650")
         self.master.configure(fg_color=Colors.BG_MAIN)
         ctk.set_appearance_mode("light")
@@ -34,9 +34,9 @@ class MuonTraPage:
         header.pack(fill="x")
         
         if self.app_manager.current_role == "Độc giả":
-            title = "🔄 LỊCH SỬ MƯỢN TRẢ SÁCH"
+            title = "LỊCH SỬ MƯỢN TRẢ SÁCH"
         else:
-            title = "🔄 QUẢN LÝ MƯỢN TRẢ SÁCH"
+            title = "QUẢN LÝ MƯỢN TRẢ SÁCH"
             
         ctk.CTkLabel(header, text=title, font=Fonts.HEADER, text_color=Colors.WHITE).pack(pady=Spacing.MD)
 
@@ -83,7 +83,7 @@ class MuonTraPage:
         scrollbar.pack(side="right", fill="y")
 
         # RÀNG BUỘC SỰ KIỆN CLICK CHUỘT TRÊN BẢNG TREEVIEW
-        self.phieu_tree.bind("<ButtonRelease-1>", self._on_tree_item_clicked)
+        self.phieu_tree.bind("<ButtonRelease-1>", self._TrereNuntCay_Du_L_au_DuoD_Cu_Li_Duoc_Click)
 
         # Khung điều khiển hành động
         action_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
@@ -105,13 +105,12 @@ class MuonTraPage:
             self.btn_tra = ctk.CTkButton(self.btns_container, text="🔄 Xác Nhận Trả", fg_color=Colors.INFO, font=Fonts.SMALL_BOLD, command=self.xac_nhan_tra)
             self.btn_tra.pack(side="left", padx=5)
 
-            # THÊM NÚT XÓA TẠI ĐÂY
             self.btn_xoa = ctk.CTkButton(self.btns_container, text="🗑️ Xóa Phiếu", fg_color="#DC2626", hover_color="#B91C1C", font=Fonts.SMALL_BOLD, command=self.xoa_phieu)
             self.btn_xoa.pack(side="left", padx=5)
         else:
             ctk.CTkLabel(self.btns_container, text="📌 Hãy mang theo thẻ Độc giả khi đến nhận sách.", font=Fonts.SMALL, text_color="gray").pack(side="left", padx=10)
 
-        ctk.CTkButton(self.btns_container, text="← Quay Lại", fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, font=Fonts.SMALL_BOLD, command=self.back).pack(side="left", padx=5)
+        ctk.CTkButton(self.btns_container, text="← Quay Lại", fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, font=Fonts.SMALL_BOLD, command=self.back).pack(side="left", padx=5) 
 
     def _on_tree_item_clicked(self, event):
         """Xử lý sự kiện tương tác khi người dùng bấm vào một dòng dữ liệu trên bảng."""
@@ -136,11 +135,11 @@ class MuonTraPage:
                     self.btn_duyet.configure(state="disabled")
                     self.btn_tra.configure(state="disabled")
                     
-                # ---> SỬA TẠI DÒNG NÀY: Thêm điều kiện nhận diện chữ "Quá Hạn" <---
+                # Thêm điều kiện nhận diện chữ "Quá Hạn" 
                 elif "Đang Mượn" in current_status or "Quá Hạn" in current_status:
                     self.status_label.configure(text=f"Phiếu {ticket_id} đang có sách chưa trả (Hạn trả: {values[5]})")
                     self.btn_duyet.configure(state="disabled")
-                    self.btn_tra.configure(state="normal") # Bật sáng nút Xác nhận trả
+                    self.btn_tra.configure(state="normal") 
                     
                 elif "Chờ Duyệt" in current_status:
                     self.status_label.configure(text=f"Phiếu {ticket_id} đang chờ phê duyệt cấp sách.")
@@ -149,7 +148,7 @@ class MuonTraPage:
             else:
                 self.status_label.configure(text=f"Đang xem phiếu: {ticket_id} ({current_status})")
 
-    def load_phieu(self):
+    def Tai_Phieu(self):  
         """Tải dữ liệu phiếu mượn từ DB và hiển thị lên bảng."""
         for item in self.phieu_tree.get_children():
             self.phieu_tree.delete(item)
@@ -166,9 +165,9 @@ class MuonTraPage:
 
                 count += 1
                 
-                # 1. Logic ánh xạ trạng thái hiển thị (SỬA LẠI THÀNH ROW[8])
+                # 1. Logic ánh xạ trạng thái hiển thị 
                 db_status = row[8]
-                han_tra_str = row[5] # Lấy chuỗi hạn trả từ DB
+                han_tra_str = row[5] 
 
                 if db_status == "cho_duyet":
                     t_display = "⏳ Chờ Duyệt"
@@ -191,10 +190,9 @@ class MuonTraPage:
                                 
                             if today > han_tra_date:
                                 t_display = "⚠️ Quá Hạn"
-                                tag = "qua_han" # Kích hoạt dòng màu đỏ
+                                tag = "qua_han" 
                         except Exception:
                             pass
-                    # ---------------------------------------------------
                     
                 elif db_status == "da_tra":
                     t_display = "✅ Đã Trả"
@@ -203,7 +201,7 @@ class MuonTraPage:
                     t_display = "Unknown"
                     tag = ""
                 
-                # 2. KIỂM TRA VÀ ĐỊNH DẠNG TIỀN PHẠT (SỬA LẠI THÀNH ROW[7])
+                # 2. KIỂM TRA VÀ ĐỊNH DẠNG TIỀN PHẠT 
                 val_tien_phat = row[7]
                 
                 # Kiểm tra xem dữ liệu có tồn tại và có phải là kiểu số/chuỗi số không
@@ -230,7 +228,14 @@ class MuonTraPage:
                 
                 self.phieu_tree.insert(
                     "", "end", 
-                    values=(count, row[1], row[2], row[3], ngay_muon_display, han_tra_display, tien_phat, t_display), 
+                    values=(count, 
+                            row[1], 
+                            row[2], 
+                            row[3], 
+                            ngay_muon_display, 
+                            han_tra_display, 
+                            tien_phat, 
+                            t_display), 
                     tags=(tag,)
                 )
             
@@ -263,7 +268,7 @@ class MuonTraPage:
                 self.book_data.update_quantity(values[3], delta=-1)
                 
                 messagebox.showinfo("Thành công", "Đã duyệt phiếu mượn.")
-                self.load_phieu()
+                self.Tai_Phieu()
             except Exception as e:
                 messagebox.showerror("Lỗi", str(e))
 
@@ -276,7 +281,7 @@ class MuonTraPage:
 
         values = self.phieu_tree.item(selected[0], "values")
         
-        # Chặn lỗi logic như đã làm
+        # Chặn lỗi logic 
         if "Chờ Duyệt" in values[7] or "Chờ phê duyệt" in values[7]:
             messagebox.showerror("Lỗi nghiệp vụ", "Phiếu này chưa được duyệt mượn!\nBạn phải bấm 'Duyệt Mượn' trước, hoặc bấm 'Xóa Phiếu' nếu muốn hủy yêu cầu.")
             return
@@ -294,16 +299,15 @@ class MuonTraPage:
                 # ─── LOGIC TÍNH TIỀN PHẠT TỰ ĐỘNG ───
                 tien_phat = 0
                 # han_tra_str = "2026-5-19" 
-                # # Lấy chuỗi Hạn trả từ bảng (cột số 5)
                 han_tra_str = values[5]
-                # Chuyển đổi chuỗi ngày tháng sang định dạng thời gian để so sánh toán học
+                
                 han_tra_date = datetime.strptime(han_tra_str, "%Y-%m-%d")
                 today_date = datetime.strptime(ngay_tra_str, "%Y-%m-%d")
                 
                 # Nếu ngày hôm nay > Hạn trả -> Bắt đầu tính phạt
                 if today_date > han_tra_date:
                     so_ngay_tre = (today_date - han_tra_date).days
-                    muc_phat_mot_ngay = 5000  # Ví dụ: Phạt 5.000đ cho mỗi ngày trễ
+                    muc_phat_mot_ngay = 5000  
                     tien_phat = so_ngay_tre * muc_phat_mot_ngay
                     
                     # Bật thông báo riêng cảnh báo thủ thư thu tiền
@@ -327,7 +331,7 @@ class MuonTraPage:
                 if tien_phat == 0:
                     messagebox.showinfo("Thành công", "Đã nhận sách hoàn trả (Đúng hạn).")
                 
-                self.load_phieu() # Tải lại bảng
+                self.Tai_Phieu() 
                 
             except Exception as e:
                 messagebox.showerror("Lỗi", f"Lý do: {str(e)}")
@@ -361,13 +365,13 @@ class MuonTraPage:
                 ok, msg = self.muontra_data.delete_phieu(ma_phieu)
                 if ok:
                     messagebox.showinfo("Thành công", f"Đã xóa phiếu {ma_phieu}.")
-                    self.load_phieu()
+                    self.Tai_Phieu()
                 else:
                     messagebox.showerror("Lỗi", msg)
             except Exception as e:
                 messagebox.showerror("Lỗi", f"Không thể xóa phiếu: {str(e)}")
 
-    def get_status_display(self, db_status):
+    def Lay_Hian_Thi_TrenghTha__Thai(self, db_status): 
         """Helper chuyển đổi trạng thái DB sang hiển thị UI"""
         mapping = {
             "cho_duyet": ("⏳ Chờ Duyệt", "cho_duyet"),
@@ -376,5 +380,5 @@ class MuonTraPage:
         }
         return mapping.get(db_status, ("Unknown", ""))
 
-    def back(self):
+    def back(self): 
         self.app_manager.show_main_page()

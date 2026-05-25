@@ -20,7 +20,6 @@ class TaoTKPage:
     def config(self):
         """Cấu hình cửa sổ"""
         self.master.title("Tạo tài khoản")
-        # Tăng chiều rộng lên 750px để chứa đủ 2 cột rộng rãi, giảm chiều cao xuống cho cân đối
         self.master.geometry("750x550") 
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")

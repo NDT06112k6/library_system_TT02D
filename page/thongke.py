@@ -34,12 +34,12 @@ class ThongKePage:
         self.setup_styles()
         self.render_view()
 
-    def config_window(self):
+    def Cau_Hinh_Cua_So(self): 
         """Thiết lập cấu hình cửa sổ hiển thị."""
         self.master.title("📊 Dashboard Thống Kê & Báo Cáo")
         self.master.geometry("1050x700")
         self.master.configure(fg_color=C["bg"])
-        ctk.set_appearance_mode("light")
+        ctk.set_appearance_mode("light") 
 
     def setup_styles(self):
         """Cấu hình style chuẩn cho Treeview (Bảng)."""
@@ -48,8 +48,8 @@ class ThongKePage:
         style.configure("Treeview.Heading", font=(FONT_FAMILY, 11, "bold"), background=C["primary"], foreground="white", borderwidth=0, padding=8)
         style.configure("Treeview", font=(FONT_FAMILY, 11), rowheight=35, borderwidth=0, background=C["card"], fieldbackground=C["card"])
         style.map("Treeview", background=[("selected", "#EBF4FF")], foreground=[("selected", C["primary"])])
-
-    def render_view(self):
+    
+    def Hien_Thi_Giao_Dien(self): 
         """Xây dựng khung giao diện chính."""
 
         header = ctk.CTkFrame(self.master, fg_color="transparent")
@@ -64,20 +64,20 @@ class ThongKePage:
             header, text="← Quay Lại", font=(FONT_FAMILY, 12, "bold"),
             fg_color="#64748b", hover_color="#475569", width=120, height=35,
             command=self.back_to_menu
-        ).pack(side="right")
+        ).pack(side="right") 
 
         # 2. Vùng cuộn chính (Chống tràn UI)
         self.scroll_view = ctk.CTkScrollableFrame(self.master, fg_color="transparent")
         self.scroll_view.pack(fill="both", expand=True, padx=20, pady=(0, 20))
         self.scroll_view.columnconfigure(0, weight=1)
 
-        # 3. Khu vực Thẻ thống kê (Cards)
-        self._build_stat_cards()
+        # 3. Khu vực Thẻ thống kê (Cards) 
+        self._Xay_Dung_The_Thong_Ke()
 
-        # 4. Khu vực Bảng dữ liệu (Tables)
-        self._build_tables()
+        # 4. Khu vực Bảng dữ liệu (Tables) 
+        self._Xay_Dung_Bang()
 
-    def _build_stat_cards(self):
+    def _Xay_Dung_The_Thong_Ke(self): 
         """Xây dựng lưới thẻ chỉ số (Grid 4 cột)"""
         card_frame = ctk.CTkFrame(self.scroll_view, fg_color="transparent")
         card_frame.grid(row=0, column=0, sticky="ew", pady=(0, 20))
@@ -128,7 +128,7 @@ class ThongKePage:
                 'Tổng giá trị': f"{np.sum(prices):,.0f} đ"
             }
 
-    def _build_tables(self):
+    def _Xay_Dung_Bang(self): 
         """Xây dựng 2 bảng thống kê bên dưới và LOẠI BỎ tài khoản quản lý (username = '1')."""
         table_frame = ctk.CTkFrame(self.scroll_view, fg_color="transparent")
         table_frame.grid(row=1, column=0, sticky="nsew")
@@ -140,7 +140,7 @@ class ThongKePage:
             FROM muontra m 
             JOIN books b ON m.ma_sach = b.ma_sach 
             WHERE m.username NOT IN ('1', 'admin')
-            GROUP BY m.ma_sach, b.ten_sach, b.tac_gia
+            GROUP BY m.ma_sach, b.ten_sach, b.tac_gia 
             ORDER BY sl DESC LIMIT 5
         """
         self._create_table_widget(
@@ -155,7 +155,7 @@ class ThongKePage:
             WHERE username NOT IN ('1', 'admin')
             GROUP BY username 
             ORDER BY sl DESC LIMIT 5
-        """
+        """ 
         self._create_table_widget(
             table_frame, "🥇 Top Độc Giả Tích Cực", 
             ["Tài khoản Độc giả", "Tổng số phiếu"], query_top_readers
@@ -163,7 +163,7 @@ class ThongKePage:
 
     def create_statistic_card(self, parent, title, value, color, icon):
         """Hàm con hỗ trợ tạo UI cho 1 thẻ thống kê."""
-        card = ctk.CTkFrame(parent, fg_color=C["card"], corner_radius=12, border_width=1, border_color=C["border"])
+        card = ctk.CTkFrame(parent, fg_color=C["card"], corner_radius=12, border_width=1, border_color=C["border"]) 
         
         indicator = ctk.CTkFrame(card, fg_color=color, width=8, corner_radius=12)
         indicator.pack(side="left", fill="y", pady=12, padx=(12, 0))
@@ -180,7 +180,7 @@ class ThongKePage:
         
         return card
 
-    def _create_table_widget(self, parent, title, columns, query):
+    def _Tao_Widget_Bang(self, parent, title, columns, query): 
         """Hàm con hỗ trợ tạo UI bảng và tự động đổ dữ liệu."""
         frame = ctk.CTkFrame(parent, fg_color=C["card"], corner_radius=12, border_width=1, border_color=C["border"])
         ctk.CTkLabel(frame, text=title, font=(FONT_FAMILY, 15, "bold"), text_color=C["text"]).pack(anchor="w", padx=20, pady=(15, 5))
@@ -200,7 +200,7 @@ class ThongKePage:
         tree.pack(fill="both", expand=True)
 
         try:
-            data = self.muontra_data.execute_query(query)
+            data = self.muontra_data.thuc_thi_query(query)
             if not data or len(data) == 0:
                 tree.insert("", "end", values=["Trống"] * len(columns))
             else:
@@ -213,7 +213,7 @@ class ThongKePage:
         return frame
 
     # CÁC HÀM LOGIC DATABASE (ĐÃ NÂNG CẤP SỬ DỤNG PANDAS VÀ SỬA LỖI CỘT)
-    def get_total_books_count(self):
+    def Lay_Tong_So_Sach(self): 
         """Lấy tổng số lượng đầu sách từ cơ sở dữ liệu bằng Pandas DataFrame"""
         try:
             danh_sach_sach = self.book_data.get_all()
@@ -230,7 +230,7 @@ class ThongKePage:
             print(f"Lỗi khi đếm tổng số sách bằng Pandas: {e}")
             return 0    
 
-    def get_borrow_records_by_status(self, status):
+    def Lay_Ban_Ghi_Muon_Theo_Trang_Thai(self, status): 
         """Lấy số lượng phiếu mượn theo trạng thái bằng các hàm lọc của Pandas"""
         try:
             danh_sach_phieu = self.muontra_data.get_all()
@@ -249,6 +249,6 @@ class ThongKePage:
             print(f"Lỗi khi lọc số phiếu mượn bằng Pandas: {e}")
             return 0
         
-    def back_to_menu(self):
-        """Trở về menu chính."""
-        self.app_manager.show_main_page()
+    def Quay_Lai_Menu(self): 
+        """Trở về menu chính.""" 
+        self.app_manager.Hien_Thi_Trang_Chinh()

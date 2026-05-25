@@ -20,7 +20,7 @@ class SuaTKPage:
         self.config()
         self.view()
 
-    def get_current_email(self, username):
+    def Lay_Email_Hien_Tai(self, username): # Đổi tên hàm
         """Lấy email hiện tại của tài khoản"""
         try:
             result = self.account_data.search("taikhoan", username, exact=True)
@@ -30,9 +30,9 @@ class SuaTKPage:
         except Exception:
             return ""
 
-    def config(self):
+    def config(self): 
         self.master.title("👤 Cập nhật tài khoản")
-        self.master.geometry("580x750")  # Tăng nhẹ chiều rộng để form nhập liệu không bị gò bó
+        self.master.geometry("580x750")  
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
@@ -45,7 +45,6 @@ class SuaTKPage:
             text_color='#1E3A8A'
         ).pack(pady=(20, 15))
 
-        # Canvas + Scrollbar (Giữ nguyên cấu trúc cuộn mượt gốc để dự phòng dữ liệu tràn)
         canvas = tk.Canvas(self.master, bg='white', highlightthickness=0)
         scrollbar = ctk.CTkScrollbar(self.master, command=canvas.yview)
         
@@ -57,15 +56,14 @@ class SuaTKPage:
         main_frame = ctk.CTkFrame(canvas, fg_color='white')
         canvas_window = canvas.create_window((0, 0), window=main_frame, anchor="nw")
 
-        def on_frame_configure(event=None):
+        def Tren_Cau_Hinh_Khung(event=None): # Đổi tên hàm
             canvas.configure(scrollregion=canvas.bbox("all"))
             canvas.itemconfig(canvas_window, width=canvas.winfo_width() - 15)
         
-        main_frame.bind("<Configure>", on_frame_configure)
+        main_frame.bind("<Configure>", Tren_Cau_Hinh_Khung)
         canvas.bind("<Configure>", lambda e: canvas.itemconfig(canvas_window, width=e.width))
 
-        def on_mousewheel(event):
-            # Thêm try...except để bỏ qua lỗi nếu canvas đã bị hủy khi chuyển trang
+        def Tren_Con_Lan_Chuot(event): # Đổi tên hàm
             try:
                 if canvas.winfo_exists():
                     canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
@@ -74,7 +72,7 @@ class SuaTKPage:
         
         canvas.bind_all("<MouseWheel>", on_mousewheel)
 
-        # ─── SECTION 1: THÔNG TIN HIỆN TẠI (Giao diện phẳng xám nhạt) ───
+        # THÔNG TIN HIỆN TẠI 
         ctk.CTkLabel(
             main_frame, 
             text="📌 Thông tin tài khoản hiện tại",
@@ -85,7 +83,6 @@ class SuaTKPage:
         old_frame = ctk.CTkFrame(main_frame, fg_color='#F3F4F6', corner_radius=10, border_width=0)
         old_frame.pack(fill="x", padx=5, pady=(0, 20))
 
-        # Hiển thị thông tin cũ dạng lưới 2 cột ngay ngắn để cân bằng thị giác
         info_labels = [
             (f"Tên đăng nhập: {self.old_username}", f"Mật khẩu: {self.old_password}"),
             (f"Họ tên: {self.old_hoten}", f"SĐT: {self.old_sdt}"),
@@ -95,7 +92,7 @@ class SuaTKPage:
             ctk.CTkLabel(old_frame, text=col1, font=("Segoe UI", 11), text_color="#374151").grid(row=r_idx, column=0, sticky="w", padx=20, pady=6)
             ctk.CTkLabel(old_frame, text=col2, font=("Segoe UI", 11), text_color="#374151").grid(row=r_idx, column=1, sticky="w", padx=40, pady=6)
 
-        # ─── SECTION 2: THÔNG TIN MỚI (CHIA LAYOUT CỘT ĐỂ LẤP KHOẢNG TRỐNG) ───
+        # THÔNG TIN MỚI 
         ctk.CTkLabel(
             main_frame, 
             text="📝 Nhập thông tin chỉnh sửa mới",
@@ -122,7 +119,6 @@ class SuaTKPage:
         # Hàm dựng ô nhập liệu theo từng hàng độc lập trong mỗi cột
         def make_column_row(parent, label_text, show=""):
             row = ctk.CTkFrame(parent, fg_color='transparent')
-            # Thêm fill="both", expand=True và tăng pady để giãn đều
             row.pack(fill="both", expand=True, padx=10, pady=12) 
             ctk.CTkLabel(row, text=label_text, font=("Segoe UI", 12, "bold"), text_color="#4B5563").pack(anchor="w", pady=(0, 4))
             entry = ctk.CTkEntry(row, font=("Segoe UI", 12), show=show, height=35, corner_radius=8)
@@ -146,18 +142,14 @@ class SuaTKPage:
         self.entry_chucvu.insert(0, self.old_chucvu)
         self.entry_email.insert(0, self.old_email)
 
-        # --- THÊM: KHÓA KHÔNG CHO SỬA CHỮ ĐỘC GIẢ ---
+        # --- KHÓA KHÔNG CHO SỬA CHỮ ĐỘC GIẢ ---
         if self.old_chucvu == "Độc giả":
             self.entry_chucvu.configure(
                 state="disabled",
                 fg_color="#A5AAB1",
                 text_color="#D0D8E6"
             )
-        # --------------------------------------------
 
-        # Thanh hiển thị mật khẩu và Lưu ý đưa xuống hàng dưới cùng của Grid (bọc toàn bộ bề ngang)
-        # --- ĐOẠN ĐƯỢC SỬA: CHUYỂN LƯU Ý SANG GÓC PHẢI ĐỂ LẤP KHOẢNG TRỐNG ---
-        # Đưa nút hiển thị mật khẩu độc lập sang góc dưới bên trái (Hàng 1, Cột 0)
         self.show_password = tk.BooleanVar()
         chk_pass = ctk.CTkCheckBox(
             new_frame, 
@@ -167,11 +159,10 @@ class SuaTKPage:
             font=("Segoe UI", 11),
             checkbox_width=18,
             checkbox_height=18,
-            corner_radius=4
+            corner_radius=4 
         )
         chk_pass.grid(row=1, column=0, sticky="nw", padx=20, pady=(10, 15))
 
-        # Đưa khung Lưu ý độc lập sang góc dưới bên phải (Hàng 1, Cột 1) - Điểm bạn khoanh đỏ
         bottom_info_frame = ctk.CTkFrame(new_frame, fg_color="transparent")
         bottom_info_frame.grid(row=1, column=1, sticky="ew", padx=10, pady=(0, 15))
 
@@ -186,9 +177,8 @@ class SuaTKPage:
         ).pack(pady=8, padx=10, anchor="w")
         # ---------------------------------------------------------------------
 
-        # ─── SECTION 3: CỤM NÚT ĐIỀU KHIỂN ───
+        # CỤM NÚT ĐIỀU KHIỂN 
         button_frame = ctk.CTkFrame(main_frame, fg_color='transparent')
-        # Loại bỏ side="bottom" để nó bám ngay dưới khung thông tin
         button_frame.pack(pady=(20, 30), fill="x", padx=30) 
 
         # Chia đều 3 cột với tỷ lệ chuẩn
@@ -197,11 +187,11 @@ class SuaTKPage:
         ctk.CTkButton(
             button_frame, text="💾 Lưu thay đổi", fg_color="#10B981", hover_color="#059669", 
             font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.save_changes
-        ).grid(row=0, column=0, padx=6, sticky="ew")
+        ).grid(row=0, column=0, padx=6, sticky="ew") 
 
         ctk.CTkButton(
             button_frame, text="🔄 Khôi phục", fg_color="#F59E0B", hover_color="#D97706", 
-            font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.reset_form
+            font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.Dat_Lai_Form
         ).grid(row=0, column=1, padx=6, sticky="ew")
 
         ctk.CTkButton(
@@ -209,13 +199,12 @@ class SuaTKPage:
             font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.cancel
         ).grid(row=0, column=2, padx=6, sticky="ew")
 
-    # ── Chức năng Logic ──────────────────────────────────────────────────────
-
-    def toggle_password(self):
+    # Chức năng Logic 
+    
+    def Bat_Tat_Mat_Khau(self): # Đổi tên hàm
         self.entry_password.configure(show="" if self.show_password.get() else "*")
         
-
-    def reset_form(self):
+    def Dat_Lai_Form(self): # Đổi tên hàm
 
         self.entry_chucvu.configure(state="normal")
 
@@ -234,8 +223,8 @@ class SuaTKPage:
         if self.old_chucvu == "Độc giả":
             self.entry_chucvu.configure(state="disabled")
 
-    def username_exists(self, username: str) -> bool:
-        """Kiểm tra tên đăng nhập tồn tại duy nhất"""
+    def Ten_Dang_Nhap_Ton_Tai(self, username: str) -> bool: # Đổi tên hàm
+        """Kiểm tra tên đăng nhập tồn tại duy nhất""" 
         try:
             result = self.account_data.search("taikhoan", username, exact=True)
             if hasattr(result, "empty") and result.empty:
@@ -246,11 +235,11 @@ class SuaTKPage:
         except Exception:
             return False
 
-    def validate_input(self) -> bool:
+    def Xac_Thuc_Dau_Vao(self) -> bool: # Đổi tên hàm
         new_username = self.entry_username.get().strip()
         new_email = self.entry_email.get().strip()
 
-        if new_username != self.old_username and self.username_exists(new_username):
+        if new_username != self.old_username and self.Ten_Dang_Nhap_Ton_Tai(new_username):
             messagebox.showerror("Lỗi", f"Tên đăng nhập '{new_username}' đã tồn tại!")
             return False
 
@@ -267,9 +256,9 @@ class SuaTKPage:
 
         return True
 
-    def save_changes(self):
-        """Xử lý logic cập nhật dữ liệu tài khoản."""
-        if not self.validate_input():
+    def Luu_Thay_Doi(self): # Đổi tên hàm
+        """Xử lý logic cập nhật dữ liệu tài khoản.""" 
+        if not self.Xac_Thuc_Dau_Vao():
             return
 
         new_username = self.entry_username.get().strip()
@@ -283,7 +272,7 @@ class SuaTKPage:
                 new_hoten == self.old_hoten and new_sdt == self.old_sdt and 
                 new_chucvu == self.old_chucvu and new_email == self.old_email):
             messagebox.showinfo("Thông báo", "Không có thay đổi nào được thực hiện")
-            return
+            return 
 
         # ─── BỘ LỌC THÔNG MINH: CHẶN TRƯỚC KHI GỌI DATABASE ───
         if new_username != self.old_username:
@@ -300,7 +289,7 @@ class SuaTKPage:
                     # Tự động gõ lại tên cũ vào ô để sửa sai cho người dùng
                     self.entry_username.delete(0, tk.END)
                     self.entry_username.insert(0, self.old_username)
-                    return  # Dừng hàm tại đây, không cho lưu tiếp
+                    return  
             except Exception as e:
                 print(f"Lỗi kiểm tra ràng buộc: {e}")
         # ────────────────────────────────────────────────────────
@@ -323,13 +312,13 @@ class SuaTKPage:
             messagebox.showerror("Lỗi", f"Không thể cập nhật tài khoản: {str(e)}")
 
     def cancel(self):
-        if self.has_unsaved_changes():
+        if self.Co_Thay_Doi_Chua_Luu():
             if messagebox.askyesno("Xác nhận", "Bạn có chắc muốn hủy? Các thay đổi sẽ không được lưu."):
                 self.app_manager.show_quanlytk_page()
         else:
             self.app_manager.show_quanlytk_page()
 
-    def has_unsaved_changes(self) -> bool:
+    def Co_Thay_Doi_Chua_Luu(self) -> bool: # Đổi tên hàm
         return (
             self.entry_username.get().strip() != self.old_username or
             self.entry_password.get().strip() != self.old_password or

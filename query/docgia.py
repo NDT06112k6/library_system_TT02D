@@ -23,7 +23,7 @@ class DocGiaQuery(Query):
             FROM books
             ORDER BY ten_sach
         """
-        return self.execute_query(query) or []
+        return self.thuc_thi_query(query) or []
 
     def search_books(self, keyword: str, the_loai: str = None, sort: str = "az"):
         """
@@ -59,23 +59,23 @@ class DocGiaQuery(Query):
             {where}
             ORDER BY {order}
         """
-        return self.execute_query(query, params or None) or []
+        return self.thuc_thi_query(query, params or None) or []
 
     def get_categories(self):
         """Lấy danh sách thể loại để fill vào filter."""
-        result = self.execute_query("SELECT DISTINCT the_loai FROM books ORDER BY the_loai")
+        result = self.thuc_thi_query("SELECT DISTINCT the_loai FROM books ORDER BY the_loai")
         return [r["the_loai"] for r in result if r["the_loai"]] if result else []
 
     def get_book_detail(self, ma_sach: str):
         """Lấy thông tin chi tiết 1 cuốn sách."""
-        result = self.execute_query(
+        result = self.thuc_thi_query(
             "SELECT * FROM books WHERE ma_sach = %s", (ma_sach,)
         )
         return result[0] if result else None
 
     def get_borrow_count_for_book(self, ma_sach: str) -> int:
         """Đếm tổng số lần sách được mượn (dùng cho badge 'Phổ biến')."""
-        result = self.execute_query(
+        result = self.thuc_thi_query(
             "SELECT COUNT(*) as cnt FROM muontra WHERE ma_sach = %s", (ma_sach,)
         )
         return result[0]["cnt"] if result else 0
@@ -84,7 +84,7 @@ class DocGiaQuery(Query):
 
     def count_active_borrows(self, username: str) -> int:
         """Đếm số phiếu đang mượn (chưa trả + chờ duyệt) của user."""
-        result = self.execute_query(
+        result = self.thuc_thi_query(
             """SELECT COUNT(*) as cnt FROM muontra
                WHERE username = %s AND trang_thai IN ('dang_muon', 'cho_duyet')""",
             (username,)
@@ -93,7 +93,7 @@ class DocGiaQuery(Query):
 
     def is_borrowing_this_book(self, username: str, ma_sach: str) -> bool:
         """Kiểm tra user có đang giữ cuốn sách này không."""
-        result = self.execute_query(
+        result = self.thuc_thi_query(
             """SELECT COUNT(*) as cnt FROM muontra
                WHERE username = %s AND ma_sach = %s
                  AND trang_thai IN ('dang_muon', 'cho_duyet')""",
@@ -103,14 +103,14 @@ class DocGiaQuery(Query):
 
     def get_book_quantity(self, ma_sach: str) -> int:
         """Lấy số lượng tồn kho."""
-        result = self.execute_query(
+        result = self.thuc_thi_query(
             "SELECT so_luong FROM books WHERE ma_sach = %s", (ma_sach,)
         )
         return result[0]["so_luong"] if result else 0
 
     def _next_ma_phieu(self) -> str:
         """Sinh mã phiếu tăng dần, ví dụ MT001 → MT002."""
-        result = self.execute_query(
+        result = self.thuc_thi_query(
             "SELECT ma_phieu FROM muontra ORDER BY id DESC LIMIT 1"
         )
         if result:
@@ -168,7 +168,7 @@ class DocGiaQuery(Query):
         Lấy lịch sử mượn của user kèm tên sách, tác giả, thể loại.
         Trả về list[dict].
         """
-        return self.execute_query(
+        return self.thuc_thi_query(
             """SELECT m.ma_phieu, m.ma_sach, b.ten_sach, b.tac_gia, b.the_loai,
                       m.ngay_muon, m.ngay_tra, m.trang_thai
                FROM muontra m

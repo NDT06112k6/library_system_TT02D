@@ -1,14 +1,6 @@
-"""
-page/components.py
-Widget tái sử dụng cho giao diện độc giả:
-  - BookCard   : card sách hiển thị trong lưới
-  - SectionHeader : tiêu đề có đường kẻ
-  - StatusBadge : nhãn trạng thái mượn/trả
-"""
 import customtkinter as ctk
 
-
-# ─────────────────── Palette màu ───────────────────
+# Màu
 C = {
     "bg":          "#F0F4F8",
     "card":        "#FFFFFF",
@@ -31,14 +23,9 @@ C = {
 
 FONT_FAMILY = "Segoe UI"
 
-
-# ═══════════════════════════════════════════════════
-#  BookCard
-# ═══════════════════════════════════════════════════
 class BookCard(ctk.CTkFrame):
     """
-    Card hiển thị thông tin 1 cuốn sách trong lưới.
-    on_borrow(ma_sach) và on_detail(ma_sach) là callback.
+    Card hiển thị thông tin 1 cuốn sách trong lưới
     """
     COVER_COLORS = [
         "#3B82F6","#8B5CF6","#EC4899","#F59E0B",
@@ -60,7 +47,7 @@ class BookCard(ctk.CTkFrame):
         self._build()
         self._bind_hover()
 
-    # ── Vẽ nội dung ─────────────────────────────────
+    # Vẽ nội dung 
     def _build(self):
         b = self.book
         ma   = b.get("ma_sach", "")
@@ -70,7 +57,7 @@ class BookCard(ctk.CTkFrame):
         sl   = int(b.get("so_luong", 0))
         avail = sl > 0
 
-        # ── Bìa sách giả ──────────────────────────
+        #Bìa sách giả 
         cover_color = self.COVER_COLORS[hash(ma) % len(self.COVER_COLORS)]
         cover = ctk.CTkFrame(self, fg_color=cover_color, corner_radius=8, height=110)
         cover.pack(fill="x", padx=10, pady=(10, 0))
@@ -95,7 +82,7 @@ class BookCard(ctk.CTkFrame):
             padx=6,
         ).pack()
 
-        # ── Thông tin ──────────────────────────────
+        # Thông tin 
         info = ctk.CTkFrame(self, fg_color="transparent")
         info.pack(fill="x", padx=10, pady=(8, 0))
 
@@ -117,7 +104,7 @@ class BookCard(ctk.CTkFrame):
             text_color=C["primary"], padx=6,
         ).pack()
 
-        # ── Nút ────────────────────────────────────
+        # Nút
         btn_row = ctk.CTkFrame(self, fg_color="transparent")
         btn_row.pack(fill="x", padx=10, pady=(8, 10))
         btn_row.columnconfigure((0, 1), weight=1)
@@ -141,8 +128,8 @@ class BookCard(ctk.CTkFrame):
             command=lambda: self.on_borrow(ma),
         ).grid(row=0, column=1, padx=(4, 0), sticky="ew")
 
-    # ── Hiệu ứng hover ──────────────────────────────
-    def _bind_hover(self):
+    #  Hiệu ứng hover 
+    def _Gan_Hieu_Ung_Di_Chuot(self): 
         def enter(_): self.configure(fg_color=C["card_hover"])
         def leave(_): self.configure(fg_color=C["card"])
         for w in self.winfo_children():
@@ -152,9 +139,7 @@ class BookCard(ctk.CTkFrame):
         self.bind("<Leave>", leave)
 
 
-# ═══════════════════════════════════════════════════
-#  BorrowRow  – hàng trong bảng "Sách đã mượn"
-# ═══════════════════════════════════════════════════
+#  Hàng trong bảng "Sách đã mượn"
 class BorrowRow(ctk.CTkFrame):
     STATUS_MAP = {
         "dang_muon":  ("✅ Đã duyệt – Đang mượn", "#DCFCE7", "#16A34A"),
@@ -172,19 +157,18 @@ class BorrowRow(ctk.CTkFrame):
         from datetime import date, datetime
         cols_w = [40, 190, 120, 90, 90, 160]
         
-        # Sửa lại để lấy Hạn Trả thay vì Ngày Trả cho cột thứ 5
         cols = [
             str(d.get("_idx", "")),
             d.get("ten_sach", "")[:32],
             d.get("tac_gia",  "")[:18],
             str(d.get("ngay_muon", "—")),
-            str(d.get("han_tra",  "—")),  # <--- Đã sửa ở đây
+            str(d.get("han_tra",  "—")),  
             d.get("trang_thai", ""),
         ]
 
         # Kiểm tra quá hạn và tính số ngày
         status_key = d.get("trang_thai", "")
-        dynamic_label = None # Biến lưu text tùy chỉnh nếu có ngày trễ
+        dynamic_label = None 
 
         if status_key == "dang_muon":
             han_tra_str = d.get("han_tra")
@@ -200,7 +184,7 @@ class BorrowRow(ctk.CTkFrame):
                     if today > han_tra_date:
                         status_key = "qua_han"
                         so_ngay_tre = (today - han_tra_date).days
-                        dynamic_label = f"🚨 Quá hạn ({so_ngay_tre} ngày)" # <--- Chèn số ngày
+                        dynamic_label = f"🚨 Quá hạn ({so_ngay_tre} ngày)" 
                 except Exception:
                     pass
 

@@ -3,12 +3,7 @@ from mysql.connector import Error
 from typing import List, Dict, Any, Optional
 
 class MySQLHandler:
-    """
-    Lớp quản lý kết nối và thực hiện các thao tác CRUD với MySQL.
-    Attributes:
-        host, user, password, database: Thông tin xác thực kết nối.
-        connection: Đối tượng kết nối MySQL hiện tại.
-    """
+    """Lớp quản lý kết nối và thực hiện các thao tác CRUD với MySQL."""
     
     def __init__(self, host: str = "localhost", user: str = "root", 
                  password: str = "root", database: str = "library_system"):
@@ -47,10 +42,10 @@ class MySQLHandler:
             self.connection.close()
             print("✓ Đóng kết nối MySQL")
     
-    def execute_query(self, query: str, params: tuple = None) -> bool:
+    def thuc_thi_query(self, query: str, params: tuple = None) -> bool:
         """
-        Thực thi các lệnh thay đổi dữ liệu (INSERT, UPDATE, DELETE).
-        Tự động thực hiện commit hoặc rollback nếu có lỗi.
+        Thực thi các lệnh thay đổi dữ liệu (INSERT, UPDATE, DELETE)
+        Tự động thực hiện commit hoặc rollback nếu có lỗi
         """
         try:
             cursor = self.connection.cursor()
@@ -66,7 +61,7 @@ class MySQLHandler:
             self.connection.rollback()
             return False
     
-    def fetch_one(self, query: str, params: tuple = None) -> Optional[tuple]:
+    def Lay_Mot_Ban_Ghi(self, query: str, params: tuple = None) -> Optional[tuple]:
         """Truy vấn lấy bản ghi duy nhất."""
         try:
             cursor = self.connection.cursor()
@@ -78,11 +73,11 @@ class MySQLHandler:
             cursor.close()
             return result
         except Error as e:
-            print(f"✗ Lỗi fetch_one: {e}")
+            print(f"✗ Lỗi lấy một bản ghi: {e}")
             return None
     
     def fetch_all(self, query: str, params: tuple = None) -> List[tuple]:
-        """Truy vấn lấy danh sách tất cả các bản ghi dạng Tuple."""
+        """Truy vấn lấy danh sách tất cả các bản ghi dạng Tuple"""
         try:
             cursor = self.connection.cursor()
             if params:
@@ -96,8 +91,8 @@ class MySQLHandler:
             print(f"✗ Lỗi fetch_all: {e}")
             return []
     
-    def fetch_all_as_dict(self, query: str, params: tuple = None) -> List[Dict]:
-        """Truy vấn lấy dữ liệu dạng Dictionary (key là tên cột)."""
+    def Lay_All_Dang_Tu_Dien(self, query: str, params: tuple = None) -> List[Dict]:
+        """Truy vấn lấy dữ liệu dạng Dictionary (key là tên cột)"""
         try:
             cursor = self.connection.cursor(dictionary=True)
             if params:
@@ -108,11 +103,11 @@ class MySQLHandler:
             cursor.close()
             return results
         except Error as e:
-            print(f"✗ Lỗi fetch_all_as_dict: {e}")
+            print(f"✗ Lỗi lấy tất cả bản ghi dưới dạng từ điển: {e}")
             return []
     
-    def get_column_names(self, table: str) -> List[str]:
-        """Lấy danh sách tên các cột của một bảng bằng lệnh DESCRIBE."""
+    def Lay_Ten_Cot(self, table: str) -> List[str]:
+        """Lấy danh sách tên các cột của một bảng bằng lệnh DESCRIBE"""
         try:
             cursor = self.connection.cursor()
             cursor.execute(f"DESCRIBE {table}")
@@ -122,7 +117,7 @@ class MySQLHandler:
             cursor.close()
             return columns
         except Error as e:
-            print(f"✗ Lỗi get_column_names: {e}")
+            print(f"✗ Lỗi lấy tên cột: {e}")
             return []
     
     def is_connected(self) -> bool:

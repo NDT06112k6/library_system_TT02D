@@ -49,7 +49,7 @@ class MuonTraData(Query):
         """Hàm sinh mã phiếu mượn mới tăng dần tường minh"""
         try:
             query = "SELECT ma_phieu FROM muontra ORDER BY id DESC LIMIT 1"
-            result = self.execute_query(query)
+            result = self.thuc_thi_query(query)
             if result is not None and len(result) > 0:
                 last_id = result[0]['ma_phieu']
                 next_number = int(last_id[2:]) + 1
@@ -61,7 +61,7 @@ class MuonTraData(Query):
     def is_currently_borrowing(self, username, ma_sach):
         """Kiểm tra xem độc giả có đang mượn cuốn sách cụ thể nào đó hay không"""
         try:
-            result = self.execute_query(
+            result = self.thuc_thi_query(
                 "SELECT COUNT(*) as cnt FROM muontra WHERE username = %s AND ma_sach = %s AND trang_thai = 'dang_muon'",
                 (username, ma_sach)
             )
@@ -72,7 +72,7 @@ class MuonTraData(Query):
     def get_status_counts(self):
         """Thống kê tổng số lượng phiếu phân loại theo từng trạng thái"""
         try:
-            result = self.execute_query(
+            result = self.thuc_thi_query(
                 "SELECT trang_thai, COUNT(*) as count FROM muontra GROUP BY trang_thai"
             )
             return {item['trang_thai']: item['count'] for item in result} if result else {}
@@ -82,7 +82,7 @@ class MuonTraData(Query):
     def get_top_borrowed_books(self, limit=5):
         """Thống kê danh sách sách được độc giả mượn nhiều nhất"""
         try:
-            result = self.execute_query(
+            result = self.thuc_thi_query(
                 "SELECT ma_sach, COUNT(*) as count FROM muontra GROUP BY ma_sach ORDER BY count DESC LIMIT %s",
                 (limit,)
             )

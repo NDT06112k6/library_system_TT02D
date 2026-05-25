@@ -1,7 +1,7 @@
 from .base import Query
 import pandas as pd
 import re
-from page.exceptions import DuplicateEntryError
+from page.exceptions import Nhap_Lieu_Trung_Lap
 
 class AccountData(Query):
     def __init__(self):
@@ -58,5 +58,5 @@ class AccountData(Query):
         """Kiểm tra điều kiện ràng buộc dữ liệu trước khi tiến hành tạo tài khoản mới"""
         username = data[0]
         if self.check_exists(username):
-            raise DuplicateEntryError(f"Tên đăng nhập '{username}' đã tồn tại")
+            raise Nhap_Lieu_Trung_Lap(f"Tên đăng nhập '{username}' đã tồn tại")
         return self.create(data)

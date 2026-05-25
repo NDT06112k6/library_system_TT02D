@@ -14,19 +14,17 @@ class QuanLyTKPage:
         self.view()
         self.load_accounts()
 
-    def config(self):
+    def config(self): 
         self.master.title("👤 Quản lý tài khoản")
         self.master.geometry("1100x650")  # Tăng không gian hiển thị cho bố cục Trái - Phải
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
     def view(self):
-        # ==========================================
-        # 1. SIDEBAR PANEL (KHUNG PANEL BÊN TRÁI)
-        # ==========================================
+        # KHUNG PANEL BÊN TRÁI
         sidebar_frame = ctk.CTkFrame(self.master, width=280, corner_radius=15, fg_color="#F2F4F7")
         sidebar_frame.pack(side="left", fill="y", padx=15, pady=15)
-        sidebar_frame.pack_propagate(False)  # Cố định độ rộng cho Sidebar
+        sidebar_frame.pack_propagate(False)  
 
         # Tiêu đề trang quản lý
         title_label = ctk.CTkLabel(
@@ -51,25 +49,25 @@ class QuanLyTKPage:
         self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
         self.entry_search.configure(text_color="gray")
 
-        # Logic sự kiện Focus của Entry (giữ nguyên các liên kết hàm của bạn)
-        def on_focus_in(event):
+        # Logic sự kiện Focus của Entry  
+        def Tren_Tieu_Diem_Vao(event): 
             if self.entry_search.get() == "Tìm theo tên đăng nhập...":
                 self.entry_search.delete(0, "end")
                 self.entry_search.configure(text_color="black")
 
-        def on_focus_out(event):
+        def Tren_Tieu_Diem_Ra(event): 
             if self.entry_search.get() == "":
                 self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
                 self.entry_search.configure(text_color="gray")
 
-        def on_key_press(event):
+        def Tren_Nut_An(event):
             if self.entry_search.get() == "Tìm theo tên đăng nhập...":
                 self.entry_search.delete(0, "end")
                 self.entry_search.configure(text_color="black")
 
-        self.entry_search.bind("<FocusIn>", on_focus_in)
-        self.entry_search.bind("<FocusOut>", on_focus_out)
-        self.entry_search.bind("<Key>", on_key_press)
+        self.entry_search.bind("<FocusIn>", Tren_Tieu_Diem_Vao)
+        self.entry_search.bind("<FocusOut>", Tren_Tieu_Diem_Ra)
+        self.entry_search.bind("<Key>", Tren_Nut_An)
         self.entry_search.bind("<Return>", lambda event: self.search_account())
 
         # Nút Tìm kiếm
@@ -77,7 +75,7 @@ class QuanLyTKPage:
             search_group,
             text="🔍 Tìm kiếm",
             command=self.search_account,
-            style_type="info"
+            style_type="info" 
         ) .pack(fill="x")
 
         # Đường phân cách trang trí
@@ -85,17 +83,15 @@ class QuanLyTKPage:
         separator.pack(fill="x", padx=15, pady=15)
 
         # Cụm nút bấm chức năng chính xếp dọc
-        CustomButton(sidebar_frame, text="🔄 Làm mới dữ liệu", command=self.load_accounts, style_type="info").pack(fill="x", padx=15, pady=5)
-        CustomButton(sidebar_frame, text="➕ Thêm tài khoản mới", command=self.add_account, style_type="success").pack(fill="x", padx=15, pady=5)
+        CustomButton(sidebar_frame, text="🔄 Làm mới dữ liệu", command=self.Tai_Tai_Khoan, style_type="info").pack(fill="x", padx=15, pady=5)
+        CustomButton(sidebar_frame, text="➕ Thêm tài khoản mới", command=self.Them_Tai_Khoan, style_type="success").pack(fill="x", padx=15, pady=5)
         CustomButton(sidebar_frame, text="✏️ Chỉnh sửa tài khoản", command=self.edit_account, style_type="warning").pack(fill="x", padx=15, pady=5)
         CustomButton(sidebar_frame, text="🗑️ Xóa tài khoản", command=self.delete_account, style_type="danger").pack(fill="x", padx=15, pady=5)
         
         # Nút Quay lại đặt cố định dưới đáy thanh công cụ
         CustomButton(sidebar_frame, text="← Quay Lại Hệ Thống", command=self.back, style_type="secondary").pack(side="bottom", fill="x", padx=15, pady=20)
 
-        # ==========================================
-        # 2. MAIN DATA PANEL (KHUNG HIỂN THỊ BẢNG BÊN PHẢI)
-        # ==========================================
+        # KHUNG HIỂN THỊ BẢNG BÊN PHẢI
         main_frame = ctk.CTkFrame(self.master, fg_color="transparent")
         main_frame.pack(side="right", expand=True, fill="both", padx=(0, 15), pady=15)
 
@@ -154,7 +150,7 @@ class QuanLyTKPage:
         )
         self.status_label.pack(fill="x", padx=10, pady=(5, 0))
 
-    def load_accounts(self):
+    def Tai_Tai_Khoan(self): 
         self.entry_search.delete(0, "end")
         self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
         self.entry_search.configure(text_color="gray")
@@ -165,7 +161,7 @@ class QuanLyTKPage:
             messagebox.showerror("Lỗi", f"Không thể tải dữ liệu: {str(e)}")
             self.status_label.configure(text="Lỗi tải dữ liệu")
 
-    def delete_account(self):
+    def Xoa_Tai_Khoan(self): 
         selected_item = self.account_tree.selection()
         if not selected_item:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn tài khoản cần xóa")
@@ -175,11 +171,11 @@ class QuanLyTKPage:
 
         if messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa tài khoản '{username}'?"):
             try:
-                self.account_data.delete_account(username)
-                self.load_accounts()
+                self.account_data.Xoa_Tai_Khoan(username)
+                self.Tai_Tai_Khoan()
                 messagebox.showinfo("Thành công", "Đã xóa tài khoản thành công")
             except Exception as e:
-                messagebox.showerror("Lỗi", f"Không thể xóa tài khoản: {str(e)}")
+                messagebox.showerror("Lỗi", f"Không thể xóa tài khoản: {str(e)}") 
 
     def edit_account(self):
         selected_item = self.account_tree.selection()
@@ -198,13 +194,13 @@ class QuanLyTKPage:
         self.app_manager.show_suatk_page(old_username, old_password, old_hoten, old_sdt, old_chucvu, old_email)
 
     def back(self):
-        self.app_manager.show_main_page()
+        self.app_manager.Hien_Thi_Trang_Chinh()
 
     def search_account(self):
         keyword = self.entry_search.get().strip()
         if keyword == "Tìm theo tên đăng nhập...":
             keyword = ""
-        try:
+        try: 
             if not keyword:
                 self.load_accounts()
             else:
@@ -214,7 +210,7 @@ class QuanLyTKPage:
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
             self.status_label.configure(text="Lỗi tìm kiếm")
-
+    
     def _populate_tree(self, data):
         for item in self.account_tree.get_children():
             self.account_tree.delete(item)
@@ -232,5 +228,5 @@ class QuanLyTKPage:
                 ))
         self.status_label.configure(text=f"Tổng số: {len(data)} tài khoản")
     
-    def add_account(self):
-        self.app_manager.show_taotk_page(is_admin=True)
+    def Them_Tai_Khoan(self): 
+        self.app_manager.Hien_Thi_Trang_Tao_TK(is_admin=True)

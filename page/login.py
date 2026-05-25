@@ -23,7 +23,7 @@ class LoginPage:
         self.load_remembered_account()
 
     def config(self):
-        self.master.title("🔐 Đăng Nhập")
+        self.master.title("Đăng Nhập")
         self.master.geometry("400x480")
         self.master.configure(fg_color=Colors.BG_MAIN)
         ctk.set_appearance_mode("light")
@@ -40,7 +40,7 @@ class LoginPage:
 
         title = ctk.CTkLabel(
             main_frame,
-            text="🔐 ĐĂNG NHẬP",
+            text="ĐĂNG NHẬP",
             font=Fonts.HEADER,
             text_color=Colors.PRIMARY
         )
@@ -95,13 +95,13 @@ class LoginPage:
         )
         checkbox.pack(anchor="w", padx=Spacing.XL, pady=Spacing.MD)
 
-        # ========== KHU VỰC ĐIỀU KHIỂN NÚT BẤM (ĐÃ THÊM NÚT ĐĂNG KÝ) ==========
+        # ========== KHU VỰC ĐIỀU KHIỂN NÚT BẤM  ==========
         btn_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
         btn_frame.pack(fill="x", padx=Spacing.XL, pady=(Spacing.MD, Spacing.XL))
 
         self.login_button = ctk.CTkButton(
             btn_frame,
-            text="🔓 Đăng Nhập",
+            text="Đăng Nhập",
             command=self.login,
             height=42,
             font=Fonts.BOLD,
@@ -113,7 +113,7 @@ class LoginPage:
 
         self.register_button = ctk.CTkButton(
             btn_frame,
-            text="📝 Đăng Ký Tài Khoản",
+            text="Đăng Ký Tài Khoản",
             command=self.go_to_register,
             height=40,
             font=Fonts.SMALL_BOLD,
@@ -182,7 +182,7 @@ class LoginPage:
                 else:
                     self.clear_remember()
 
-                chuc_vu = "Độc giả"  # Mặc định nếu không tìm thấy trường chức vụ
+                chuc_vu = "Độc giả"  
                 if isinstance(user, dict):
                     chuc_vu = user.get("chucvu") or user.get("chuc_vu") or "Độc giả"
                 elif isinstance(user, (list, tuple)) and len(user) > 0:

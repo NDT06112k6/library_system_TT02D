@@ -66,7 +66,7 @@ class BookData(Query):
         """Xóa tất cả sách trong database"""
         try:
             query = "DELETE FROM books"
-            self.execute_query(query)
+            self.thuc_thi_query(query)
             return True
         except Exception as e:
             print(f"Lỗi xóa dữ liệu: {str(e)}")

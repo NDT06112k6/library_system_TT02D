@@ -14,7 +14,7 @@ class SuaSachPage:
         self.config()
         self.view()
 
-    def config(self):
+    def config(self): 
         self.master.title("Sửa sách")
         self.master.geometry("450x550")
         self.master.resizable(True, True)
@@ -78,7 +78,7 @@ class SuaSachPage:
             command=self.cancel
         ).pack(side="left", padx=10)
 
-    def validate(self):
+    def validate(self): 
         data = {k: v.get().strip() for k, v in self.entries.items()}
 
         for key in ("ten_sach", "tac_gia", "the_loai", "so_luong", "gia"):
@@ -93,7 +93,7 @@ class SuaSachPage:
 
         return data
 
-    def save(self):
+    def save(self): 
         data = self.validate()
         if data is None:
             return
@@ -103,26 +103,25 @@ class SuaSachPage:
             messagebox.showinfo("Thông báo", "Không có thay đổi nào")
             return
 
-        try:
-            self._update_book_in_file(data)
+        try: 
+            self._Cap_Nhat_Sach_Trong_File(data)
             messagebox.showinfo("Thành công", "Đã cập nhật sách thành công")
             self.app_manager.show_quanlysach_page()
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể cập nhật: {str(e)}")
 
-    def reset(self):
+    def reset(self):  
         for key, entry in self.entries.items():
             if key == "ma_sach":
                 continue
-            entry.delete(0, "end")
+            entry.delete(0, "end") 
             entry.insert(0, str(self.old_data.get(key, "")))
 
     def cancel(self):
         self.app_manager.show_quanlysach_page()
 
-    # ===== HÀM HỖ TRỢ DỮ LIỆU =====
-
-    def _load_book_data(self, ma_sach):
+    # ===== HÀM HỖ TRỢ DỮ LIỆU ===== 
+    def _Tai_Du_Lieu_Sach(self, ma_sach): 
         """Đọc dữ liệu sách theo mã sách và xử lý an toàn dù kết quả trả về dạng Dict hay DataFrame"""
         result = self.book_data.search("ma_sach", ma_sach, exact=True)
         
@@ -140,7 +139,7 @@ class SuaSachPage:
             
         return {}
 
-    def _update_book_in_file(self, new_data):
+    def _Cap_Nhat_Sach_Trong_File(self, new_data): 
         """Đóng gói dữ liệu thành dạng Dictionary để truyền xuống hàm update động của lớp cha"""
         thong_tin_sua = {
             "ten_sach": new_data["ten_sach"],

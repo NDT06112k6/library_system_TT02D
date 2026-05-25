@@ -35,7 +35,7 @@ class Query:
         if self.connection and self.connection.is_connected():
             self.connection.close()
 
-    def execute_query(self, query, params=None):
+    def thuc_thi_query(self, query, params=None):
         """Thực thi câu lệnh truy vấn SQL và trả về kết quả dưới dạng danh sách"""
         conn = self.connect()
         if not conn:
@@ -62,7 +62,7 @@ class Query:
             query = f"SELECT * FROM {self.table_name} WHERE {column_name} LIKE %s"
             params = (f"%{keyword}%",)
         
-        result = self.execute_query(query, params)
+        result = self.thuc_thi_query(query, params)
         if result is not None:
             return pd.DataFrame(result)
         return pd.DataFrame(columns=self.fields)
@@ -70,7 +70,7 @@ class Query:
     def list_all(self):
         """Truy vấn tất cả dữ liệu từ bảng đang quản lý"""
         query = f"SELECT * FROM {self.table_name}"
-        result = self.execute_query(query)
+        result = self.thuc_thi_query(query)
         if result is not None:
             return [list(row.values()) for row in result]
         return []

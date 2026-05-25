@@ -13,7 +13,7 @@ class ThemSachPage:
         self.config()
         self.view()
 
-    def config(self):
+    def config(self): 
         self.master.title("Thêm sách")
         # Tăng chiều cao lên một chút để chứa thêm ô nhập ISBN
         self.master.geometry("450x550")
@@ -38,8 +38,8 @@ class ThemSachPage:
         form_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
         form_frame.pack(fill="both", expand=True, padx=Spacing.LG, pady=Spacing.LG)
 
-        # Hàm hỗ trợ tạo ô nhập liệu
-        def create_form_field(parent, label_text, placeholder=""):
+        # Hàm hỗ trợ tạo ô nhập liệu 
+        def Tao_Truong_Form(parent, label_text, placeholder=""): # Đổi tên hàm
             label = ctk.CTkLabel(parent, text=label_text, font=Fonts.SMALL_BOLD, text_color=Colors.TEXT_PRIMARY)
             label.pack(anchor="w", padx=Spacing.MD, pady=(Spacing.MD, Spacing.XS))
             
@@ -52,12 +52,10 @@ class ThemSachPage:
             return entry
 
         # Khởi tạo các ô nhập liệu
-        self.entries = {}
-        self.entries["ma_sach"] = create_form_field(form_frame, "📝 Mã Sách (VD: S001)", "Nhập mã sách...")
+        self.entries = {} 
+        self.entries["ma_sach"] = Tao_Truong_Form(form_frame, "📝 Mã Sách (VD: S001)", "Nhập mã sách...")
 
-        # ==========================================
         # CHỖ CHÈN GIAO DIỆN API (Dưới Mã sách, Trên Tên sách)
-        # ==========================================
         api_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
         api_frame.pack(fill="x", padx=Spacing.MD, pady=(Spacing.SM, 0))
 
@@ -69,12 +67,11 @@ class ThemSachPage:
         self.entry_isbn = ctk.CTkEntry(api_input_frame, height=35, font=Fonts.REGULAR, placeholder_text="VD: 9780140328721", fg_color=Colors.BG_MAIN, border_color=Colors.BORDER)
         self.entry_isbn.pack(side="left", fill="x", expand=True, padx=(0, Spacing.SM))
         
-        ctk.CTkButton(api_input_frame, text="🔍 Điền tự động", width=110, height=35, font=Fonts.BOLD, fg_color=Colors.INFO, hover_color="#138496", command=self.fetch_api_data).pack(side="right")
-        # ==========================================
+        ctk.CTkButton(api_input_frame, text="🔍 Điền tự động", width=110, height=35, font=Fonts.BOLD, fg_color=Colors.INFO, hover_color="#138496", command=self.Lay_Du_Lieu_Api).pack(side="right")
 
-        self.entries["ten_sach"] = create_form_field(form_frame, "📖 Tên Sách", "Nhập tên sách...")
-        self.entries["tac_gia"] = create_form_field(form_frame, "✍️ Tác Giả", "Nhập tên tác giả...")
-        self.entries["the_loai"] = create_form_field(form_frame, "📂 Thể Loại", "Nhập thể loại...")
+        self.entries["ten_sach"] = Tao_Truong_Form(form_frame, "📖 Tên Sách", "Nhập tên sách...")
+        self.entries["tac_gia"] = Tao_Truong_Form(form_frame, "✍️ Tác Giả", "Nhập tên tác giả...")
+        self.entries["the_loai"] = Tao_Truong_Form(form_frame, "📂 Thể Loại", "Nhập thể loại...")
 
         # Hàng chứa Số lượng & Giá
         row_frame = ctk.CTkFrame(form_frame, fg_color="transparent")
@@ -106,7 +103,7 @@ class ThemSachPage:
             fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, hover_color=Colors.BORDER_DARK, command=self.cancel
         ).pack(side="left", fill="x", expand=True)
 
-    def validate(self):
+    def validate(self): 
         # Thu thập dữ liệu
         data = {}
         for k, v in self.entries.items():
@@ -148,7 +145,7 @@ class ThemSachPage:
 
         return data
 
-    def save(self):
+    def save(self): 
         data = self.validate()
         if data == None:
             return
@@ -163,13 +160,11 @@ class ThemSachPage:
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể lưu: {str(e)}")
 
-    def cancel(self):
+    def cancel(self): 
         self.app_manager.show_quanlysach_page()
 
-    # ==========================================
-    # CHỖ CHÈN LOGIC XỬ LÝ API (Nằm ở cuối cùng của Class)
-    # ==========================================
-    def fetch_api_data(self):
+    # CHỖ CHÈN LOGIC XỬ LÝ API (Nằm ở cuối cùng của Class) 
+    def Lay_Du_Lieu_Api(self): # Đổi tên hàm
         """Gọi Open Library API để lấy thông tin sách dựa trên mã ISBN"""
         isbn = self.entry_isbn.get().strip()
         

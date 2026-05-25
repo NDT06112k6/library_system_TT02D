@@ -15,13 +15,13 @@ class MainPage:
         self.view()
         self.load_dashboard_data()
 
-    def config(self):
-        self.master.title("🖥️ Bảng Điều Khiển Quản Trị Thư Viện")
+    def config(self): 
+        self.master.title("Bảng Điều Khiển Quản Trị Thư Viện")
         self.master.geometry("1000x650")
         ctk.set_appearance_mode("light")
 
     def view(self):
-        # CONTAINER CHÍNH CHIA LÀM 2 VÙNG: PANEL TRÁI (SIDEBAR) & PANEL PHẢI (CONTENT)
+        # VÙNG CHỨA CHÍNH CHIA LÀM 2 VÙNG: PANEL TRÁI (SIDEBAR) & PANEL PHẢI (CONTENT)
         main_container = ctk.CTkFrame(self.master, fg_color="transparent")
         main_container.pack(fill="both", expand=True)
 
@@ -30,7 +30,7 @@ class MainPage:
         sidebar.pack(side="left", fill="y")
         sidebar.pack_propagate(False)
 
-        # Logo / Tên thương hiệu nhỏ trên Sidebar
+        # Logo / Tên thương hiệu 
         ctk.CTkLabel(
             sidebar, text="📚 QUANG VINH\nLIBRARY", 
             font=("Segoe UI", 16, "bold"), text_color="#f1f5f9"
@@ -40,44 +40,43 @@ class MainPage:
         ctk.CTkButton(
             sidebar, text="📚 Quản Lý Sách", fg_color="transparent", text_color="#cbd5e1",
             hover_color="#334155", font=("Segoe UI", 13, "bold"), anchor="w", height=40,
-            command=lambda: self.app_manager.show_quanlysach_page()
+            command=lambda: self.app_manager.Hien_Thi_Trang_Quan_Ly_Sach()
         ).pack(fill="x", padx=10, pady=5)
 
         ctk.CTkButton(
             sidebar, text="🔄 Mượn Trả Sách", fg_color="transparent", text_color="#cbd5e1",
             hover_color="#334155", font=("Segoe UI", 13, "bold"), anchor="w", height=40,
-            command=lambda: self.app_manager.show_muontra_page()
+            command=lambda: self.app_manager.Hien_Thi_Trang_Muon_Tra()
         ).pack(fill="x", padx=10, pady=5)
 
         ctk.CTkButton(
             sidebar, text="📊 Thống Kê Báo Cáo", fg_color="transparent", text_color="#cbd5e1",
             hover_color="#334155", font=("Segoe UI", 13, "bold"), anchor="w", height=40,
-            command=lambda: self.app_manager.show_thongke_page()
+            command=lambda: self.app_manager.Hien_Thi_Trang_Thong_Ke()
         ).pack(fill="x", padx=10, pady=5)
 
-        # Đã cập nhật gọi đúng hàm show_quanlytk_page trong AppManager của bạn
         ctk.CTkButton(
             sidebar, text="👤 Quản Lý Tài Khoản", fg_color="transparent", text_color="#cbd5e1",
             hover_color="#334155", font=("Segoe UI", 13, "bold"), anchor="w", height=40,
-            command=lambda: self.app_manager.show_quanlytk_page()
+            command=lambda: self.app_manager.Hien_Thi_Trang_Quan_Ly_TK()
         ).pack(fill="x", padx=10, pady=5)
 
         # Nút Đăng xuất ở cuối thanh bên
         ctk.CTkButton(
-            sidebar, text="🚪 Đăng Xuất", fg_color="#ef4444", text_color="white",
+            sidebar, text="Đăng Xuất", fg_color="#ef4444", text_color="white",
             hover_color="#dc2626", font=("Segoe UI", 13, "bold"), height=35,
             command=self.xac_nhan_dang_xuat
         ).pack(side="bottom", fill="x", padx=15, pady=20)
 
         ctk.CTkButton(
-            sidebar, text="ℹ️ Về Chương Trình", 
+            sidebar, text="Tổng Quan Chương Trình", 
             fg_color="#17a2b8", text_color="white",
             hover_color="#138496", font=("Segoe UI", 13, "bold"), 
             height=35,
             command=self.hien_thi_about
         ).pack(side="bottom", fill="x", padx=15, pady=(0, 10))
 
-        # 2. ─── VÙNG KHÔNG GIAN BÊN PHẢI (LẤP ĐẦY KHOẢNG TRỐNG) ───
+        # 2. ─── VÙNG KHÔNG GIAN BÊN PHẢI  ───
         content_area = ctk.CTkFrame(main_container, fg_color="#f8fafc", corner_radius=0)
         content_area.pack(side="right", fill="both", expand=True)
 
@@ -87,7 +86,7 @@ class MainPage:
         header_banner.pack_propagate(False)
 
         ctk.CTkLabel(
-            header_banner, text="👑 HỆ THỐNG QUẢN LÝ THƯ VIỆN QUANG VINH", 
+            header_banner, text="HỆ THỐNG QUẢN LÝ THƯ VIỆN QUANG VINH", 
             font=("Segoe UI", 16, "bold"), text_color="#0f172a"
         ).pack(side="left", padx=20)
 
@@ -162,20 +161,19 @@ class MainPage:
         style = ttk.Style()
         style.theme_use("clam")
         
-        # 1. Cấu hình màu gốc cho Header
+        # Cấu hình màu gốc cho Header
         style.configure("Treeview.Heading", 
                         background="#1E3A5F", 
                         foreground="white", 
                         font=("Segoe UI", 11, "bold"), 
                         borderwidth=0)
         
-        # 2. ÉP MÀU BẰNG MAP (ĐÂY LÀ CHÌA KHÓA)
-        # Bất kể trạng thái nào (hover hay bình thường), Header cũng phải có màu nền đậm
+        # ÉP MÀU BẰNG MAP 
         style.map("Treeview.Heading",
                   background=[('active', '#2D5A8E'), ('!active', '#1E3A5F')],
                   foreground=[('active', 'white'), ('!active', 'white')])
         
-        # 3. Chỉnh nền các dòng dữ liệu bên dưới
+        # Chỉnh nền các dòng dữ liệu bên dưới
         style.configure("Treeview", 
                         background="#FFFFFF", 
                         fieldbackground="#FFFFFF", 
@@ -184,14 +182,13 @@ class MainPage:
                         font=("Segoe UI", 11), 
                         borderwidth=0)
         
-        # 3. Chỉnh màu khi click chọn 1 dòng
+        # Chỉnh màu khi click chọn 1 dòng
         style.map("Treeview", 
                   background=[('selected', '#EBF4FF')], 
                   foreground=[('selected', '#2563EB')])
         style.configure("Treeview", rowheight=28, font=("Segoe UI", 11))
         style.configure("Treeview.Heading", font=("Segoe UI", 11, "bold"), background="#f1f5f9")
 
-    # THÊM MỚI HÀM NÀY VÀO TRONG CLASS MainPage:
     def xac_nhan_dang_xuat(self):
         """Hiển thị hộp thoại yêu cầu xác nhận trước khi đăng xuất hệ thống."""
         from tkinter import messagebox
@@ -200,13 +197,12 @@ class MainPage:
             self.app_manager.show_login_page()
 
     # ================= LOGIC ĐỌC DỮ LIỆU TỪ MYSQL DOCKER =================
-    
-    def load_dashboard_data(self):
+    def Tai_Du_Lieu_Bang_Dieu_Khien(self): 
         """Đổ dữ liệu thời gian thực từ database lên các Card và 2 bảng thông báo nhanh"""
         try:
             # 1. Đếm và cập nhật số liệu lên khối Card Tổng Sách
             query_total_books = "SELECT COUNT(*) as total FROM books"
-            res_books = self.book_data.execute_query(query_total_books)
+            res_books = self.book_data.thuc_thi_query(query_total_books)
             
             if res_books:
                 first_row_books = res_books[0]
@@ -218,7 +214,7 @@ class MainPage:
 
             # 2. Đếm và cập nhật số liệu lên khối Card Đang Mượn Ngoài
             query_active_borrows = "SELECT COUNT(*) as total FROM muontra WHERE trang_thai = 'dang_muon'"
-            res_borrows = self.book_data.execute_query(query_active_borrows)
+            res_borrows = self.book_data.thuc_thi_query(query_active_borrows)
             
             if res_borrows:
                 first_row_borrows = res_borrows[0]
@@ -230,7 +226,7 @@ class MainPage:
 
             # 3. Đếm và cập nhật số liệu lên khối Card Yêu Cầu Chờ Duyệt
             query_pending = "SELECT COUNT(*) as total FROM muontra WHERE trang_thai = 'cho_duyet'"
-            res_pending = self.book_data.execute_query(query_pending)
+            res_pending = self.book_data.thuc_thi_query(query_pending)
             
             if res_pending:
                 first_row_pending = res_pending[0]
@@ -246,7 +242,7 @@ class MainPage:
                 self.tree_new_requests.delete(item)
 
             query_req_list = "SELECT username, ma_sach FROM muontra WHERE trang_thai = 'cho_duyet' ORDER BY id DESC LIMIT 5"
-            req_data = self.book_data.execute_query(query_req_list)
+            req_data = self.book_data.thuc_thi_query(query_req_list)
             
             if req_data:
                 for row in req_data:
@@ -264,7 +260,7 @@ class MainPage:
                 WHERE trang_thai = 'dang_muon' AND CURDATE() > STR_TO_DATE(han_tra, '%Y-%m-%d')
                 ORDER BY han_tra ASC LIMIT 5
             """
-            overdue_data = self.book_data.execute_query(query_overdue_list)
+            overdue_data = self.book_data.thuc_thi_query(query_overdue_list)
             
             if overdue_data:
                 for row in overdue_data:
@@ -278,10 +274,10 @@ class MainPage:
     def hien_thi_about(self):
         """Hiển thị cửa sổ thông tin về chương trình"""
         thong_tin_about = """
-╔════════════════════════════════════════╗
-║  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN         ║
-║        QUANG VINH LIBRARY             ║
-╚════════════════════════════════════════╝
+=========================================
+||  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN        ||
+||       QUANG VINH LIBRARY             ||
+=========================================
 
 📋 Thông Tin Chương Trình:
 - Phiên bản: 1.0
@@ -289,23 +285,22 @@ class MainPage:
 - Mô tả: Ứng dụng quản lý kho sách,
   mượn trả sách, thống kê báo cáo
 
-👥 Nhóm Thực Hiện:
-- Thành viên 1
-- Thành viên 2
-- Thành viên 3
-- Thành viên 4
+👥 Nhóm Thực Hiện: 1
+- Thành viên 1: Nguyễn Đức Trường (Nhóm trưởng)
+- Thành viên 2: 
+- Thành viên 3: Chu Việt Quang
 
 🎓 Lớp: Lập Trình Python
-🏫 Trường: [Tên Trường của Bạn]
+    Giảng Viên: 
+🏫 Trường: Đại Học Hạ Long
 
 💻 Công Nghệ Sử Dụng:
 - CustomTkinter (GUI)
 - MySQL (Database)
 - Pandas & NumPy (Xử lý dữ liệu)
-- Matplotlib (Biểu đồ)
 
-📧 Liên Hệ: [Email của bạn]
+📧 Liên Hệ: ductruong6116@gmail.com
 """
-        messagebox.showinfo("Về Chương Trình", thong_tin_about)
+        messagebox.showinfo("Tổng Quan Về Chương Trình", thong_tin_about)
     
     

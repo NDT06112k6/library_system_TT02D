@@ -156,12 +156,12 @@ class ThemSachPage:
                 data["the_loai"], data["so_luong"], data["gia"]
             ])
             messagebox.showinfo("Thành công", "Đã thêm sách thành công")
-            self.app_manager.show_quanlysach_page()
+            self.app_manager.Hien_Thi_Trang_Quan_Ly_Sach()
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể lưu: {str(e)}")
 
     def cancel(self): 
-        self.app_manager.show_quanlysach_page()
+        self.app_manager.Hien_Thi_Trang_Quan_Ly_Sach()
 
     # CHỖ CHÈN LOGIC XỬ LÝ API (Nằm ở cuối cùng của Class) 
     def Lay_Du_Lieu_Api(self): # Đổi tên hàm

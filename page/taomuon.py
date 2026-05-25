@@ -153,7 +153,7 @@ class TaoMuonPage:
         ma_sach = values[1]
         
         # Kiểm tra xem tài khoản này có đang mượn cuốn sách này mà chưa trả không
-        is_borrowing = self.muontra_data.is_currently_borrowing(username, ma_sach)
+        is_borrowing = self.muontra_data.Sach_Dang_Muon(username, ma_sach)
         if is_borrowing == True:
             messagebox.showerror("Lỗi", f"'{username}' đang mượn sách này rồi, chưa trả!")
             return

@@ -934,4 +934,4 @@ class DocGiaPage:
             "Đăng xuất",
             "Bạn có chắc muốn đăng xuất?"
         ):
-            self.app_manager.show_login_page()
+            self.app_manager.Hien_Thi_Trang_Dang_Nhap()

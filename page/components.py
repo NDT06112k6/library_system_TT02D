@@ -45,7 +45,7 @@ class BookCard(ctk.CTkFrame):
         self.on_borrow = on_borrow
         self.on_detail = on_detail
         self._build()
-        self._bind_hover()
+        self._Gan_Hieu_Ung_Di_Chuot()
 
     # Vẽ nội dung 
     def _build(self):

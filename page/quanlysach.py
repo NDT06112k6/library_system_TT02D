@@ -13,7 +13,7 @@ class QuanLySachPage:
         self.muontra_data = MuonTraData()  
         self.config()
         self.view()
-        self.load_books()
+        self.Tai_Sach()
 
     def config(self):
         self.master.title("📚 Quản Lý Sách")
@@ -58,7 +58,7 @@ class QuanLySachPage:
         self.entry_search.pack(side="left", fill="x", expand=True, padx=(0, 10))
         
         # Thanh tìm kiếm tự động lọc mỗi khi bạn gõ phím (
-        self.entry_search.bind("<KeyRelease>", lambda e: self.search_books())
+        self.entry_search.bind("<KeyRelease>", lambda e: self.Tim_Kiem_Sach())
 
         ctk.CTkButton(left_search, text="Tìm", width=70, height=35, font=Fonts.SMALL_BOLD, command=self.Tim_Kiem_Sach).pack(side="left", padx=2)
         ctk.CTkButton(left_search, text="Reset", width=70, height=35, font=Fonts.SMALL_BOLD, fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, hover_color=Colors.BORDER_DARK, command=self.Tai_Sach).pack(side="left", padx=2)
@@ -188,7 +188,7 @@ class QuanLySachPage:
 
         # 2. Kiểm tra xem Độc giả này có đang gửi yêu cầu hoặc đang mượn cuốn này rồi không
         username_hien_tai = self.app_manager.current_user
-        if self.muontra_data.is_currently_borrowing(username_hien_tai, ma_sach):
+        if self.muontra_data.Sach_Dang_Muon(username_hien_tai, ma_sach):
             messagebox.showerror("Lỗi", "Bạn đang mượn hoặc có yêu cầu chờ duyệt với cuốn sách này rồi!")
             return
 
@@ -196,7 +196,7 @@ class QuanLySachPage:
         if messagebox.askyesno("Xác nhận", f"Bạn có chắc chắn muốn gửi yêu cầu mượn cuốn sách:\n'{ten_sach}'?"):
             try:
                 # Gọi hàm lưu trạng thái 'cho_duyet' vừa bổ sung vào tầng query
-                self.muontra_data.create_borrow_request(username_hien_tai, ma_sach)
+                self.muontra_data.Tao_Yeu_Cau_Muon(username_hien_tai, ma_sach)
                 messagebox.showinfo("Thành công", "Gửi yêu cầu thành công!\nVui lòng đến quầy thư viện để nhận sách và duyệt phiếu.") 
                 self.Tai_Sach()
             except Exception as e:
@@ -205,15 +205,15 @@ class QuanLySachPage:
     def Tai_Sach(self): 
         self.entry_search.delete(0, "end")
         self.filter_category.set("Tất cả thể loại")
-        self._Do_Du_Lieu_Vao_Bang(self._Doc_Tat_Ca_Sach())
+        self._Tong_Tai_Khoan(self._Doc_Tat_Ca_Sach())
 
     def Loc_Theo_The_Loai(self, category):
         all_books = self._Doc_Tat_Ca_Sach()
         if category == "Tất cả thể loại":
-            self._Do_Du_Lieu_Vao_Bang(all_books)
+            self._Tong_Tai_Khoan(all_books)
         else:
             filtered = [b for b in all_books if len(b) > 4 and b[4] == category]
-            self._Do_Du_Lieu_Vao_Bang(filtered)
+            self._Tong_Tai_Khoan(filtered)
 
     def Tim_Kiem_Sach(self): 
         keyword = self.entry_search.get().strip()
@@ -222,12 +222,12 @@ class QuanLySachPage:
             return
         try:
             result = self.book_data.search_books(keyword)
-            self._populate_tree(result)
+            self._Tong_Tai_Khoan(result)
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
 
     def them_sach(self):
-        self.app_manager.show_themsach_page()
+        self.app_manager.Hien_Thi_Trang_Them_Sach()
 
     def sua_sach(self):
         selected = self.book_tree.selection()
@@ -235,7 +235,7 @@ class QuanLySachPage:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn sách cần sửa")
             return
         values = self.book_tree.item(selected[0], "values")
-        self.app_manager.show_suasach_page(values[1])
+        self.app_manager.Hien_Thi_Trang_Sua_Sach(values[1])
 
     def xoa_sach(self):
         selected = self.book_tree.selection()
@@ -256,16 +256,16 @@ class QuanLySachPage:
             messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")
 
     def back(self):
-        self.app_manager.show_main_page()
+        self.app_manager.Hien_Thi_Trang_Chinh()
 
-    def _Doc_Tat_Ca_Sach(self): # Đổi tên hàm
+    def _Doc_Tat_Ca_Sach(self): 
         try:
             return self.book_data.get_all() 
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể đọc dữ liệu: {str(e)}")
             return []
 
-    def _populate_tree(self, rows):
+    def _Tong_Tai_Khoan(self, rows):
         """Hiển thị dữ liệu sách lên Treeview tự động nhận diện kiểu dữ liệu"""
         for item in self.book_tree.get_children():
             self.book_tree.delete(item)
@@ -321,7 +321,7 @@ class QuanLySachPage:
                 
         self.status_label.configure(text=f"Tổng: {len(rows)} sách")
 
-    def _Xoa_Sach_Khoi_File(self, ma_sach_xoa): # Đổi tên hàm
+    def _Xoa_Sach_Khoi_File(self, ma_sach_xoa): 
         try:
             from query.muontra import MuonTraData
             muon_tra_data = MuonTraData()

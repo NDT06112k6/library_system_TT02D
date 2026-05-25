@@ -58,7 +58,7 @@ class MuonTraData(Query):
         except Exception:
             return "MT001"
 
-    def is_currently_borrowing(self, username, ma_sach):
+    def Sach_Dang_Muon(self, username, ma_sach):
         """Kiểm tra xem độc giả có đang mượn cuốn sách cụ thể nào đó hay không"""
         try:
             result = self.thuc_thi_query(
@@ -90,13 +90,13 @@ class MuonTraData(Query):
         except Exception:
             return []
 
-    def create_borrow_request(self, username, ma_sach):
+    def Tao_Yeu_Cau_Muon(self, username, ma_sach):
         """Ghi nhận yêu cầu mượn sách mới từ độc giả với trạng thái chờ duyệt"""
         ma_phieu = self.generate_new_id()
         data = [ma_phieu, username, ma_sach, None, None, None, 0, "cho_duyet"]
         return self.create(data)
 
-    def approve_borrow_request(self, ma_phieu, ngay_muon, han_tra):
+    def Yeu_Cau_Phe_Duyet(self, ma_phieu, ngay_muon, han_tra):
         """Cập nhật trạng thái phiếu từ chờ duyệt sang đang mượn kèm thời hạn"""
         data_update = {
             "ngay_muon": ngay_muon,

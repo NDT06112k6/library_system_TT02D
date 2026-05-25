@@ -10,7 +10,7 @@ class SuaSachPage:
         self.app_manager = app_manager
         self.book_data = BookData()
         self.ma_sach = ma_sach
-        self.old_data = self._load_book_data(ma_sach)
+        self.old_data = self._Tai_Du_Lieu_Sach(ma_sach)
         self.config()
         self.view()
 
@@ -106,7 +106,7 @@ class SuaSachPage:
         try: 
             self._Cap_Nhat_Sach_Trong_File(data)
             messagebox.showinfo("Thành công", "Đã cập nhật sách thành công")
-            self.app_manager.show_quanlysach_page()
+            self.app_manager.Hien_Thi_Trang_Quan_Ly_Sach()
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể cập nhật: {str(e)}")
 
@@ -118,7 +118,7 @@ class SuaSachPage:
             entry.insert(0, str(self.old_data.get(key, "")))
 
     def cancel(self):
-        self.app_manager.show_quanlysach_page()
+        self.app_manager.Hien_Thi_Trang_Quan_Ly_Sach()
 
     # ===== HÀM HỖ TRỢ DỮ LIỆU ===== 
     def _Tai_Du_Lieu_Sach(self, ma_sach): 

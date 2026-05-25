@@ -159,7 +159,7 @@ class LoginPage:
 
     def go_to_register(self):
         """Chuyển hướng người dùng sang giao diện đăng ký tài khoản độc giả"""
-        self.app_manager.show_register_page()
+        self.app_manager.Hien_Thi_Trang_Dang_Ky()
 
     def login(self):
         """Xử lý đăng nhập và điều hướng theo chức vụ"""
@@ -191,7 +191,7 @@ class LoginPage:
                 messagebox.showinfo("Thông báo", f"Đăng nhập thành công!\nChức vụ: {chuc_vu}")
                 
                 hoten = user.get("hoten", username) if isinstance(user, dict) else username
-                self.master.after(10, lambda: self.app_manager.login_success(username, str(chuc_vu).strip(), hoten))
+                self.master.after(10, lambda: self.app_manager.Dang_Nhap_Thanh_Cong(username, str(chuc_vu).strip(), hoten))
                 return
 
             messagebox.showerror("Thông báo", "Đăng nhập thất bại! Sai tài khoản hoặc mật khẩu.")

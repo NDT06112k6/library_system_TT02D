@@ -15,7 +15,7 @@ class MuonTraPage:
         self.book_data = BookData()
         self.config()
         self.view()
-        self.load_phieu()
+        self.Tai_Phieu()
 
     def config(self): 
         """Thiết lập cấu hình giao diện cơ bản."""
@@ -83,7 +83,7 @@ class MuonTraPage:
         scrollbar.pack(side="right", fill="y")
 
         # RÀNG BUỘC SỰ KIỆN CLICK CHUỘT TRÊN BẢNG TREEVIEW
-        self.phieu_tree.bind("<ButtonRelease-1>", self._TrereNuntCay_Du_L_au_DuoD_Cu_Li_Duoc_Click)
+        self.phieu_tree.bind("<ButtonRelease-1>", self._on_tree_item_clicked)
 
         # Khung điều khiển hành động
         action_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
@@ -264,7 +264,7 @@ class MuonTraPage:
                 han_tra_date = now + timedelta(days=14)
                 han_tra_str = han_tra_date.strftime("%Y-%m-%d")
                 
-                self.muontra_data.approve_borrow_request(values[1], ngay_muon_str, han_tra_str)
+                self.muontra_data.Yeu_Cau_Phe_Duyet(values[1], ngay_muon_str, han_tra_str)
                 self.book_data.update_quantity(values[3], delta=-1)
                 
                 messagebox.showinfo("Thành công", "Đã duyệt phiếu mượn.")
@@ -336,7 +336,7 @@ class MuonTraPage:
             except Exception as e:
                 messagebox.showerror("Lỗi", f"Lý do: {str(e)}")
     def tao_phieu(self):
-        self.app_manager.show_taomuon_page()
+        self.app_manager.Hien_Thi_Trang_Tao_Muon()
 
     def xoa_phieu(self):
         """Xóa phiếu mượn và hoàn trả số lượng sách nếu cần."""
@@ -381,4 +381,4 @@ class MuonTraPage:
         return mapping.get(db_status, ("Unknown", ""))
 
     def back(self): 
-        self.app_manager.show_main_page()
+        self.app_manager.Hien_Thi_Trang_Chinh()

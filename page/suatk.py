@@ -20,7 +20,7 @@ class SuaTKPage:
         self.config()
         self.view()
 
-    def Lay_Email_Hien_Tai(self, username): # Đổi tên hàm
+    def Lay_Email_Hien_Tai(self, username): 
         """Lấy email hiện tại của tài khoản"""
         try:
             result = self.account_data.search("taikhoan", username, exact=True)
@@ -56,21 +56,21 @@ class SuaTKPage:
         main_frame = ctk.CTkFrame(canvas, fg_color='white')
         canvas_window = canvas.create_window((0, 0), window=main_frame, anchor="nw")
 
-        def Tren_Cau_Hinh_Khung(event=None): # Đổi tên hàm
+        def Tren_Cau_Hinh_Khung(event=None): 
             canvas.configure(scrollregion=canvas.bbox("all"))
             canvas.itemconfig(canvas_window, width=canvas.winfo_width() - 15)
         
         main_frame.bind("<Configure>", Tren_Cau_Hinh_Khung)
         canvas.bind("<Configure>", lambda e: canvas.itemconfig(canvas_window, width=e.width))
 
-        def Tren_Con_Lan_Chuot(event): # Đổi tên hàm
+        def Tren_Con_Lan_Chuot(event): 
             try:
                 if canvas.winfo_exists():
                     canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
             except Exception:
                 pass
         
-        canvas.bind_all("<MouseWheel>", on_mousewheel)
+        canvas.bind_all("<MouseWheel>", Tren_Con_Lan_Chuot)
 
         # THÔNG TIN HIỆN TẠI 
         ctk.CTkLabel(
@@ -134,7 +134,7 @@ class SuaTKPage:
         self.entry_sdt      = make_column_row(right_column, "Số điện thoại mới:")
         self.entry_email    = make_column_row(right_column, "Email mới (Gmail):")
 
-        # Điền lại giá trị mặc định vào Form (giữ nguyên logic gốc của bạn)
+        # Điền lại giá trị mặc định vào Form 
         self.entry_username.insert(0, self.old_username)
         self.entry_password.insert(0, self.old_password)
         self.entry_hoten.insert(0, self.old_hoten)
@@ -155,7 +155,7 @@ class SuaTKPage:
             new_frame, 
             text="Hiển thị mật khẩu công khai",
             variable=self.show_password, 
-            command=self.toggle_password,
+            command=self.Bat_Tat_Mat_Khau,
             font=("Segoe UI", 11),
             checkbox_width=18,
             checkbox_height=18,
@@ -186,7 +186,7 @@ class SuaTKPage:
 
         ctk.CTkButton(
             button_frame, text="💾 Lưu thay đổi", fg_color="#10B981", hover_color="#059669", 
-            font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.save_changes
+            font=("Segoe UI", 12, "bold"), height=38, corner_radius=8, command=self.Luu_Thay_Doi
         ).grid(row=0, column=0, padx=6, sticky="ew") 
 
         ctk.CTkButton(
@@ -201,10 +201,10 @@ class SuaTKPage:
 
     # Chức năng Logic 
     
-    def Bat_Tat_Mat_Khau(self): # Đổi tên hàm
+    def Bat_Tat_Mat_Khau(self):
         self.entry_password.configure(show="" if self.show_password.get() else "*")
         
-    def Dat_Lai_Form(self): # Đổi tên hàm
+    def Dat_Lai_Form(self): 
 
         self.entry_chucvu.configure(state="normal")
 
@@ -223,7 +223,7 @@ class SuaTKPage:
         if self.old_chucvu == "Độc giả":
             self.entry_chucvu.configure(state="disabled")
 
-    def Ten_Dang_Nhap_Ton_Tai(self, username: str) -> bool: # Đổi tên hàm
+    def Ten_Dang_Nhap_Ton_Tai(self, username: str) -> bool: 
         """Kiểm tra tên đăng nhập tồn tại duy nhất""" 
         try:
             result = self.account_data.search("taikhoan", username, exact=True)
@@ -235,7 +235,7 @@ class SuaTKPage:
         except Exception:
             return False
 
-    def Xac_Thuc_Dau_Vao(self) -> bool: # Đổi tên hàm
+    def Xac_Thuc_Dau_Vao(self) -> bool: 
         new_username = self.entry_username.get().strip()
         new_email = self.entry_email.get().strip()
 
@@ -256,7 +256,7 @@ class SuaTKPage:
 
         return True
 
-    def Luu_Thay_Doi(self): # Đổi tên hàm
+    def Luu_Thay_Doi(self): 
         """Xử lý logic cập nhật dữ liệu tài khoản.""" 
         if not self.Xac_Thuc_Dau_Vao():
             return
@@ -306,7 +306,7 @@ class SuaTKPage:
             
             self.account_data.update("taikhoan", self.old_username, thong_tin_sua)
             messagebox.showinfo("Thành công", "Đã cập nhật tài khoản thành công")
-            self.app_manager.show_quanlytk_page()
+            self.app_manager.Hien_Thi_Trang_Quan_Ly_TK()
             
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể cập nhật tài khoản: {str(e)}")
@@ -314,11 +314,11 @@ class SuaTKPage:
     def cancel(self):
         if self.Co_Thay_Doi_Chua_Luu():
             if messagebox.askyesno("Xác nhận", "Bạn có chắc muốn hủy? Các thay đổi sẽ không được lưu."):
-                self.app_manager.show_quanlytk_page()
+                self.app_manager.Hien_Thi_Trang_Quan_Ly_TK()
         else:
-            self.app_manager.show_quanlytk_page()
+            self.app_manager.Hien_Thi_Trang_Quan_Ly_TK()
 
-    def Co_Thay_Doi_Chua_Luu(self) -> bool: # Đổi tên hàm
+    def Co_Thay_Doi_Chua_Luu(self) -> bool: 
         return (
             self.entry_username.get().strip() != self.old_username or
             self.entry_password.get().strip() != self.old_password or

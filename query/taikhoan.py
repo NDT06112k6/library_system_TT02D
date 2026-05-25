@@ -37,7 +37,7 @@ class AccountData(Query):
             print(f"Lỗi lấy tất cả tài khoản: {e}")
             return []
 
-    def delete_account(self, username):
+    def Xoa_Tai_Khoan(self, username):
         """Thực hiện xóa một tài khoản ra khỏi hệ thống"""
         return self.delete("taikhoan", username)
 

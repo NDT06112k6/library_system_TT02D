@@ -13,7 +13,7 @@ class MainPage:
 
         self.config()
         self.view()
-        self.load_dashboard_data()
+        self.Tai_Du_Lieu_Bang_Dieu_Khien()
 
     def config(self): 
         self.master.title("Bảng Điều Khiển Quản Trị Thư Viện")
@@ -46,7 +46,7 @@ class MainPage:
         ctk.CTkButton(
             sidebar, text="🔄 Mượn Trả Sách", fg_color="transparent", text_color="#cbd5e1",
             hover_color="#334155", font=("Segoe UI", 13, "bold"), anchor="w", height=40,
-            command=lambda: self.app_manager.Hien_Thi_Trang_Muon_Tra()
+            command=lambda: self.app_manager.show_muontra_page()
         ).pack(fill="x", padx=10, pady=5)
 
         ctk.CTkButton(
@@ -194,7 +194,7 @@ class MainPage:
         from tkinter import messagebox
         ans = messagebox.askyesno("Xác nhận đăng xuất", "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?")
         if ans == True:
-            self.app_manager.show_login_page()
+            self.app_manager.Hien_Thi_Trang_Dang_Nhap()
 
     # ================= LOGIC ĐỌC DỮ LIỆU TỪ MYSQL DOCKER =================
     def Tai_Du_Lieu_Bang_Dieu_Khien(self): 

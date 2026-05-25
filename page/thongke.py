@@ -30,9 +30,9 @@ class ThongKePage:
         self.muontra_data = MuonTraData()
         self.book_data = BookData()
         
-        self.config_window()
+        self.Cau_Hinh_Cua_So()
         self.setup_styles()
-        self.render_view()
+        self.Hien_Thi_Giao_Dien()
 
     def Cau_Hinh_Cua_So(self): 
         """Thiết lập cấu hình cửa sổ hiển thị."""
@@ -63,7 +63,7 @@ class ThongKePage:
         ctk.CTkButton(
             header, text="← Quay Lại", font=(FONT_FAMILY, 12, "bold"),
             fg_color="#64748b", hover_color="#475569", width=120, height=35,
-            command=self.back_to_menu
+            command=self.Quay_Lai_Menu
         ).pack(side="right") 
 
         # 2. Vùng cuộn chính (Chống tràn UI)
@@ -86,12 +86,12 @@ class ThongKePage:
             card_frame.columnconfigure(i, weight=1, uniform="card")
 
         # Lấy dữ liệu
-        total_books = self.get_total_books_count()
-        cho_duyet = self.get_borrow_records_by_status("cho_duyet")
-        dang_muon = self.get_borrow_records_by_status("dang_muon")
-        da_tra = self.get_borrow_records_by_status("da_tra")
-        qua_han = self.get_borrow_records_by_status("qua_han")
-        
+        total_books = self.Lay_Tong_So_Sach()
+        cho_duyet = self.Lay_Ban_Ghi_Muon_Theo_Trang_Thai("cho_duyet")
+        dang_muon = self.Lay_Ban_Ghi_Muon_Theo_Trang_Thai("dang_muon")
+        da_tra = self.Lay_Ban_Ghi_Muon_Theo_Trang_Thai("da_tra")
+        qua_han = self.Lay_Ban_Ghi_Muon_Theo_Trang_Thai("qua_han")
+
         total_phieu = cho_duyet + dang_muon + da_tra + qua_han
 
         # Cấu trúc: (Tiêu đề, Giá trị, Màu sắc, Icon)
@@ -108,7 +108,7 @@ class ThongKePage:
         for i, (title, val, color, icon) in enumerate(stats):
             row_idx = i // 4
             col_idx = i % 4
-            self.create_statistic_card(card_frame, title, str(val), color, icon).grid(row=row_idx, column=col_idx, padx=8, pady=8, sticky="ew")
+            self.Tao_The_Thong_Ke(card_frame, title, str(val), color, icon).grid(row=row_idx, column=col_idx, padx=8, pady=8, sticky="ew")
 
         # Tính trung bình số lượng sách
         all_books = self.book_data.list_all()
@@ -143,7 +143,7 @@ class ThongKePage:
             GROUP BY m.ma_sach, b.ten_sach, b.tac_gia 
             ORDER BY sl DESC LIMIT 5
         """
-        self._create_table_widget(
+        self._Tao_Widget_Bang(
             table_frame, "🏆 Top 5 Sách Mượn Nhiều Nhất", 
             ["Tên sách", "Tác giả", "Lượt mượn"], query_top_books
         ).grid(row=0, column=0, padx=8, pady=8, sticky="nsew")
@@ -156,12 +156,12 @@ class ThongKePage:
             GROUP BY username 
             ORDER BY sl DESC LIMIT 5
         """ 
-        self._create_table_widget(
+        self._Tao_Widget_Bang(
             table_frame, "🥇 Top Độc Giả Tích Cực", 
             ["Tài khoản Độc giả", "Tổng số phiếu"], query_top_readers
         ).grid(row=0, column=1, padx=8, pady=8, sticky="nsew")
 
-    def create_statistic_card(self, parent, title, value, color, icon):
+    def Tao_The_Thong_Ke(self, parent, title, value, color, icon):
         """Hàm con hỗ trợ tạo UI cho 1 thẻ thống kê."""
         card = ctk.CTkFrame(parent, fg_color=C["card"], corner_radius=12, border_width=1, border_color=C["border"]) 
         

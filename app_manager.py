@@ -35,6 +35,7 @@ class AppManager:
             widget.destroy()
         self.current_page = None
 
+
     # XỬ LÝ ĐĂNG NHẬP THÀNH CÔNG
     def Dang_Nhap_Thanh_Cong(self, username, chucvu, hoten=None): 
         """Hàm được gọi sau khi login thành công"""
@@ -115,7 +116,7 @@ class AppManager:
     # TRANG MƯỢN/TRẢ
     def show_muontra_page(self):
         """Hiển thị trang tra cứu hoặc xử lý mượn/trả"""
-        self.clear_current_page()
+        self.Xoa_Trang_Hien_Tai()
         self.root.geometry("900x550")
         self.current_page = MuonTraPage(self.root, self)
 

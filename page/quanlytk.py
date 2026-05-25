@@ -12,11 +12,11 @@ class QuanLyTKPage:
         self.account_data = AccountData()
         self.config()
         self.view()
-        self.load_accounts()
+        self.Tai_Tai_Khoan()
 
     def config(self): 
         self.master.title("👤 Quản lý tài khoản")
-        self.master.geometry("1100x650")  # Tăng không gian hiển thị cho bố cục Trái - Phải
+        self.master.geometry("1100x650")  
         ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
@@ -86,7 +86,7 @@ class QuanLyTKPage:
         CustomButton(sidebar_frame, text="🔄 Làm mới dữ liệu", command=self.Tai_Tai_Khoan, style_type="info").pack(fill="x", padx=15, pady=5)
         CustomButton(sidebar_frame, text="➕ Thêm tài khoản mới", command=self.Them_Tai_Khoan, style_type="success").pack(fill="x", padx=15, pady=5)
         CustomButton(sidebar_frame, text="✏️ Chỉnh sửa tài khoản", command=self.edit_account, style_type="warning").pack(fill="x", padx=15, pady=5)
-        CustomButton(sidebar_frame, text="🗑️ Xóa tài khoản", command=self.delete_account, style_type="danger").pack(fill="x", padx=15, pady=5)
+        CustomButton(sidebar_frame, text="🗑️ Xóa tài khoản", command=self.Xoa_Tai_Khoan, style_type="danger").pack(fill="x", padx=15, pady=5)
         
         # Nút Quay lại đặt cố định dưới đáy thanh công cụ
         CustomButton(sidebar_frame, text="← Quay Lại Hệ Thống", command=self.back, style_type="secondary").pack(side="bottom", fill="x", padx=15, pady=20)
@@ -156,7 +156,7 @@ class QuanLyTKPage:
         self.entry_search.configure(text_color="gray")
         try:
             rows = self.account_data.get_all_accounts()
-            self._populate_tree(rows)
+            self._Tong_Tai_Khoan(rows)
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải dữ liệu: {str(e)}")
             self.status_label.configure(text="Lỗi tải dữ liệu")
@@ -191,7 +191,7 @@ class QuanLyTKPage:
         old_chucvu = item_values[5]
         old_email = item_values[6]
 
-        self.app_manager.show_suatk_page(old_username, old_password, old_hoten, old_sdt, old_chucvu, old_email)
+        self.app_manager.Hien_Thi_Trang_Sua_TK(old_username, old_password, old_hoten, old_sdt, old_chucvu, old_email)
 
     def back(self):
         self.app_manager.Hien_Thi_Trang_Chinh()
@@ -202,16 +202,16 @@ class QuanLyTKPage:
             keyword = ""
         try: 
             if not keyword:
-                self.load_accounts()
+                self.Tai_Tai_Khoan()
             else:
                 rows = self.account_data.search_accounts(keyword)
-                self._populate_tree(rows)
+                self._Tong_Tai_Khoan(rows)
                 self.status_label.configure(text=f"Tìm thấy {len(rows)} tài khoản")
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tìm kiếm: {str(e)}")
             self.status_label.configure(text="Lỗi tìm kiếm")
     
-    def _populate_tree(self, data):
+    def _Tong_Tai_Khoan(self, data):
         for item in self.account_tree.get_children():
             self.account_tree.delete(item)
         

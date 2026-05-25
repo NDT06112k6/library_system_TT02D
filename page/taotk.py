@@ -133,10 +133,10 @@ class TaoTKPage:
             entry.configure(border_color="#ABB2B9", border_width=1)
 
     def back_admin(self):
-            self.app_manager.show_quanlytk_page()
+            self.app_manager.Hien_Thi_Trang_Quan_Ly_TK()
 
     def back_login(self):
-        self.app_manager.show_login_page()
+        self.app_manager.Hien_Thi_Trang_Dang_Nhap()
 
     def tao_tk(self):
         """Tạo tài khoản mới"""
@@ -189,6 +189,6 @@ class TaoTKPage:
         try:
             self.account_data.create([username, password, hoten, sdt, chucvu, gmail])
             messagebox.showinfo("Thông báo", "Tạo tài khoản thành công!")
-            self.app_manager.show_login_page()
+            self.app_manager.Hien_Thi_Trang_Dang_Nhap()
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tạo tài khoản: {str(e)}")

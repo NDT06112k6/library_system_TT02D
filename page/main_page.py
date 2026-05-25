@@ -1,10 +1,9 @@
 import customtkinter as ctk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from query.muontra import MuonTraData
 from query.books import BookData
 import os
 import platform
-
 
 class MainPage:
     def __init__(self, master, app_manager, username="Admin"):
@@ -71,6 +70,14 @@ class MainPage:
             hover_color="#dc2626", font=("Segoe UI", 13, "bold"), height=35,
             command=self.xac_nhan_dang_xuat
         ).pack(side="bottom", fill="x", padx=15, pady=20)
+
+        ctk.CTkButton(
+            sidebar, text="ℹ️ Về Chương Trình", 
+            fg_color="#17a2b8", text_color="white",
+            hover_color="#138496", font=("Segoe UI", 13, "bold"), 
+            height=35,
+            command=self.hien_thi_about
+        ).pack(side="bottom", fill="x", padx=15, pady=(0, 10))
 
         # 2. ─── VÙNG KHÔNG GIAN BÊN PHẢI (LẤP ĐẦY KHOẢNG TRỐNG) ───
         content_area = ctk.CTkFrame(main_container, fg_color="#f8fafc", corner_radius=0)
@@ -269,27 +276,38 @@ class MainPage:
 
         except Exception as e:
             print(f"Lỗi khi tải dữ liệu cho bảng điều khiển Dashboard: {e}")
+        
+    def hien_thi_about(self):
+        """Hiển thị cửa sổ thông tin về chương trình"""
+        thong_tin_about = """
+╔════════════════════════════════════════╗
+║  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN         ║
+║        QUANG VINH LIBRARY             ║
+╚════════════════════════════════════════╝
+
+📋 Thông Tin Chương Trình:
+- Phiên bản: 1.0
+- Năm phát triển: 2026
+- Mô tả: Ứng dụng quản lý kho sách,
+  mượn trả sách, thống kê báo cáo
+
+👥 Nhóm Thực Hiện:
+- Thành viên 1
+- Thành viên 2
+- Thành viên 3
+- Thành viên 4
+
+🎓 Lớp: Lập Trình Python
+🏫 Trường: [Tên Trường của Bạn]
+
+💻 Công Nghệ Sử Dụng:
+- CustomTkinter (GUI)
+- MySQL (Database)
+- Pandas & NumPy (Xử lý dữ liệu)
+- Matplotlib (Biểu đồ)
+
+📧 Liên Hệ: [Email của bạn]
+"""
+        messagebox.showinfo("Về Chương Trình", thong_tin_about)
     
-    def open_guide():
-        try:
-            if platform.system() == 'Windows':
-                os.startfile("guide.pdf")
-            else:
-                os.system(f"xdg-open guide.pdf")
-        except:
-            messagebox.showwarning("Lỗi", "Không tìm thấy guide.pdf")
-
-    ctk.CTkButton(sidebar, text="📖 Hướng Dẫn",
-                command=open_guide, ...).pack(fill="x", padx=10, pady=5)
-    
-    def show_about():
-        messagebox.showinfo("Về phần mềm",
-            "Hệ Thống Quản Lý Thư Viện\n"
-            "Version 1.0\n"
-            "© 2026 - Nhóm TT02D\n"
-            "Liên hệ: library@system.com")
-
-    ctk.CTkButton(main_content, text="ℹ️ About",
-              command=show_about, ...).pack()
-
     

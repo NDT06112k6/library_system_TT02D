@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import customtkinter as ctk
-import requests
 
 # HÀM HIỂN THỊ BẢNG
 def show_table(parent, columns, column_configs, height=10):
@@ -121,11 +120,3 @@ def show_warning(title, message):
         title=f"⚠️ {title}",
         message=message
     )
-
-def get_weather():
-    try:
-        r = requests.get("https://api.open-meteo.com/v1/forecast?latitude=20.8&longitude=106.6")
-        data = r.json()
-        return data['current']
-    except:
-        return None

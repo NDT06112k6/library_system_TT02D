@@ -153,13 +153,21 @@ class Query:
             return None
     
     def import_from_csv(self, filepath):
+        """Nhập dữ liệu từ file CSV vào database"""
         try:
-            with open(filepath, 'r', encoding='utf-8-sig') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    self.create(list(row.values())[1:])
-            messagebox.showinfo("Thành công", "Import xong!")
+            with open(filepath, 'r', encoding='utf-8-sig') as tep_csv:
+                doc_csv = csv.DictReader(tep_csv)
+                for dong_du_lieu in doc_csv:
+                    danh_sach_gia_tri = []
+                    for ten_truong in self.fields[1:]:
+                        if ten_truong in dong_du_lieu:
+                            gia_tri = dong_du_lieu[ten_truong]
+                        else:
+                            gia_tri = None
+                        danh_sach_gia_tri.append(gia_tri)
+                    self.create(danh_sach_gia_tri)
+            messagebox.showinfo("Thành công", "Nhập dữ liệu thành công!")
             return True
-        except Exception as e:
-            messagebox.showerror("Lỗi", f"Import failed: {e}")
+        except Exception as loi:
+            messagebox.showerror("Lỗi", f"Nhập thất bại: {str(loi)}")
             return False

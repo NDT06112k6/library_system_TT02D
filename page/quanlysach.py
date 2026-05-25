@@ -154,6 +154,8 @@ class QuanLySachPage:
             ctk.CTkButton(btns_container, text="➕ Thêm Mới", fg_color=Colors.SUCCESS, font=Fonts.SMALL_BOLD, command=self.them_sach).pack(side="left", padx=5)
             ctk.CTkButton(btns_container, text="✏️ Sửa", fg_color=Colors.INFO, font=Fonts.SMALL_BOLD, command=self.sua_sach).pack(side="left", padx=5)
             ctk.CTkButton(btns_container, text="🗑️ Xóa", fg_color=Colors.ERROR, font=Fonts.SMALL_BOLD, command=self.xoa_sach).pack(side="left", padx=5)
+            ctk.CTkButton(btns_container, text="📥 Xuất CSV", fg_color="#8B5CF6", font=Fonts.SMALL_BOLD, command=self.xuat_du_lieu_csv).pack(side="left", padx=5)
+            ctk.CTkButton(btns_container, text="📤 Nhập CSV", fg_color="#8B5CF6", font=Fonts.SMALL_BOLD, command=self.nhap_du_lieu_csv).pack(side="left", padx=5)
         else:
             # TỰ ĐỘNG THAY THẾ: Nút đăng ký mượn dành riêng cho Sinh viên/Độc giả
             ctk.CTkButton(
@@ -333,30 +335,28 @@ class QuanLySachPage:
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")
             return False
-    
-    ctk.CTkButton(button_frame, text="📥 Export CSV",
-              command=self.book_data.export_to_csv).pack(side="left")
 
-    def import_csv():
-        file = filedialog.askopenfilename(filetypes=[("CSV", "*.csv")])
-        if file:
-            self.book_data.import_from_csv(file)
+    def xuat_du_lieu_csv(self):
+        """Hàm xuất dữ liệu sách sang file CSV"""
+        try:
+            ten_file = self.book_data.export_to_csv()
+            if ten_file:
+                messagebox.showinfo("Thành công", f"Đã xuất file: {ten_file}")
+        except Exception as loi:
+            messagebox.showerror("Lỗi", f"Không thể xuất file: {str(loi)}")
 
-    ctk.CTkButton(button_frame, text="📤 Import CSV",
-              command=import_csv).pack(side="left")
-    
-
-
-    `def load_data_async(self):
-        def heavy_task():
-            self.books = self.book_data.list_all()
-            self.root.after(0, self.load_table)  # Update UI từ main thread
-        
-        thread = threading.Thread(target=heavy_task, daemon=True)
-        thread.start()
-        self.show_loading_spinner()  # Hiển thị loading
-
-    def show_loading_spinner(self):
-        self.loading_label = ctk.CTkLabel(self.master, text="⏳ Đang tải...")
-        self.loading_label.pack()`
-    
+    def nhap_du_lieu_csv(self):
+        """Hàm nhập dữ liệu sách từ file CSV"""
+        try:
+            duong_dan_file = filedialog.askopenfilename(
+                title="Chọn file CSV để nhập",
+                filetypes=[("Tệp CSV", "*.csv"), ("Tất cả tệp", "*.*")]
+            )
+            
+            if duong_dan_file:
+                ket_qua_nhap = self.book_data.import_from_csv(duong_dan_file)
+                if ket_qua_nhap:
+                    self.load_books()
+                    messagebox.showinfo("Thành công", "Đã nhập dữ liệu thành công!")
+        except Exception as loi:
+            messagebox.showerror("Lỗi", f"Không thể nhập file: {str(loi)}")

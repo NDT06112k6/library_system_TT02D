@@ -2,15 +2,13 @@ from email import header
 
 import customtkinter as ctk
 from tkinter import ttk
-from common.helpers import get_weather
 from query.muontra import MuonTraData
 from query.books import BookData
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-# --- Bảng màu chuẩn đồng bộ với hệ thống ---
+
+# Bảng màu chuẩn đồng bộ với hệ thống
 C = {
     "bg": "#F0F4F8",
     "card": "#FFFFFF",
@@ -55,7 +53,7 @@ class ThongKePage:
 
     def render_view(self):
         """Xây dựng khung giao diện chính."""
-        # 1. Header
+
         header = ctk.CTkFrame(self.master, fg_color="transparent")
         header.pack(fill="x", padx=30, pady=(20, 10))
         
@@ -131,6 +129,7 @@ class ThongKePage:
                 'Sách rẻ nhất': f"{np.min(prices):,.0f} đ",
                 'Tổng giá trị': f"{np.sum(prices):,.0f} đ"
             }
+
     def _build_tables(self):
         """Xây dựng 2 bảng thống kê bên dưới và LOẠI BỎ tài khoản quản lý (username = '1')."""
         table_frame = ctk.CTkFrame(self.scroll_view, fg_color="transparent")
@@ -215,11 +214,9 @@ class ThongKePage:
 
         return frame
 
-    # ========================================================
-    # CÁC HÀM LOGIC DB (ĐÃ THÊM LỌC SẠCH TÀI KHOẢN ADMIN)
-    # ========================================================
+    # CÁC HÀM LOGIC DATABASE
     def get_total_books_count(self):
-        """Lấy tổng số lượng sách từ cơ sở dữ liệu."""
+        """Lấy tổng số lượng sách từ cơ sở dữ liệu"""
         try:
             result = self.book_data.execute_query("SELECT COUNT(*) as total_count FROM books")
             if result is not None and len(result) > 0:
@@ -230,9 +227,8 @@ class ThongKePage:
             return 0    
 
     def get_borrow_records_by_status(self, status):
-        """Lấy số lượng phiếu mượn theo trạng thái (LOẠI BỎ HOÀN TOÀN TÀI KHOẢN QUẢN LÝ)."""
+        """Lấy số lượng phiếu mượn theo trạng thái"""
         try:
-            # Thêm điều kiện NOT IN ('1', 'admin')
             result = self.muontra_data.execute_query(
                 "SELECT COUNT(*) as total_records FROM muontra WHERE trang_thai = %s AND username NOT IN ('1', 'admin')", (status,)
             )
@@ -242,27 +238,6 @@ class ThongKePage:
         except Exception as e:
             print(f"Lỗi khi đếm số phiếu mượn: {e}")
             return 0
-    
-    def draw_borrow_chart(self):
-        results = self.muontra_data.execute_query(
-            "SELECT MONTH(ngay_muon), COUNT(*) FROM muontra GROUP BY MONTH(ngay_muon)"
-        )
-        months = [r[0] for r in results]
-        counts = [r[1] for r in results]
-        
-        fig, ax = plt.subplots(figsize=(8, 4))
-        ax.plot(months, counts, marker='o')
-        ax.set_xlabel('Tháng')
-        ax.set_ylabel('Số lượt mượn')
-        ax.set_title('Thống kê mượn sách theo tháng')
-        
-        canvas = FigureCanvasTkAgg(fig, master=self.chart_frame)
-        canvas.draw()
-        canvas.get_tk_widget().pack()
-    
-    weather = get_weather()
-    if weather:
-        ctk.CTkLabel(header, text=f"🌡️ {weather['temperature']}°C").pack()
 
     def back_to_menu(self):
         """Trở về menu chính."""

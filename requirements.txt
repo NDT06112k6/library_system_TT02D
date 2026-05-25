@@ -1,3 +1,4 @@
 customtkinter
 pandas
 mysql-connector-python
+matplotlib

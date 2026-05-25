@@ -1,0 +1,82 @@
+﻿id,ma_sach,ten_sach,tac_gia,the_loai,so_luong,gia
+119,IT001,Lập trình Python căn bản,Nguyễn Văn A,CÔNG NGHỆ,10,150000.00,2026-05-24 06:22:11
+120,IT002,Cơ sở dữ liệu MySQL,Trần Văn B,CÔNG NGHỆ,8,120000.00,2026-05-24 06:22:11
+121,IT003,Mạng máy tính hiện đại,Andrew Tanenbaum,CÔNG NGHỆ,6,250000.00,2026-05-24 06:22:11
+122,IT004,Trí tuệ nhân tạo (AI),Stuart Russell,CÔNG NGHỆ,6,300000.00,2026-05-24 06:22:11
+123,IT005,Thiết kế Web thực chiến,Jon Duckett,CÔNG NGHỆ,7,200000.00,2026-05-24 06:22:11
+124,KT001,Quốc gia khởi nghiệp,Dan Senor,KINH TẾ,12,180000.00,2026-05-24 06:22:11
+125,KT002,Cha giàu cha nghèo,Robert Kiyosaki,KINH TẾ,15,90000.00,2026-05-24 06:22:11
+126,KT003,Tư duy hệ thống kinh tế,Peter Senge,KINH TẾ,4,220000.00,2026-05-24 06:22:11
+127,KT004,Quản trị doanh nghiệp,Peter Drucker,KINH TẾ,6,250000.00,2026-05-24 06:22:11
+128,KT005,Tài chính cá nhân,Ramit Sethi,KINH TẾ,8,140000.00,2026-05-24 06:22:11
+129,VH001,Truyện Kiều,Nguyễn Du,VĂN HỌC,20,50000.00,2026-05-24 06:22:11
+130,VH002,Số đỏ,Vũ Trọng Phụng,VĂN HỌC,10,60000.00,2026-05-24 06:22:11
+131,VH003,Nhà giả kim,Paulo Coelho,VĂN HỌC,25,80000.00,2026-05-24 06:22:11
+132,VH004,Bố già,Mario Puzo,VĂN HỌC,9,120000.00,2026-05-24 06:22:11
+133,VH005,Rừng Na Uy,Haruki Murakami,VĂN HỌC,7,100000.00,2026-05-24 06:22:11
+134,KN001,Đắc nhân tâm,Dale Carnegie,KỸ NĂNG,31,70000.00,2026-05-24 06:22:11
+135,KN002,7 Thói quen thành đạt,Stephen Covey,KỸ NĂNG,11,130000.00,2026-05-24 06:22:11
+136,KN003,Sức mạnh của thói quen,Charles Duhigg,KỸ NĂNG,10,110000.00,2026-05-24 06:22:11
+137,KN004,Tư duy nhanh và chậm,Daniel Kahneman,KỸ NĂNG,5,200000.00,2026-05-24 06:22:11
+138,KN005,Tuần làm việc 4 giờ,Timothy Ferriss,KỸ NĂNG,8,150000.00,2026-05-24 06:22:11
+139,NN001,Tiếng Anh giao tiếp,John Smith,NGOẠI NGỮ,20,100000.00,2026-05-24 06:22:11
+140,NN002,Tự học tiếng Nhật,Tanaka Kenji,NGOẠI NGỮ,15,120000.00,2026-05-24 06:22:11
+141,NN003,Tiếng Hàn tổng hợp,Kim Huyn,NGOẠI NGỮ,10,130000.00,2026-05-24 06:22:11
+142,NN004,Tiếng Trung cấp tốc,Wang Li,NGOẠI NGỮ,8,110000.00,2026-05-24 06:22:11
+143,NN005,Luyện thi IELTS,Cambridge,NGOẠI NGỮ,5,300000.00,2026-05-24 06:22:11
+144,KH001,Lược sử thời gian,Stephen Hawking,KHOA HỌC,6,180000.00,2026-05-24 06:22:11
+145,KH002,Thế giới phẳng,Thomas Friedman,KHOA HỌC,4,190000.00,2026-05-24 06:22:11
+146,KH003,Lịch sử nhân loại,Yuval Harari,KHOA HỌC,7,250000.00,2026-05-24 06:22:11
+147,KH004,Vũ trụ trong vỏ hạt dẻ,Stephen Hawking,KHOA HỌC,5,170000.00,2026-05-24 06:22:11
+148,KH005,Khoa học về sự sống,Bill Bryson,KHOA HỌC,6,220000.00,2026-05-24 06:22:11
+149,IT006,Thuật toán và cấu trúc dữ liệu,Thomas H. Cormen,CÔNG NGHỆ,5,350000.00,2026-05-24 06:22:11
+150,IT007,Clean Code,Robert C. Martin,CÔNG NGHỆ,8,280000.00,2026-05-24 06:22:11
+151,IT008,Ngôn ngữ lập trình C++,Bjarne Stroustrup,CÔNG NGHỆ,4,210000.00,2026-05-24 06:22:11
+152,IT009,Hệ điều hành hiện đại,Andrew Tanenbaum,CÔNG NGHỆ,3,320000.00,2026-05-24 06:22:11
+153,IT010,Bảo mật hệ thống thông tin,William Stallings,CÔNG NGHỆ,5,290000.00,2026-05-24 06:22:11
+154,KT006,Dạy con làm giàu,Robert Kiyosaki,KINH TẾ,10,85000.00,2026-05-24 06:22:11
+155,KT007,Nhà đầu tư thông minh,Benjamin Graham,KINH TẾ,6,250000.00,2026-05-24 06:22:11
+156,KT008,Tâm lý học hành vi kinh tế,Dan Ariely,KINH TẾ,4,180000.00,2026-05-24 06:22:11
+157,KT009,Sức mạnh của tư duy tích cực,Norman Vincent,KINH TẾ,7,95000.00,2026-05-24 06:22:11
+158,KT010,Bí mật tư duy triệu phú,T. Harv Eker,KINH TẾ,12,110000.00,2026-05-24 06:22:11
+159,VH006,Giết con chim nhại,Harper Lee,VĂN HỌC,8,140000.00,2026-05-24 06:22:11
+160,VH007,Những người khốn khổ,Victor Hugo,VĂN HỌC,3,200000.00,2026-05-24 06:22:11
+161,VH008,Hoàng tử bé,Antoine de Saint-Exupéry,VĂN HỌC,20,60000.00,2026-05-24 06:22:11
+162,VH009,Suối nguồn,Ayn Rand,VĂN HỌC,5,300000.00,2026-05-24 06:22:11
+163,VH010,Kafka bên bờ biển,Haruki Murakami,VĂN HỌC,6,150000.00,2026-05-24 06:22:11
+164,KN006,Đánh thức con người phi thường,Tony Robbins,KỸ NĂNG,5,220000.00,2026-05-24 06:22:11
+165,KN007,Làm chủ sự thay đổi,Ken Blanchard,KỸ NĂNG,4,130000.00,2026-05-24 06:22:11
+166,KN008,Tư duy ngược,Nguyễn Anh Dũng,KỸ NĂNG,15,110000.00,2026-05-24 06:22:11
+167,KN009,Người nam châm,Jack Canfield,KỸ NĂNG,10,95000.00,2026-05-24 06:22:11
+168,KN010,Giao tiếp bất kỳ ai,Leil Lowndes,KỸ NĂNG,8,120000.00,2026-05-24 06:22:11
+169,NN006,Tự học tiếng Pháp,Marie Claire,NGOẠI NGỮ,3,180000.00,2026-05-24 06:22:11
+170,NN007,Tiếng Tây Ban Nha căn bản,Juan Carlos,NGOẠI NGỮ,4,160000.00,2026-05-24 06:22:11
+171,NN008,Từ vựng tiếng Đức,Hans Müller,NGOẠI NGỮ,3,170000.00,2026-05-24 06:22:11
+172,NN009,Tiếng Ý cho người mới,Rossi Lucca,NGOẠI NGỮ,2,190000.00,2026-05-24 06:22:11
+173,NN010,Luyện nghe tiếng Anh,Oxford Press,NGOẠI NGỮ,10,140000.00,2026-05-24 06:22:11
+174,KH006,Sapiens: Lược sử loài người,Yuval Noah Harari,KHOA HỌC,9,230000.00,2026-05-24 06:22:11
+175,KH007,Homo Deus: Lược sử tương lai,Yuval Noah Harari,KHOA HỌC,8,240000.00,2026-05-24 06:22:11
+176,KH008,Nguồn gốc các loài,Charles Darwin,KHOA HỌC,2,280000.00,2026-05-24 06:22:11
+177,KH009,Vũ trụ,Carl Sagan,KHOA HỌC,5,260000.00,2026-05-24 06:22:11
+178,KH010,Bản thiết kế vĩ đại,Stephen Hawking,KHOA HỌC,3,210000.00,2026-05-24 06:22:11
+179,IT011,Lập trình Android,Google Team,CÔNG NGHỆ,5,250000.00,2026-05-24 06:22:11
+180,IT012,Docker thực hành,Nigel Poulton,CÔNG NGHỆ,6,300000.00,2026-05-24 06:22:11
+181,KT011,Marketing du kích,Jay Conrad Levinson,KINH TẾ,5,160000.00,2026-05-24 06:22:11
+182,KT012,Kinh tế học cho mọi người,Ha-Joon Chang,KINH TẾ,4,190000.00,2026-05-24 06:22:11
+183,VH011,Chiến tranh và hòa bình,Leo Tolstoy,VĂN HỌC,2,350000.00,2026-05-24 06:22:11
+184,VH012,Anna Karenina,Leo Tolstoy,VĂN HỌC,1,320000.00,2026-05-24 06:22:11
+185,KN011,Kỹ năng quản lý thời gian,Brian Tracy,KỸ NĂNG,7,120000.00,2026-05-24 06:22:11
+186,KN012,Sức mạnh của sự tĩnh lặng,Eckhart Tolle,KỸ NĂNG,6,130000.00,2026-05-24 06:22:11
+187,NN011,Tiếng Nga căn bản,Ivan Petrov,NGOẠI NGỮ,2,200000.00,2026-05-24 06:22:11
+188,NN012,Tiếng Ả Rập cơ bản,Omar Sharif,NGOẠI NGỮ,1,250000.00,2026-05-24 06:22:11
+189,KH011,Lịch sử thời gian,Stephen Hawking,KHOA HỌC,5,180000.00,2026-05-24 06:22:11
+190,KH012,Sự sống trên sao Hỏa,NASA Research,KHOA HỌC,3,210000.00,2026-05-24 06:22:11
+191,IT013,Xây dựng Web hiện đại,Chris Coyier,CÔNG NGHỆ,4,240000.00,2026-05-24 06:22:11
+192,KT013,Chiến lược đại dương xanh,W. Chan Kim,KINH TẾ,6,210000.00,2026-05-24 06:22:11
+193,VH013,Tội ác và hình phạt,Fyodor Dostoevsky,VĂN HỌC,3,250000.00,2026-05-24 06:22:11
+194,KN013,Làm việc nhóm hiệu quả,Patrick Lencioni,KỸ NĂNG,5,140000.00,2026-05-24 06:22:11
+195,NN013,Học tiếng Thái cấp tốc,Somsak,NGOẠI NGỮ,2,150000.00,2026-05-24 06:22:11
+196,KH013,Mật mã Gen,Jennifer Doudna,KHOA HỌC,3,220000.00,2026-05-24 06:22:11
+197,IT014,Machine Learning với R,Brett Lantz,CÔNG NGHỆ,5,320000.00,2026-05-24 06:22:11
+198,KT014,Tư duy kinh tế tối giản,Timothy Taylor,KINH TẾ,5,170000.00,2026-05-24 06:22:11
+199,KT015,Tư duy phản biện,Timothy, KINH TẾ,8,320000.00,2026-05-24 06:22:11

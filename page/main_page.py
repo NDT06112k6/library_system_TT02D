@@ -274,10 +274,10 @@ class MainPage:
     def hien_thi_about(self):
         """Hiển thị cửa sổ thông tin về chương trình"""
         thong_tin_about = """
-=========================================
-||  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN        ||
-||       QUANG VINH LIBRARY             ||
-=========================================
+
+  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN        
+       QUANG VINH LIBRARY             
+
 
 📋 Thông Tin Chương Trình:
 - Phiên bản: 1.0
@@ -287,11 +287,11 @@ class MainPage:
 
 👥 Nhóm Thực Hiện: 1
 - Thành viên 1: Nguyễn Đức Trường (Nhóm trưởng)
-- Thành viên 2: 
+- Thành viên 2: Kiều Xuân Vinh
 - Thành viên 3: Chu Việt Quang
 
 🎓 Lớp: Lập Trình Python
-    Giảng Viên: 
+👨‍🏫 Giảng Viên: Phạm Nguyên Hồng
 🏫 Trường: Đại Học Hạ Long
 
 💻 Công Nghệ Sử Dụng:

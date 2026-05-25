@@ -166,7 +166,6 @@ class Query:
                             gia_tri = None
                         danh_sach_gia_tri.append(gia_tri)
                     self.create(danh_sach_gia_tri)
-            messagebox.showinfo("Thành công", "Nhập dữ liệu thành công!")
             return True
         except Exception as loi:
             messagebox.showerror("Lỗi", f"Nhập thất bại: {str(loi)}")

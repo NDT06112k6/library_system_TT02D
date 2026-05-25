@@ -15,27 +15,11 @@ from page.docgia import DocGiaPage
 
 
 class AppManager:
-    """
-    Lớp quản lý toàn bộ ứng dụng.
-    
-    Chức năng:
-    - Điều hướng giữa các page
-    - Quản lý phân quyền người dùng
-    - Quản lý cửa sổ chính
-    - Lưu thông tin phiên đăng nhập
-    """
+    """Lớp quản lý toàn bộ ứng dụng"""
 
     # HÀM KHỞI TẠO
     def __init__(self):
-        """
-        Khởi tạo ứng dụng
-        
-        Bao gồm:
-        - Tạo cửa sổ chính
-        - Thiết lập kích thước
-        - Khởi tạo thông tin đăng nhập
-        - Mở trang login đầu tiên
-        """
+        """Khởi tạo ứng dụng"""
 
         self.root = ctk.CTk()
         self.root.title("Hệ Thống Quản Lý Thư Viện")

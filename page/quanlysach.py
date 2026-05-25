@@ -338,25 +338,55 @@ class QuanLySachPage:
 
     def xuat_du_lieu_csv(self):
         """Hàm xuất dữ liệu sách sang file CSV"""
-        try:
-            ten_file = self.book_data.export_to_csv()
-            if ten_file:
-                messagebox.showinfo("Thành công", f"Đã xuất file: {ten_file}")
-        except Exception as loi:
-            messagebox.showerror("Lỗi", f"Không thể xuất file: {str(loi)}")
+        def do_export():
+            try:
+                ten_file = self.book_data.export_to_csv()
+                self.master.after(0, lambda: messagebox.showinfo("Thành công", f"Đã xuất file: {ten_file}"))
+            except Exception as loi:
+                self.master.after(0, lambda: messagebox.showerror("Lỗi", f"Không thể xuất file: {str(loi)}"))
+        
+        thread = threading.Thread(target=do_export)
+        thread.daemon = True
+        thread.start()
 
     def nhap_du_lieu_csv(self):
         """Hàm nhập dữ liệu sách từ file CSV"""
-        try:
-            duong_dan_file = filedialog.askopenfilename(
-                title="Chọn file CSV để nhập",
-                filetypes=[("Tệp CSV", "*.csv"), ("Tất cả tệp", "*.*")]
-            )
-            
-            if duong_dan_file:
+        duong_dan_file = filedialog.askopenfilename(
+            title="Chọn file CSV để nhập",
+            filetypes=[("Tệp CSV", "*.csv"), ("Tất cả tệp", "*.*")]
+        )
+        
+        if not duong_dan_file:
+            return
+    
+    # Chạy import ở thread riêng
+        def do_import():
+            try:
+                # Hỏi người dùng
+                if messagebox.askyesno(
+                    "Xác nhận",
+                    "Muốn xóa toàn bộ sách cũ rồi nhập CSV mới?\n(Nếu không → sẽ bị duplicate)"
+                ):
+                    self.book_data.delete_all()
+                
+                # Nhập CSV
                 ket_qua_nhap = self.book_data.import_from_csv(duong_dan_file)
+                
                 if ket_qua_nhap:
-                    self.load_books()
-                    messagebox.showinfo("Thành công", "Đã nhập dữ liệu thành công!")
-        except Exception as loi:
-            messagebox.showerror("Lỗi", f"Không thể nhập file: {str(loi)}")
+                    self.master.after(0, self.load_books)
+                    self.master.after(0, lambda: messagebox.showinfo(
+                        "Thành công", "Đã nhập dữ liệu thành công!"
+                    ))
+                else:
+                    self.master.after(0, lambda: messagebox.showwarning(
+                        "Cảnh báo", "Nhập CSV không thành công"
+                    ))
+            except Exception as loi:
+                error_msg = str(loi)  
+                self.master.after(0, lambda: messagebox.showerror(
+                    "Lỗi", f"Không thể nhập file: {error_msg}"
+                ))
+        
+        thread = threading.Thread(target=do_import)
+        thread.daemon = True
+        thread.start()

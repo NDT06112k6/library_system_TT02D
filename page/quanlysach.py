@@ -1,5 +1,4 @@
 import customtkinter as ctk
-import tkinter as tk
 from tkinter import messagebox, filedialog, ttk
 from query.books import BookData
 from query.muontra import MuonTraData  
@@ -350,7 +349,7 @@ class QuanLySachPage:
         thread.start()
 
     def nhap_du_lieu_csv(self):
-        """Hàm nhập dữ liệu sách từ file CSV"""
+        """Nhập dữ liệu từ file CSV (Sửa lỗi treo giao diện và hoàn thiện luồng Threading)"""
         duong_dan_file = filedialog.askopenfilename(
             title="Chọn file CSV để nhập",
             filetypes=[("Tệp CSV", "*.csv"), ("Tất cả tệp", "*.*")]
@@ -358,35 +357,48 @@ class QuanLySachPage:
         
         if not duong_dan_file:
             return
+        
+        # BƯỚC 1: Hỏi xác nhận ở Main Thread để tránh làm đơ giao diện Tkinter
+        xac_nhan_xoa = messagebox.askyesno(
+            "Xác nhận",
+            "Bạn có muốn xóa toàn bộ sách cũ trước khi nhập CSV mới không?\n(Nếu không -> dữ liệu mới sẽ được thêm nối tiếp vào bảng)"
+        )
     
-    # Chạy import ở thread riêng
+        # BƯỚC 2: Định nghĩa hàm chạy ngầm trong Thread phụ
         def do_import():
             try:
-                # Hỏi người dùng
-                if messagebox.askyesno(
-                    "Xác nhận",
-                    "Muốn xóa toàn bộ sách cũ rồi nhập CSV mới?\n(Nếu không → sẽ bị duplicate)"
-                ):
-                    self.book_data.delete_all()
+                if xac_nhan_xoa:
+                    # SỬA LỖI: Tự mở kết nối độc lập để chạy lệnh DELETE, 
+                    # KHÔNG dùng execute_query để né lỗi InterfaceError (No result set to fetch from)
+                    ket_noi = self.book_data.connect()
+                    if ket_noi:
+                        con_tro = ket_noi.cursor()
+                        con_tro.execute("DELETE FROM books")
+                        ket_noi.commit()
+                        con_tro.close()
+                        self.book_data.close()
                 
-                # Nhập CSV
+                # Thực hiện nạp file dữ liệu CSV vào MySQL
                 ket_qua_nhap = self.book_data.import_from_csv(duong_dan_file)
                 
+                # BƯỚC 3: Gửi lệnh cập nhật giao diện và thông báo về Main Thread an toàn
                 if ket_qua_nhap:
                     self.master.after(0, self.load_books)
                     self.master.after(0, lambda: messagebox.showinfo(
-                        "Thành công", "Đã nhập dữ liệu thành công!"
+                        "Thành công", "Đã nhập dữ liệu sách từ file CSV thành công!"
                     ))
                 else:
                     self.master.after(0, lambda: messagebox.showwarning(
-                        "Cảnh báo", "Nhập CSV không thành công"
+                        "Cảnh báo", "Nhập dữ liệu từ file CSV không thành công"
                     ))
             except Exception as loi:
+                # Chụp lại thông báo lỗi thành chuỗi trước khi truyền vào Lambda
                 error_msg = str(loi)  
-                self.master.after(0, lambda: messagebox.showerror(
-                    "Lỗi", f"Không thể nhập file: {error_msg}"
+                self.master.after(0, lambda msg=error_msg: messagebox.showerror(
+                    "Lỗi", f"Không thể nhập file sách: {msg}"
                 ))
         
+        # BƯỚC 4: Kích hoạt luồng chạy ngầm
         thread = threading.Thread(target=do_import)
         thread.daemon = True
         thread.start()

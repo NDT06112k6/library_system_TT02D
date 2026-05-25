@@ -1,5 +1,3 @@
-from email import header
-
 import customtkinter as ctk
 from tkinter import ttk
 from query.muontra import MuonTraData
@@ -214,31 +212,43 @@ class ThongKePage:
 
         return frame
 
-    # CÁC HÀM LOGIC DATABASE
+    # CÁC HÀM LOGIC DATABASE (ĐÃ NÂNG CẤP SỬ DỤNG PANDAS VÀ SỬA LỖI CỘT)
     def get_total_books_count(self):
-        """Lấy tổng số lượng sách từ cơ sở dữ liệu"""
+        """Lấy tổng số lượng đầu sách từ cơ sở dữ liệu bằng Pandas DataFrame"""
         try:
-            result = self.book_data.execute_query("SELECT COUNT(*) as total_count FROM books")
-            if result is not None and len(result) > 0:
-                return result[0]['total_count']
+            danh_sach_sach = self.book_data.get_all()
+            
+            # ĐÃ SỬA: Thêm cột 'created_at' vào cuối để khớp với 8 cột từ CSDL MySQL
+            ten_cac_cot = ["id", "ma_sach", "ten_sach", "tac_gia", "the_loai", "so_luong", "gia", "created_at"]
+            
+            df_sach = pd.DataFrame(danh_sach_sach, columns=ten_cac_cot)
+            
+            if not df_sach.empty:
+                return int(len(df_sach))
             return 0
         except Exception as e:
-            print(f"Lỗi khi đếm tổng số sách: {e}")
+            print(f"Lỗi khi đếm tổng số sách bằng Pandas: {e}")
             return 0    
 
     def get_borrow_records_by_status(self, status):
-        """Lấy số lượng phiếu mượn theo trạng thái"""
+        """Lấy số lượng phiếu mượn theo trạng thái bằng các hàm lọc của Pandas"""
         try:
-            result = self.muontra_data.execute_query(
-                "SELECT COUNT(*) as total_records FROM muontra WHERE trang_thai = %s AND username NOT IN ('1', 'admin')", (status,)
-            )
-            if result is not None and len(result) > 0:
-                return result[0]['total_records']
+            danh_sach_phieu = self.muontra_data.get_all()
+            
+            # ĐÃ SỬA: Thêm cột 'created_at' vào cuối để khớp với 10 cột từ CSDL MySQL
+            ten_cac_cot = ["id", "ma_phieu", "username", "ma_sach", "ngay_muon", "han_tra", "ngay_tra", "tien_phat", "trang_thai", "created_at"]
+            
+            df_phieu = pd.DataFrame(danh_sach_phieu, columns=ten_cac_cot)
+            
+            if not df_phieu.empty:
+                df_loc_nguoi_dung = df_phieu[~df_phieu["username"].isin(["1", "admin"])]
+                df_ket_qua = df_loc_nguoi_dung[df_loc_nguoi_dung["trang_thai"] == status]
+                return int(len(df_ket_qua))
             return 0
         except Exception as e:
-            print(f"Lỗi khi đếm số phiếu mượn: {e}")
+            print(f"Lỗi khi lọc số phiếu mượn bằng Pandas: {e}")
             return 0
-
+        
     def back_to_menu(self):
         """Trở về menu chính."""
         self.app_manager.show_main_page()

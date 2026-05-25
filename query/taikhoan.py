@@ -1,4 +1,3 @@
-import email
 from .base import Query
 import pandas as pd
 import re

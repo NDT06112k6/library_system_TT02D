@@ -2,8 +2,6 @@ import customtkinter as ctk
 from tkinter import ttk, messagebox
 from query.muontra import MuonTraData
 from query.books import BookData
-import os
-import platform
 
 class MainPage:
     def __init__(self, master, app_manager, username="Admin"):

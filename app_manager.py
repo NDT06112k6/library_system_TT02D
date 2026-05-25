@@ -1,4 +1,3 @@
-import tkinter as tk
 import customtkinter as ctk
 from page.login import LoginPage
 from page.taotk import TaoTKPage
@@ -69,11 +68,11 @@ class AppManager:
         self.current_page = MainPage(self.root, self, username)
 
     # TRANG TẠO TÀI KHOẢN
-    def show_taotk_page(self):
+    def show_taotk_page(self, is_admin=False):
         """Hiển thị trang tạo tài khoản mới"""
         self.clear_current_page()
         self.root.geometry("420x650")
-        self.current_page = TaoTKPage(self.root, self)
+        self.current_page = TaoTKPage(self.root, self, is_admin=is_admin)
     
     # TRANG ĐĂNG KÝ
     def show_register_page(self):

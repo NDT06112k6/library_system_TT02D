@@ -9,9 +9,10 @@ class TaoTKPage:
     Trang tạo tài khoản mới dành cho khách hàng với chức vụ mặc định là Độc giả.
     Hỗ trợ cuộn chuột khi form quá dài.
     """
-    def __init__(self, master, app_manager):
+    def __init__(self, master, app_manager, is_admin=False):
         self.master = master
         self.app_manager = app_manager
+        self.is_admin = is_admin
         self.account_data = AccountData()
         self.config()
         self.view()
@@ -112,11 +113,19 @@ class TaoTKPage:
             font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), corner_radius=8
         ).pack(pady=(0, 10))
 
-        ctk.CTkButton(
-            button_frame, text="QUAY LẠI ĐĂNG NHẬP", command=self.back_login,
-            width=280, height=42, fg_color="#BDC3C7", hover_color="#A6B1B9",
-            text_color="#2C3E50", font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), corner_radius=8
-        ).pack()
+        if not self.is_admin:
+            ctk.CTkButton(
+                button_frame, text="QUAY LẠI ĐĂNG NHẬP", command=self.back_login,
+                width=280, height=42, fg_color="#BDC3C7", hover_color="#A6B1B9",
+                text_color="#2C3E50", font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), corner_radius=8
+            ).pack()
+        else:
+            # Nếu là Admin, chỉ vẽ nút QUAY LẠI (về trang quản lý)
+            ctk.CTkButton(
+                button_frame, text="QUAY LẠI TRANG QUẢN LÝ", command=self.back_admin,
+                width=280, height=42, fg_color="#BDC3C7", hover_color="#A6B1B9",
+                text_color="#2C3E50", font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), corner_radius=8
+            ).pack()
     def on_focus(self, entry, is_focused):
         """Xử lý sự kiện focus cho entry"""
         if is_focused:
@@ -124,8 +133,10 @@ class TaoTKPage:
         else:
             entry.configure(border_color="#ABB2B9", border_width=1)
 
+    def back_admin(self):
+            self.app_manager.show_quanlytk_page()
+
     def back_login(self):
-        """Quay lại trang đăng nhập"""
         self.app_manager.show_login_page()
 
     def tao_tk(self):

@@ -7,8 +7,6 @@ Lớp truy vấn dành riêng cho nghiệp vụ độc giả:
   - Xem lịch sử mượn cá nhân
 """
 from .base import Query
-from datetime import date, timedelta
-
 MAX_BORROW = 5          # Giới hạn số sách mượn đồng thời
 BORROW_DAYS = 14        # Số ngày cho phép mượn
 

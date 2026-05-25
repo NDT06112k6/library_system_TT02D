@@ -12,7 +12,7 @@ CREATE TABLE taikhoan (
 
 -- Bảng lưu trữ thông tin sách
 CREATE TABLE books (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    ma_sach INT AUTO_INCREMENT PRIMARY KEY,
     ma_sach VARCHAR(50) UNIQUE NOT NULL,
     ten_sach VARCHAR(255) NOT NULL,
     tac_gia VARCHAR(255),

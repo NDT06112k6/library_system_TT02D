@@ -86,6 +86,7 @@ class QuanLyTKPage:
 
         # Cụm nút bấm chức năng chính xếp dọc
         CustomButton(sidebar_frame, text="🔄 Làm mới dữ liệu", command=self.load_accounts, style_type="info").pack(fill="x", padx=15, pady=5)
+        CustomButton(sidebar_frame, text="➕ Thêm tài khoản mới", command=self.add_account, style_type="success").pack(fill="x", padx=15, pady=5)
         CustomButton(sidebar_frame, text="✏️ Chỉnh sửa tài khoản", command=self.edit_account, style_type="warning").pack(fill="x", padx=15, pady=5)
         CustomButton(sidebar_frame, text="🗑️ Xóa tài khoản", command=self.delete_account, style_type="danger").pack(fill="x", padx=15, pady=5)
         
@@ -230,3 +231,6 @@ class QuanLyTKPage:
                     row[6]
                 ))
         self.status_label.configure(text=f"Tổng số: {len(data)} tài khoản")
+    
+    def add_account(self):
+        self.app_manager.show_taotk_page(is_admin=True)

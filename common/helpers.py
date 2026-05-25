@@ -4,13 +4,7 @@ import customtkinter as ctk
 
 # HÀM HIỂN THỊ BẢNG
 def show_table(parent, columns, column_configs, height=10):
-    """Hiển thị bảng Treeview với cấu hình chuẩn
-   
-    Parameters:
-    - parent: frame chứa bảng
-    - columns: danh sách tên cột
-    - column_configs: cấu hình từng cột (width, anchor)
-    - height: số dòng hiển thị
+    """Hiển thị bảng Treeview 
     """
     # Tạo frame chứa bảng
     table_frame = ctk.CTkFrame(parent, 

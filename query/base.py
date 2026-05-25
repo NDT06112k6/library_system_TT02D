@@ -1,39 +1,36 @@
-import mysql.connector
 import pandas as pd
 from tkinter import messagebox
 import csv
 from datetime import datetime
+# Import MySQLHandler từ thư mục database
+from database.mysql_handler import MySQLHandler
 
 class Query:
     def __init__(self, table_name=None, fields=None):
-        """Khởi tạo cấu hình kết nối MySQL và các thông số bảng dữ liệu"""
-        self.host = "localhost"
-        self.user = "root"
-        self.password = "root"
-        self.database = "library_system"
-        self.connection = None
+        """Khởi tạo cấu hình kết nối thông qua MySQLHandler"""
+        self.db_handler = MySQLHandler(host="localhost", user="root", password="root", database="library_system")
         self.table_name = table_name
         self.fields = fields
+        self.connection = None
 
     def connect(self):
-        """Thiết lập kết nối tới cơ sở dữ liệu MySQL"""
-        try:
-            self.connection = mysql.connector.connect(
-                host=self.host,
-                user=self.user,
-                password=self.password,
-                database=self.database,
-                charset="utf8mb4"
-            )
+        """Thiết lập kết nối tới cơ sở dữ liệu qua MySQLHandler"""
+        if self.db_handler.connect():
+            self.connection = self.db_handler.connection
             return self.connection
-        except mysql.connector.Error as err:
-            messagebox.showerror("Lỗi kết nối", f"Không thể kết nối cơ sở dữ liệu: {err}")
-            return None
+        return None
 
     def close(self):
-        """Đóng kết nối cơ sở dữ liệu nếu đang mở"""
-        if self.connection and self.connection.is_connected():
-            self.connection.close()
+        """Đóng kết nối cơ sở dữ liệu một cách an toàn"""
+        # Nếu hàm close() tồn tại trong MySQLHandler thì gọi nó
+        if hasattr(self.db_handler, 'close'):
+            self.db_handler.close()
+        # Nếu không, tự động đóng connection của thư viện mysql.connector
+        elif self.connection:
+            if self.connection.is_connected():
+                self.connection.close()
+                
+        self.connection = None
 
     def thuc_thi_query(self, query, params=None):
         """Thực thi câu lệnh truy vấn SQL và trả về kết quả dưới dạng danh sách"""
@@ -46,7 +43,7 @@ class Query:
             result = cursor.fetchall()
             conn.commit()
             return result
-        except mysql.connector.Error as err:
+        except Exception as err:
             messagebox.showerror("Lỗi truy vấn", f"Lỗi thực thi lệnh SQL: {err}")
             return None
         finally:
@@ -86,7 +83,7 @@ class Query:
             cursor.execute(query, (value,))
             conn.commit()
             return cursor.rowcount > 0
-        except mysql.connector.Error as err:
+        except Exception as err:
             messagebox.showerror("Lỗi xóa", f"Không thể xóa dữ liệu: {err}")
             return False
         finally:
@@ -106,7 +103,7 @@ class Query:
             cursor.execute(query, tuple(data))
             conn.commit()
             return True
-        except mysql.connector.Error as err:
+        except Exception as err:
             messagebox.showerror("Lỗi thêm", f"Không thể thêm dữ liệu: {err}")
             return False
         finally:
@@ -131,7 +128,7 @@ class Query:
             cursor.execute(query, tuple(params))
             conn.commit()
             return cursor.rowcount > 0
-        except mysql.connector.Error as err:
+        except Exception as err:
             messagebox.showerror("Lỗi cập nhật", f"Không thể cập nhật cơ sở dữ liệu: {err}")
             return False
         finally:

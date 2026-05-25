@@ -15,7 +15,6 @@ class ThemSachPage:
 
     def config(self): 
         self.master.title("Thêm sách")
-        # Tăng chiều cao lên một chút để chứa thêm ô nhập ISBN
         self.master.geometry("450x550")
         self.master.resizable(True, True)
 

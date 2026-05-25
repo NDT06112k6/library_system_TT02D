@@ -112,6 +112,7 @@ class ThongKePage:
 
         # Tính trung bình số lượng sách
         all_books = self.book_data.list_all()
+        #quantities (SoLuong)
         quantities = [book[5] for book in all_books]
         avg_qty = np.mean(quantities) if quantities else 0
         median_qty = np.median(quantities) if quantities else 0

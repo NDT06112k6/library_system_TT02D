@@ -189,6 +189,11 @@ class TaoTKPage:
         try:
             self.account_data.create([username, password, hoten, sdt, chucvu, gmail])
             messagebox.showinfo("Thông báo", "Tạo tài khoản thành công!")
-            self.app_manager.Hien_Thi_Trang_Dang_Nhap()
+            
+            if getattr(self, 'is_admin', False): 
+                self.back_admin()
+            else:
+                self.back_login()
+            
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tạo tài khoản: {str(e)}")

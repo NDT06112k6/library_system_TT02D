@@ -3,17 +3,7 @@ import tkinter as tk
 
 class CustomButton(tk.Button):
     """Button tùy chỉnh với nhiều style khác nhau
-    
-    Kế thừa từ:
-    - tk.Button
-
-    Các loại style:
-    - primary
-    - success
-    - danger
-    - warning
-    - info
-    - secondary"""
+    """
     
     def __init__(self, parent, 
                  text="", 

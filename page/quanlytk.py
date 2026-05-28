@@ -2,7 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox, ttk
 from common.button import CustomButton
 from query.taikhoan import AccountData
-
+#V
 
 class QuanLyTKPage:
 

@@ -1,6 +1,6 @@
 import pandas as pd
 from .base import Query
-
+#V
 class MuonTraData(Query):
     def __init__(self):
         """Khởi tạo thực thể quản lý dữ liệu phiếu mượn/trả thư viện"""

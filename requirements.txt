@@ -1,4 +1,8 @@
 customtkinter
 pandas
 "py -m pip install customtkinter pandas "
+
 mysql-connector-python  "py -m pip install mysql-connector-python"
+
+matplotlib
+""py -m pip install matplotlib""

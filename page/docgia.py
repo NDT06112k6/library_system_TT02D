@@ -4,7 +4,9 @@ import customtkinter as ctk
 from query.docgia import DocGiaQuery, MAX_BORROW, BORROW_DAYS
 from page.components import BookCard, BorrowRow, C, FONT_FAMILY
 from datetime import date, datetime
-
+import os
+import webbrowser
+import threading
 
 class DocGiaPage:
     """Trang dành cho độc giả: tìm sách, mượn sách, xem lịch sử."""
@@ -15,6 +17,7 @@ class DocGiaPage:
     def __init__(self, master: ctk.CTk, app_manager):
         self.master = master
         self.app_manager = app_manager
+        self._is_active = True
         self.query = DocGiaQuery()
         self.username = app_manager.current_user
         self.hoten = getattr(app_manager, "current_hoten", self.username)
@@ -44,7 +47,6 @@ class DocGiaPage:
 
         # Tính lại cột khi đổi kích thước cửa sổ 
         self.master.bind("<Configure>", self._Xu_Ly_Doi_Kich_Thuoc) 
-
         self._Canh_Bao_Qua_Han()
 
     # 1. XÂY DỰNG BỐ CỤC
@@ -65,19 +67,17 @@ class DocGiaPage:
         def _Ve_Trang_Chu():
             if self._current_view != self.VIEW_BOOKS:
                 self._current_view = self.VIEW_BOOKS
-
                 txt = (
                     "⚠️ Sách quá hạn!"
                     if getattr(self, "_has_overdue", False)
                     else "📋 Sách đã mượn"
                 )
-
                 self.btn_history.configure(text=txt)
                 self._Ap_Dung_Bo_Loc()
 
         home_btn = ctk.CTkButton(
             header,
-            text="📚  Thư Viện Quang Vinh",
+            text="📚   Thư Viện Quang Vinh",
             font=(FONT_FAMILY, 18, "bold"),
             text_color="white",
             fg_color="transparent",
@@ -117,7 +117,7 @@ class DocGiaPage:
         # Thông tin user
         ctk.CTkLabel(
             header,
-            text=f"👤  {self.hoten}",
+            text=f"👤   {self.hoten}",
             font=(FONT_FAMILY, 11),
             text_color="#93C5FD",
         ).pack(side="right", padx=12)
@@ -152,13 +152,7 @@ class DocGiaPage:
             font=(FONT_FAMILY, 12),
             width=340,
         )
-
-        self.search_entry.pack(
-            side="left",
-            padx=(4, 10),
-            pady=4
-        )
-
+        self.search_entry.pack(side="left", padx=(4, 10), pady=4)
         self.search_entry.bind("<KeyRelease>", self._Tim_Kiem)
 
         # BODY
@@ -176,7 +170,6 @@ class DocGiaPage:
             corner_radius=0,
             border_width=0
         )
-
         sb.pack(side="left", fill="y")
         sb.pack_propagate(False)
 
@@ -200,7 +193,7 @@ class DocGiaPage:
         self.cat_menu = ctk.CTkOptionMenu(
             sb,
             variable=self.cat_var,
-                values=["Tất cả"], 
+            values=["Tất cả"], 
             command=self._Ap_Dung_Bo_Loc,
             fg_color="white",
             button_color=C["primary"],
@@ -209,7 +202,6 @@ class DocGiaPage:
             width=174,
             corner_radius=8,
         )
-
         self.cat_menu.pack(padx=18, pady=(4, 14))
 
         # Sắp xếp
@@ -221,13 +213,7 @@ class DocGiaPage:
         ).pack(anchor="w", padx=18)
 
         self.sort_var = tk.StringVar(value="A–Z")
-
-        sort_options = [
-            "A–Z",
-            "Mới nhất",
-            "Phổ biến",
-            "Còn sách"
-        ]
+        sort_options = ["A–Z", "Mới nhất", "Phổ biến", "Còn sách"]
 
         ctk.CTkOptionMenu(
             sb,
@@ -276,13 +262,12 @@ class DocGiaPage:
             font=(FONT_FAMILY, 12, "bold"),
             text_color=C["success"]
         )
-
         self.quota_label.pack(anchor="w", padx=18)
 
         # Nút Làm mới
         ctk.CTkButton(
             sb,
-            text="🔄  Làm mới",
+            text="🔄   Làm mới",
             height=34,
             corner_radius=8,
             fg_color=C["primary"],
@@ -290,7 +275,33 @@ class DocGiaPage:
             font=(FONT_FAMILY, 11),
             command=self._Lam_Moi_Sach,
         ).pack(fill="x", padx=18, pady=(24, 0))
+
+        # Nút Mở tài liệu HDSD PDF (Đạt điểm tối đa theo biểu điểm)
+        ctk.CTkButton(
+            sb,
+            text="📄 Hướng Dẫn Sử Dụng",
+            height=34,
+            corner_radius=8,
+            fg_color="#10B981", 
+            hover_color="#059669",
+            text_color="white",
+            font=(FONT_FAMILY, 11, "bold"),
+            command=self._Mo_File_PDF_HDSD,
+        ).pack(fill="x", padx=18, pady=(10, 0))
     
+        # Nút Tổng quan chương trình (About)
+        ctk.CTkButton(
+            sb, 
+            text="ℹ️ Tổng Quan Chương Trình",
+            height=34,
+            corner_radius=8,
+            fg_color="#17a2b8",
+            hover_color="#138496",
+            text_color="white",
+            font=(FONT_FAMILY, 11, "bold"),
+            command=self.hien_thi_about,
+        ).pack(fill="x", padx=18, pady=(10, 0))
+
     # Nội dung
     def _Xay_Dung_Noi_Dung(self, parent):
         self.content_frame = ctk.CTkFrame(
@@ -298,7 +309,6 @@ class DocGiaPage:
             fg_color=C["bg"],
             corner_radius=0
         )
-
         self.content_frame.pack(fill="both", expand=True)
 
         # Thanh trạng thái nhỏ
@@ -309,16 +319,14 @@ class DocGiaPage:
             text_color=C["muted"],
             anchor="w",
         )
-
         self.status_bar.pack(fill="x", padx=18, pady=(10, 4))
 
-        # vùng chứa có thể cuộn
+        # Vùng chứa có thể cuộn
         self.scroll = ctk.CTkScrollableFrame(
             self.content_frame,
             fg_color=C["bg"],
             corner_radius=0,
         )
-
         self.scroll.pack(fill="both", expand=True, padx=10, pady=(0, 4))
 
         # Thanh phân trang
@@ -330,40 +338,40 @@ class DocGiaPage:
             border_width=1,
             border_color=C["border"],
         )
-
         self._pagination_bar.pack(fill="x", side="bottom")
         self._pagination_bar.pack_propagate(False)
 
-        self._page_btn_container = ctk.CTkFrame(
-            self._pagination_bar,
-            fg_color="transparent"
-        )
-
-        self._page_btn_container.place(
-            relx=0.5,
-            rely=0.5,
-            anchor="center"
-        )
+        self._page_btn_container = ctk.CTkFrame(self._pagination_bar, fg_color="transparent")
+        self._page_btn_container.place(relx=0.5, rely=0.5, anchor="center")
 
     # 2. TẢI DỮ LIỆU
     def _Tai_The_Loai(self):
-        cats = ["Tất cả"] + self.query.get_categories()
-        self.cat_menu.configure(values=cats)
+        try:
+            cats = ["Tất cả"] + self.query.get_categories()
+            self.cat_menu.configure(values=cats)
+        except Exception:
+            pass
 
     def _Lam_Moi_Sach(self):
-        self._all_books = self.query.get_all_books()
+        self.status_bar.configure(text="⏳ Đang đồng bộ kho sách từ Database...")
+        
+        def run_load():
+            try:
+                self._all_books = self.query.get_all_books()
+                if self._is_active and self.master.winfo_exists():
+                    self.master.after(0, self._Cap_Nhat_Sau_Khi_Tai)
+            except Exception as e:
+                print(f"Lỗi tải dữ liệu: {e}")
+
+        threading.Thread(target=run_load, daemon=True).start()
+
+    def _Cap_Nhat_Sau_Khi_Tai(self):
         self._Cap_Nhat_Han_Muon()
         self._Ap_Dung_Bo_Loc()
 
     def _Cap_Nhat_Han_Muon(self):
         active = self.query.count_active_borrows(self.username)
-
-        color = (
-            C["danger"]
-            if active >= MAX_BORROW
-            else C["success"]
-        )
-
+        color = C["danger"] if active >= MAX_BORROW else C["success"]
         self.quota_label.configure(
             text=f"{active} / {MAX_BORROW} sách",
             text_color=color
@@ -371,15 +379,22 @@ class DocGiaPage:
 
     # 3. TÌM KIẾM & LỌC
     def _Tim_Kiem(self, *_):
-        """Debounce: chỉ query sau 300 ms kể từ lần gõ cuối."""
+        """Debounce: chỉ truy vấn sau 300 ms kể từ lần gõ cuối."""
+        if not self._is_active:
+            return
 
         if self._search_after_id:
-            self.master.after_cancel(self._search_after_id)
+            try:
+                if self.master.winfo_exists():
+                    self.master.after_cancel(self._search_after_id)
+            except Exception:
+                pass
 
-        self._search_after_id = self.master.after(
-            300,
-            self._Ap_Dung_Bo_Loc
-        )
+        try:
+            if self._is_active and self.master.winfo_exists():
+                self._search_after_id = self.master.after(300, self._Ap_Dung_Bo_Loc)
+        except Exception:
+            pass
 
     def _Ap_Dung_Bo_Loc(self, *_):
         if self._current_view != self.VIEW_BOOKS:
@@ -395,23 +410,11 @@ class DocGiaPage:
             "Còn sách": "available"
         }.get(self.sort_var.get(), "az")
 
-        self._filtered_books = self.query.search_books(
-            kw,
-            cat,
-            sort
-        )
-
+        self._filtered_books = self.query.search_books(kw, cat, sort)
         self._current_page = 1
-
-        self._total_pages = max(
-            1,
-            -(-len(self._filtered_books) // self.BOOKS_PER_PAGE)
-        )
-
-        self.status_bar.configure(
-            text=f"Tìm thấy {len(self._filtered_books)} cuốn sách"
-        )
-
+        self._total_pages = max(1, -(-len(self._filtered_books) // self.BOOKS_PER_PAGE))
+        
+        self.status_bar.configure(text=f"Tìm thấy {len(self._filtered_books)} cuốn sách")
         self._Hien_Thi_Sach()
 
     # 4. RENDER LƯỚI SÁCH + PAGINATION
@@ -420,33 +423,21 @@ class DocGiaPage:
         end = start + self.BOOKS_PER_PAGE
 
         page_books = self._filtered_books[start:end]
-
         self._Render_Luoi(page_books)
         self._Render_Phan_Trang()
 
     def _Chuyen_Trang(self, page: int):
-        """Chuyển sang trang chỉ định, cuộn lên đầu."""
-
-        self._current_page = max(
-            1,
-            min(page, self._total_pages)
-        )
-
+        self._current_page = max(1, min(page, self._total_pages))
         self._Hien_Thi_Sach()
-
-        # Cuộn về đầu danh sách
         try:
             self.scroll._parent_canvas.yview_moveto(0)
         except Exception:
             pass
 
     def _Render_Phan_Trang(self):
-        """Vẽ lại thanh số trang bên dưới lưới."""
-
         for w in self._page_btn_container.winfo_children():
             w.destroy()
 
-        # Ẩn toàn bộ thanh nếu chỉ có 1 trang
         if self._total_pages <= 1:
             self._pagination_bar.pack_forget()
             return
@@ -456,29 +447,10 @@ class DocGiaPage:
         cp = self._current_page
         tp = self._total_pages
 
-        def _Tao_Nut(
-            text,
-            page,
-            active=False,
-            disabled=False
-        ):
-            fg = (
-                C["primary"]
-                if active
-                else ("#E5E7EB" if disabled else "#F3F4F6")
-            )
-
-            txt = (
-                "white"
-                if active
-                else (C["muted"] if disabled else C["text"])
-            )
-
-            hov = (
-                C["primary_h"]
-                if active
-                else ("#E5E7EB" if disabled else "#E5E7EB")
-            )
+        def _Tao_Nut(text, page, active=False, disabled=False):
+            fg = C["primary"] if active else ("#E5E7EB" if disabled else "#F3F4F6")
+            txt = "white" if active else (C["muted"] if disabled else C["text"])
+            hov = C["primary_h"] if active else "#E5E7EB"
 
             b = ctk.CTkButton(
                 self._page_btn_container,
@@ -491,37 +463,19 @@ class DocGiaPage:
                 corner_radius=6,
                 font=(FONT_FAMILY, 11, "bold" if active else "normal"),
                 state="disabled" if disabled else "normal",
-                command=(
-                    lambda p=page: self._Chuyen_Trang(p)
-                ) if not disabled else None,
+                command=(lambda p=page: self._Chuyen_Trang(p)) if not disabled else None,
             )
-
             b.pack(side="left", padx=2)
 
-        # Nút ◀ Trước
         _Tao_Nut("◀", cp - 1, disabled=(cp == 1))
 
-        # Dãy số trang
-        def _Lay_Trang_Hien_Thi(
-            current,
-            total,
-            window=2
-        ):
-            pages = set()
-
-            pages.add(1)
-            pages.add(total)
-
-            for p in range(
-                max(2, current - window),
-                min(total, current + window + 1)
-            ):
+        def _Lay_Trang_Hien_Thi(current, total, window=2):
+            pages = set([1, total])
+            for p in range(max(2, current - window), min(total, current + window + 1)):
                 pages.add(p)
-
             return sorted(pages)
 
         prev = None
-
         for p in _Lay_Trang_Hien_Thi(cp, tp):
             if prev is not None and p - prev > 1:
                 ctk.CTkLabel(
@@ -535,10 +489,8 @@ class DocGiaPage:
             _Tao_Nut(p, p, active=(p == cp))
             prev = p
 
-        # Nút ▶ Tiếp
         _Tao_Nut("▶", cp + 1, disabled=(cp == tp))
 
-        # Nhãn "Trang X / Y"
         ctk.CTkLabel(
             self._pagination_bar,
             text=f"Trang {cp} / {tp}",
@@ -546,18 +498,14 @@ class DocGiaPage:
             text_color=C["muted"],
         ).place(relx=0.02, rely=0.5, anchor="w")
 
-        # Nhãn tổng sách
-        total_books = len(self._filtered_books)
-
         ctk.CTkLabel(
             self._pagination_bar,
-            text=f"{total_books} cuốn",
+            text=f"{len(self._filtered_books)} cuốn",
             font=(FONT_FAMILY, 10),
             text_color=C["muted"],
         ).place(relx=0.98, rely=0.5, anchor="e")
 
     def _Render_Luoi(self, books: list):
-        # Xóa cũ
         for w in self.scroll.winfo_children():
             w.destroy()
 
@@ -566,20 +514,14 @@ class DocGiaPage:
         if not books:
             ctk.CTkLabel(
                 self.scroll,
-                text="😕  Không tìm thấy sách nào",
+                text="😕   Không tìm thấy sách nào",
                 font=(FONT_FAMILY, 14),
                 text_color=C["muted"],
             ).pack(pady=60)
-
             return
 
         cols = self._Tinh_So_Cot()
-
-        rows_frame = ctk.CTkFrame(
-            self.scroll,
-            fg_color="transparent"
-        )
-
+        rows_frame = ctk.CTkFrame(self.scroll, fg_color="transparent")
         rows_frame.pack(fill="both", expand=True)
 
         for i, book in enumerate(books):
@@ -589,15 +531,7 @@ class DocGiaPage:
                 on_borrow=self._Xac_Nhan_Muon,
                 on_detail=self._Hien_Thi_Chi_Tiet,
             )
-
-            card.grid(
-                row=i // cols,
-                column=i % cols,
-                padx=8,
-                pady=8,
-                sticky="nsew"
-            )
-
+            card.grid(row=i // cols, column=i % cols, padx=8, pady=8, sticky="nsew")
             self._card_widgets.append(card)
 
         for c in range(cols):
@@ -607,18 +541,12 @@ class DocGiaPage:
         try:
             if not self.scroll.winfo_exists():
                 return self._cols
-
             w = self.scroll.winfo_width()
-
         except Exception:
             return self._cols
 
-        if w < 600:
-            return 2
-
-        if w < 900:
-            return 3
-
+        if w < 600: return 2
+        if w < 900: return 3
         return 4
 
     def _Xu_Ly_Doi_Kich_Thuoc(self, event):
@@ -627,156 +555,96 @@ class DocGiaPage:
 
         if not hasattr(self, "scroll") or not self.scroll.winfo_exists():
             return
-
         new_cols = self._Tinh_So_Cot()
 
         if new_cols != self._cols:
             self._cols = new_cols
-
             if self._current_view == self.VIEW_BOOKS:
                 self._Hien_Thi_Sach()
 
     # 5. MƯỢN SÁCH
     def _Xac_Nhan_Muon(self, ma_sach: str):
         book = self.query.get_book_detail(ma_sach)
-
         if not book:
-            messagebox.showerror(
-                "Lỗi",
-                "Không tìm thấy thông tin sách."
-            )
+            messagebox.showerror("Lỗi", "Không tìm thấy thông tin sách.")
             return
 
         ten = book.get("ten_sach", ma_sach)
-
-        # Xác nhận
         if not messagebox.askyesno(
             "Xác nhận gửi yêu cầu mượn",
-            f"Bạn muốn gửi yêu cầu mượn:\n\n📖  {ten}\n\n"
+            f"Bạn muốn gửi yêu cầu mượn:\n\n📖   {ten}\n\n"
             f"Yêu cầu sẽ chờ quản lý xét duyệt.\n"
             f"Sau khi duyệt, sách sẽ được tính thời hạn {BORROW_DAYS} ngày.\n\n"
             f"Xác nhận?"
         ):
             return
 
-        # Gửi yêu cầu
-        ok, msg, _ = self.query.create_borrow(
-            self.username,
-            ma_sach
-        )
+        ok, msg, _ = self.query.create_borrow(self.username, ma_sach)
 
         if ok:
             messagebox.showinfo(
                 "Gửi yêu cầu thành công ✅",
-                f"Đã gửi yêu cầu mượn:\n\n📖  {ten}\n\n"
+                f"Đã gửi yêu cầu mượn:\n\n📖   {ten}\n\n"
                 f"Trạng thái: ⏳ Chờ quản lý duyệt\n"
                 f"Vào \"Sách đã mượn\" để theo dõi."
             )
-
             self._Lam_Moi_Sach()
-
         else:
-            messagebox.showerror(
-                "Không thể gửi yêu cầu ❌",
-                msg
-            )
+            messagebox.showerror("Không thể gửi yêu cầu ❌", msg)
 
     # 6. CHI TIẾT SÁCH
     def _Hien_Thi_Chi_Tiet(self, ma_sach: str):
         book = self.query.get_book_detail(ma_sach)
-
         if not book:
             return
-
+            
         pop = ctk.CTkToplevel(self.master)
-
         pop.title("Chi tiết sách")
         pop.geometry("400x380")
         pop.resizable(False, False)
         pop.grab_set()
 
         avail = int(book.get("so_luong", 0)) > 0
+        cover_color = BookCard.COVER_COLORS[hash(ma_sach) % len(BookCard.COVER_COLORS)]
 
-        cover_color = BookCard.COVER_COLORS[
-            hash(ma_sach) % len(BookCard.COVER_COLORS)
-        ]
-
-        # Bìa
-        cover = ctk.CTkFrame(
-            pop,
-            fg_color=cover_color,
-            height=120,
-            corner_radius=0
-        )
-
+        cover = ctk.CTkFrame(pop, fg_color=cover_color, height=120, corner_radius=0)
         cover.pack(fill="x")
         cover.pack_propagate(False)
 
-        short = "".join(
-            w[0].upper()
-            for w in book.get("ten_sach", "?").split()[:3]
-        )
+        short = "".join(w[0].upper() for w in book.get("ten_sach", "?").split()[:3])
 
         ctk.CTkLabel(
-            cover,
-            text=short,
-            font=(FONT_FAMILY, 36, "bold"),
-            text_color="white"
+            cover, text=short, font=(FONT_FAMILY, 36, "bold"), text_color="white"
         ).place(relx=0.5, rely=0.5, anchor="center")
 
-        body = ctk.CTkFrame(
-            pop,
-            fg_color="white",
-            corner_radius=0
-        )
-
+        body = ctk.CTkFrame(pop, fg_color="white", corner_radius=0)
         body.pack(fill="both", expand=True)
 
         def _Dong_Thong_Tin(label, value):
             f = ctk.CTkFrame(body, fg_color="transparent")
-
             f.pack(fill="x", padx=24, pady=3)
 
             ctk.CTkLabel(
-                f,
-                text=label,
-                font=(FONT_FAMILY, 10),
-                text_color=C["muted"],
-                width=80,
-                anchor="w"
+                f, text=label, font=(FONT_FAMILY, 10), text_color=C["muted"], width=80, anchor="w"
             ).pack(side="left")
 
             ctk.CTkLabel(
-                f,
-                text=str(value),
-                font=(FONT_FAMILY, 11, "bold"),
-                text_color=C["text"],
-                anchor="w"
+                f, text=str(value), font=(FONT_FAMILY, 11, "bold"), text_color=C["text"], anchor="w"
             ).pack(side="left")
 
         ctk.CTkLabel(
-            body,
-            text=book.get("ten_sach", ""),
-            font=(FONT_FAMILY, 14, "bold"),
-            text_color=C["text"],
-            wraplength=340
+            body, text=book.get("ten_sach", ""), font=(FONT_FAMILY, 14, "bold"), text_color=C["text"], wraplength=340
         ).pack(padx=24, pady=(16, 4), anchor="w")
 
         _Dong_Thong_Tin("Tác giả", book.get("tac_gia", "—"))
         _Dong_Thong_Tin("Thể loại", book.get("the_loai", "—"))
         _Dong_Thong_Tin("Mã sách", book.get("ma_sach", "—"))
         _Dong_Thong_Tin("Tồn kho", f"{book.get('so_luong', 0)} cuốn")
-
-        _Dong_Thong_Tin(
-            "Giá bìa",
-            f"{int(book.get('gia', 0)):,} ₫"
-            if book.get("gia")
-            else "—"
-        )
+        _Dong_Thong_Tin("Giá bìa", f"{int(book.get('gia', 0)):,} ₫" if book.get("gia") else "—")
 
         ctk.CTkButton(
             body,
-            text="📨  Gửi yêu cầu mượn" if avail else "Hết sách",
+            text="📨   Gửi yêu cầu mượn" if avail else "Hết sách",
             fg_color=C["primary"] if avail else "#D1D5DB",
             hover_color=C["primary_h"] if avail else "#D1D5DB",
             text_color="white" if avail else C["muted"],
@@ -784,45 +652,23 @@ class DocGiaPage:
             height=36,
             corner_radius=8,
             font=(FONT_FAMILY, 12, "bold"),
-            command=lambda: (
-                pop.destroy(),
-                self._Xac_Nhan_Muon(ma_sach)
-            ),
+            command=lambda: (pop.destroy(), self._Xac_Nhan_Muon(ma_sach)),
         ).pack(fill="x", padx=24, pady=(12, 6))
 
         ctk.CTkButton(
-            body,
-            text="Đóng",
-            fg_color="#F3F4F6",
-            hover_color="#E5E7EB",
-            text_color=C["text"],
-            height=32,
-            corner_radius=8,
-            command=pop.destroy
+            body, text="Đóng", fg_color="#F3F4F6", hover_color="#E5E7EB", text_color=C["text"], height=32, corner_radius=8, command=pop.destroy
         ).pack(fill="x", padx=24, pady=(0, 16))
 
     # 7. LỊCH SỬ MƯỢN
     def _Chuyen_View(self):
         if self._current_view == self.VIEW_BOOKS:
             self._current_view = self.VIEW_HISTORY
-
-            self.btn_history.configure(
-                text="📚 Danh sách sách"
-            )
-
+            self.btn_history.configure(text="📚 Danh sách sách")
             self._Hien_Thi_Lich_Su()
-
         else:
             self._current_view = self.VIEW_BOOKS
-
-            txt = (
-                "⚠️ Sách quá hạn!"
-                if getattr(self, "_has_overdue", False)
-                else "📋 Sách đã mượn"
-            )
-
+            txt = "⚠️ Sách quá hạn!" if getattr(self, "_has_overdue", False) else "📋 Sách đã mượn"
             self.btn_history.configure(text=txt)
-
             self._Ap_Dung_Bo_Loc()
 
     def _Hien_Thi_Lich_Su(self):
@@ -830,47 +676,24 @@ class DocGiaPage:
             w.destroy()
 
         records = self.query.get_my_borrows(self.username)
-
-        self.status_bar.configure(
-            text=f"Lịch sử mượn: {len(records)} phiếu"
-        )
+        self.status_bar.configure(text=f"Lịch sử mượn: {len(records)} phiếu")
 
         if not records:
             ctk.CTkLabel(
-                self.scroll,
-                text="📭  Bạn chưa mượn sách nào",
-                font=(FONT_FAMILY, 14),
-                text_color=C["muted"]
+                self.scroll, text="📭   Bạn chưa mượn sách nào", font=(FONT_FAMILY, 14), text_color=C["muted"]
             ).pack(pady=60)
-
             return
 
-        # Header bảng
-        header = ctk.CTkFrame(
-            self.scroll,
-            fg_color="#E5E7EB",
-            corner_radius=6,
-            height=36
-        )
-
+        header = ctk.CTkFrame(self.scroll, fg_color="#E5E7EB", corner_radius=6, height=36)
         header.pack(fill="x", pady=(0, 2))
         header.pack_propagate(False)
 
         for txt, w in [
-            ("STT", 40),
-            ("Tên sách", 190),
-            ("Tác giả", 120),
-            ("Ngày mượn", 90),
-            ("Hạn trả", 90),
-            ("Trạng thái", 160)
+            ("STT", 40), ("Tên sách", 190), ("Tác giả", 120),
+            ("Ngày mượn", 90), ("Hạn trả", 90), ("Trạng thái", 160)
         ]:
             ctk.CTkLabel(
-                header,
-                text=txt,
-                font=(FONT_FAMILY, 10, "bold"),
-                text_color=C["text_sub"],
-                width=w,
-                anchor="w"
+                header, text=txt, font=(FONT_FAMILY, 10, "bold"), text_color=C["text_sub"], width=w, anchor="w"
             ).pack(side="left", padx=4)
 
         for idx, rec in enumerate(records, 1):
@@ -878,60 +701,87 @@ class DocGiaPage:
             BorrowRow(self.scroll, rec, idx).pack(fill="x", pady=1)
 
     def _Canh_Bao_Qua_Han(self):
-        """Kiểm tra và đổi màu nút Header nếu độc giả có sách quá hạn"""
-
         records = self.query.get_my_borrows(self.username)
-
         has_overdue = False
         today = date.today()
 
         for rec in records:
-            """
-            Test hạn trả quá hạn
-            if rec.get("trang_thai") == "dang_muon":
-                rec["han_tra"] = "2026-05-01"
-            """
-
-            if (
-                rec.get("trang_thai") == "dang_muon"
-                and rec.get("han_tra")
-            ):
+            if rec.get("trang_thai") == "dang_muon" and rec.get("han_tra"):
                 try:
                     ht = rec["han_tra"]
-
                     if isinstance(ht, str):
-                        ht = datetime.strptime(
-                            ht,
-                            "%Y-%m-%d"
-                        ).date()
-
+                        ht = datetime.strptime(ht, "%Y-%m-%d").date()
                     if today > ht:
                         has_overdue = True
                         break
-
                 except Exception:
                     pass
 
         self._has_overdue = has_overdue
-
         if has_overdue:
-            self.btn_history.configure(
-                fg_color="#DC2626",
-                hover_color="#B91C1C",
-                text="⚠️ Sách quá hạn!"
-            )
-
+            self.btn_history.configure(fg_color="#DC2626", hover_color="#B91C1C", text="⚠️ Sách quá hạn!")
         else:
-            self.btn_history.configure(
-                fg_color="#2563EB",
-                hover_color="#1D4ED8",
-                text="📋 Sách đã mượn"
-            )
+            self.btn_history.configure(fg_color="#2563EB", hover_color="#1D4ED8", text="📋 Sách đã mượn")
 
     # 8. ĐĂNG XUẤT
     def _Dang_Xuat(self):
-        if messagebox.askyesno(
-            "Đăng xuất",
-            "Bạn có chắc muốn đăng xuất?"
-        ):
+        self._is_active = False
+        if messagebox.askyesno("Đăng xuất", "Bạn có chắc muốn đăng xuất?"):
             self.app_manager.Hien_Thi_Trang_Dang_Nhap()
+
+    # HÀM MỞ FILE PDF HDSD
+    def _Mo_File_PDF_HDSD(self):     
+        file_name = "HDSD.pdf" 
+        if os.path.exists(file_name):
+            try:
+                duong_dan = os.path.abspath(file_name)
+                messagebox.showinfo("Thông báo", "Hệ thống đang mở tệp PDF Hướng dẫn sử dụng!")
+                webbrowser.open(duong_dan)
+            except Exception as e:
+                messagebox.showerror("Lỗi", f"Không thể mở PDF: {str(e)}")
+        else:
+            messagebox.showwarning("Thông báo", f"Tệp tin '{file_name}' không tồn tại trong thư mục gốc của dự án!")
+
+    # HÀM HIỂN THỊ THÔNG TIN ABOUT NHÓM
+    def hien_thi_about(self):
+        """Hiển thị cửa sổ thông tin về chương trình"""
+        thong_tin_about = """
+  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN        
+       QUANG VINH LIBRARY             
+
+📋 Thông Tin Chương Trình:
+- Phiên bản: 1.0
+- Năm phát triển: 2026
+- Mô tả: Ứng dụng quản lý kho sách,
+  mượn trả sách, thống kê báo cáo
+
+👥 Nhóm Thực Hiện: 1
+- Thành viên 1: Nguyễn Đức Trường (Nhóm trưởng)
+- Thành viên 2: Kiều Xuân Vinh
+- Thành viên 3: Chu Việt Quang
+
+🎓 Lớp: Lập Trình Python
+👨‍🏫 Giảng Viên: Phạm Nguyên Hồng
+🏫 Trường: Đại Học Hạ Long
+
+💻 Công Nghệ Sử Dụng:
+- CustomTkinter (GUI)
+- MySQL (Database)
+- Pandas & NumPy (Xử lý dữ liệu)
+
+📧 Liên Hệ: ductruong6116@gmail.com
+"""
+        messagebox.showinfo("Tổng Quan Về Chương Trình", thong_tin_about)
+
+    def cleanup(self):
+        """Dọn dẹp tài nguyên: huỷ after callbacks"""
+        self._is_active = False
+        try:
+            if self._search_after_id:
+                try:
+                    self.master.after_cancel(self._search_after_id)
+                except Exception:
+                    pass
+                self._search_after_id = None
+        except Exception as e:
+            print(f"Lỗi dọn dẹp: {e}")

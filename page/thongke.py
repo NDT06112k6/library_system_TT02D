@@ -4,7 +4,9 @@ from query.muontra import MuonTraData
 from query.books import BookData
 import numpy as np
 import pandas as pd
-
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+#Q
 
 # Bảng màu chuẩn đồng bộ với hệ thống
 C = {
@@ -71,10 +73,20 @@ class ThongKePage:
         self.scroll_view.pack(fill="both", expand=True, padx=20, pady=(0, 20))
         self.scroll_view.columnconfigure(0, weight=1)
 
-        # 3. Khu vực Thẻ thống kê (Cards) 
         self._Xay_Dung_The_Thong_Ke()
 
-        # 4. Khu vực Bảng dữ liệu (Tables) 
+        frame_bieu_do = ctk.CTkFrame(
+            self.scroll_view,
+            fg_color=C["card"],
+            corner_radius=12,
+            border_width=1,
+            border_color=C["border"]
+        )
+
+        frame_bieu_do.grid(row=2, column=0, sticky="ew", pady=(10, 20))
+
+        self._Ve_Bieu_Do(frame_bieu_do)
+ 
         self._Xay_Dung_Bang()
 
     def _Xay_Dung_The_Thong_Ke(self): 
@@ -249,6 +261,31 @@ class ThongKePage:
         except Exception as e:
             print(f"Lỗi khi lọc số phiếu mượn bằng Pandas: {e}")
             return 0
+    
+    def _Ve_Bieu_Do(self, frame_chua):
+        """Vẽ biểu đồ tròn thống kê trạng thái mượn trả bằng Matplotlib"""
+
+        dang_muon = self.Lay_Ban_Ghi_Muon_Theo_Trang_Thai("dang_muon")
+        cho_duyet = self.Lay_Ban_Ghi_Muon_Theo_Trang_Thai("cho_duyet")
+        da_tra = self.Lay_Ban_Ghi_Muon_Theo_Trang_Thai("da_tra")
+        
+        if dang_muon == 0 and cho_duyet == 0 and da_tra == 0:
+            so_lieu = [1, 1, 1]
+            nhan = ["Chưa có DL", "Chưa có DL", "Chưa có DL"]
+        else:
+            so_lieu = [dang_muon, cho_duyet, da_tra]
+            nhan = ["Đang mượn", "Chờ duyệt", "Đã trả"]
+            
+        mau_sac = ['#3b82f6', '#f59e0b', '#10b981'] # Xanh dương, Vàng, Xanh lá
+
+        fig, ax = plt.subplots(figsize=(4, 4), facecolor='#F0F4F8')
+        ax.pie(so_lieu, labels=nhan, autopct='%1.1f%%', colors=mau_sac, startangle=90)
+        ax.axis('equal') # Đảm bảo biểu đồ hình tròn
+        ax.set_title("Tỷ Lệ Trạng Thái Mượn Sách", fontweight="bold", pad=15)
+
+        canvas = FigureCanvasTkAgg(fig, master=frame_chua)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True, padx=10, pady=10)
         
     def Quay_Lai_Menu(self): 
         """Trở về menu chính.""" 

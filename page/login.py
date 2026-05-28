@@ -5,6 +5,7 @@ import os
 import json
 from query.taikhoan import AccountData
 from common.theme import Colors, Fonts, Spacing
+#Vinh
 
 REMEMBER_FILE = "database/remember.json"
 
@@ -14,6 +15,7 @@ class LoginPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
+        self._is_active = True
 
         self.account_data = AccountData()
 
@@ -174,7 +176,7 @@ class LoginPage:
                 messagebox.showerror("Lỗi", "Vui lòng nhập password")
                 return
 
-            user = self.account_data.authenticate(username, password)
+            user = self.account_data.Xac_Thuc_Dang_Nhap(username, password)
             
             if user:
                 if self.remember_var.get():
@@ -191,7 +193,11 @@ class LoginPage:
                 messagebox.showinfo("Thông báo", f"Đăng nhập thành công!\nChức vụ: {chuc_vu}")
                 
                 hoten = user.get("hoten", username) if isinstance(user, dict) else username
-                self.master.after(10, lambda: self.app_manager.Dang_Nhap_Thanh_Cong(username, str(chuc_vu).strip(), hoten))
+                try:
+                    if self.master.winfo_exists():
+                        self.master.after(10, lambda: self.app_manager.Dang_Nhap_Thanh_Cong(username, str(chuc_vu).strip(), hoten))
+                except Exception:
+                    pass
                 return
 
             messagebox.showerror("Thông báo", "Đăng nhập thất bại! Sai tài khoản hoặc mật khẩu.")
@@ -200,3 +206,7 @@ class LoginPage:
             messagebox.showerror("Thông báo", "Chưa có tài khoản nào được tạo")
         except Exception as e:
             messagebox.showerror("Lỗi", f"Lỗi đăng nhập: {str(e)}")
+
+    def cleanup(self):
+        """Dọn dẹp tài nguyên khi page bị thay đổi"""
+        self._is_active = False

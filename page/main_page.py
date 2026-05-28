@@ -1,7 +1,8 @@
 import customtkinter as ctk
-from tkinter import ttk, messagebox
+from tkinter import ttk
 from query.muontra import MuonTraData
 from query.books import BookData
+
 
 class MainPage:
     def __init__(self, master, app_manager, username="Admin"):
@@ -67,14 +68,6 @@ class MainPage:
             hover_color="#dc2626", font=("Segoe UI", 13, "bold"), height=35,
             command=self.xac_nhan_dang_xuat
         ).pack(side="bottom", fill="x", padx=15, pady=20)
-
-        ctk.CTkButton(
-            sidebar, text="Tổng Quan Chương Trình", 
-            fg_color="#17a2b8", text_color="white",
-            hover_color="#138496", font=("Segoe UI", 13, "bold"), 
-            height=35,
-            command=self.hien_thi_about
-        ).pack(side="bottom", fill="x", padx=15, pady=(0, 10))
 
         # 2. ─── VÙNG KHÔNG GIAN BÊN PHẢI  ───
         content_area = ctk.CTkFrame(main_container, fg_color="#f8fafc", corner_radius=0)
@@ -203,42 +196,32 @@ class MainPage:
             # 1. Đếm và cập nhật số liệu lên khối Card Tổng Sách
             query_total_books = "SELECT COUNT(*) as total FROM books"
             res_books = self.book_data.thuc_thi_query(query_total_books)
-            
-            if res_books:
-                first_row_books = res_books[0]
-                tong_s = first_row_books['total']
-            else:
-                tong_s = 0
-                
+            tong_s = 0
+            if res_books and len(res_books) > 0:
+                row = res_books[0]
+                tong_s = row.get('total', 0) if isinstance(row, dict) else row[0]
             self.lbl_tong_sach.configure(text=str(tong_s))
 
             # 2. Đếm và cập nhật số liệu lên khối Card Đang Mượn Ngoài
             query_active_borrows = "SELECT COUNT(*) as total FROM muontra WHERE trang_thai = 'dang_muon'"
             res_borrows = self.book_data.thuc_thi_query(query_active_borrows)
-            
-            if res_borrows:
-                first_row_borrows = res_borrows[0]
-                dang_m = first_row_borrows['total']
-            else:
-                dang_m = 0
-                
+            dang_m = 0
+            if res_borrows and len(res_borrows) > 0:
+                row = res_borrows[0]
+                dang_m = row.get('total', 0) if isinstance(row, dict) else row[0]
             self.lbl_dang_muon.configure(text=str(dang_m))
 
             # 3. Đếm và cập nhật số liệu lên khối Card Yêu Cầu Chờ Duyệt
             query_pending = "SELECT COUNT(*) as total FROM muontra WHERE trang_thai = 'cho_duyet'"
             res_pending = self.book_data.thuc_thi_query(query_pending)
-            
-            if res_pending:
-                first_row_pending = res_pending[0]
-                cho_d = first_row_pending['total']
-            else:
-                cho_d = 0
-                
+            cho_d = 0
+            if res_pending and len(res_pending) > 0:
+                row = res_pending[0]
+                cho_d = row.get('total', 0) if isinstance(row, dict) else row[0]
             self.lbl_cho_duyet.configure(text=str(cho_d))
 
             # 4. Làm mới dữ liệu bảng "YÊU CẦU CHỜ DUYỆT"
-            danh_sach_cu_req = self.tree_new_requests.get_children()
-            for item in danh_sach_cu_req:
+            for item in self.tree_new_requests.get_children():
                 self.tree_new_requests.delete(item)
 
             query_req_list = "SELECT username, ma_sach FROM muontra WHERE trang_thai = 'cho_duyet' ORDER BY id DESC LIMIT 5"
@@ -246,13 +229,12 @@ class MainPage:
             
             if req_data:
                 for row in req_data:
-                    reader_name = row['username']
-                    book_id = row['ma_sach']
-                    self.tree_new_requests.insert("", "end", values=(reader_name, book_id))
+                    u = row.get('username') if isinstance(row, dict) else row[0]
+                    m = row.get('ma_sach') if isinstance(row, dict) else row[1]
+                    self.tree_new_requests.insert("", "end", values=(u, m))
 
             # 5. Làm mới dữ liệu bảng "CẢNH BÁO QUÁ HẠN"
-            danh_sach_cu_overdue = self.tree_overdue.get_children()
-            for item in danh_sach_cu_overdue:
+            for item in self.tree_overdue.get_children():
                 self.tree_overdue.delete(item)
 
             query_overdue_list = """
@@ -264,43 +246,18 @@ class MainPage:
             
             if overdue_data:
                 for row in overdue_data:
-                    overdue_reader = row['username']
-                    return_deadline = row['han_tra']
-                    self.tree_overdue.insert("", "end", values=(overdue_reader, return_deadline))
+                    u = row.get('username') if isinstance(row, dict) else row[0]
+                    h = row.get('han_tra') if isinstance(row, dict) else row[1]
+                    self.tree_overdue.insert("", "end", values=(u, h))
 
         except Exception as e:
             print(f"Lỗi khi tải dữ liệu cho bảng điều khiển Dashboard: {e}")
+            # Cập nhật giao diện Tkinter để tránh kẹt Frame
+            try:
+                self.master.update_idletasks()
+            except:
+                pass
         
-    def hien_thi_about(self):
-        """Hiển thị cửa sổ thông tin về chương trình"""
-        thong_tin_about = """
-
-  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN        
-       QUANG VINH LIBRARY             
-
-
-📋 Thông Tin Chương Trình:
-- Phiên bản: 1.0
-- Năm phát triển: 2026
-- Mô tả: Ứng dụng quản lý kho sách,
-  mượn trả sách, thống kê báo cáo
-
-👥 Nhóm Thực Hiện: 1
-- Thành viên 1: Nguyễn Đức Trường (Nhóm trưởng)
-- Thành viên 2: Kiều Xuân Vinh
-- Thành viên 3: Chu Việt Quang
-
-🎓 Lớp: Lập Trình Python
-👨‍🏫 Giảng Viên: Phạm Nguyên Hồng
-🏫 Trường: Đại Học Hạ Long
-
-💻 Công Nghệ Sử Dụng:
-- CustomTkinter (GUI)
-- MySQL (Database)
-- Pandas & NumPy (Xử lý dữ liệu)
-
-📧 Liên Hệ: ductruong6116@gmail.com
-"""
-        messagebox.showinfo("Tổng Quan Về Chương Trình", thong_tin_about)
+    
     
     

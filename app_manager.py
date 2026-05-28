@@ -1,3 +1,4 @@
+import sys
 import customtkinter as ctk
 from page.login import LoginPage
 from page.taotk import TaoTKPage
@@ -11,7 +12,7 @@ from page.taomuon import TaoMuonPage
 from page.thongke import ThongKePage
 from page.main_page import MainPage
 from page.docgia import DocGiaPage
-
+#Trường
 
 class AppManager:
     """Lớp quản lý toàn bộ ứng dụng"""
@@ -23,17 +24,120 @@ class AppManager:
         self.root = ctk.CTk()
         self.root.title("Hệ Thống Quản Lý Thư Viện")
         self.root.geometry("300x200")
+        # đảm bảo dọn dẹp khi người dùng đóng cửa sổ
+        self.root.protocol("WM_DELETE_WINDOW", self.Dong_Ung_Dung)
         self.current_user = None  
         self.current_role = None  
         self.current_page = None
-        self.Hien_Thi_Trang_Dang_Nhap()  
+        self._is_closing = False
+        
+        # Xử lý background errors để tránh "application has been destroyed"
+        def _bgerror_handler(err):
+            """Bỏ qua lỗi background sau khi app đã đóng"""
+            if not self._is_closing:
+                try:
+                    print(f"Background error: {err}")
+                except Exception:
+                    pass
+        
+        try:
+            self.root.tk.call('proc', 'bgerror', 'msg', 'return')
+        except Exception:
+            pass
+        
+        self.Hien_Thi_Man_Hinh_Cho()
 
     # XÓA PAGE HIỆN TẠI 
     def Xoa_Trang_Hien_Tai(self): 
         """Xóa tất cả widget của page hiện tại để chuẩn bị chuyển giao diện"""
+        try:
+            if self.current_page:
+                # Đánh dấu page không còn active
+                if hasattr(self.current_page, "_is_active"):
+                    try:
+                        self.current_page._is_active = False
+                    except Exception:
+                        pass
+                
+                # Gọi cleanup nếu có
+                if hasattr(self.current_page, "cleanup"):
+                    try:
+                        self.current_page.cleanup()
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+        # Giải quyết nốt các animation/tác vụ đồ họa còn sót lại trước khi xóa
+        try:
+            self.root.update_idletasks()
+        except Exception:
+            pass
+
         for widget in self.root.winfo_children():
-            widget.destroy()
+            try:
+                # Ngắt gói giao diện trước để tránh xung đột render
+                if hasattr(widget, "pack_forget"): widget.pack_forget()
+                if hasattr(widget, "grid_forget"): widget.grid_forget()
+                widget.destroy()
+            except Exception:
+                pass
+                
         self.current_page = None
+
+    def Dong_Ung_Dung(self):
+        """Dọn dẹp an toàn trước khi thoát: huỷ các after của Tk và các page timers."""
+        self._is_closing = True
+        
+        try:
+            try:
+                if self.current_page:
+                    if hasattr(self.current_page, "_is_active"):
+                        try:
+                            self.current_page._is_active = False
+                        except Exception:
+                            pass
+                    
+                    if hasattr(self.current_page, "cleanup"):
+                        try:
+                            self.current_page.cleanup()
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+
+            try:
+                infos = self.root.tk.call('after', 'info')
+                if infos:
+                    # infos may be a string or sequence
+                    try:
+                        for aid in infos:
+                            try:
+                                self.root.after_cancel(aid)
+                            except Exception:
+                                pass
+                    except TypeError:
+                        try:
+                            self.root.after_cancel(infos)
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+
+            try:
+                self.root.quit()
+            except Exception:
+                pass
+            try:
+                self.root.destroy()
+            except Exception:
+                pass
+        finally:
+            # đảm bảo tiến trình kết thúc
+            try:
+                sys.exit(0)
+            except Exception:
+                pass
 
 
     # XỬ LÝ ĐĂNG NHẬP THÀNH CÔNG
@@ -140,6 +244,48 @@ class AppManager:
         self.Xoa_Trang_Hien_Tai()
         self.root.geometry("1200x750")
         self.current_page = DocGiaPage(self.root, self)
+    
+    def Hien_Thi_Man_Hinh_Cho(self):
+        """Hiển thị màn hình chào và thanh loading chạy trong 3 giây"""
+        self.Xoa_Trang_Hien_Tai()
+        self.root.geometry("400x250")
+        self.root.title("Quang Vinh Library")
+        
+        # Khung chứa màu xanh tối đồng bộ hệ thống
+        bg_frame = ctk.CTkFrame(self.root, fg_color="#1E3A5F", corner_radius=0)
+        bg_frame.pack(fill="both", expand=True)
+        
+        # Tên phần mềm
+        ctk.CTkLabel(
+            bg_frame, 
+            text="📚 THƯ VIỆN QUANG VINH", 
+            font=("Segoe UI", 20, "bold"), 
+            text_color="white"
+        ).pack(pady=(45, 10))
+        
+        ctk.CTkLabel(
+            bg_frame, 
+            text="Đang khởi tạo hệ thống...", 
+            font=("Segoe UI", 12, "italic"), 
+            text_color="#93C5FD"
+        ).pack(pady=5)
+        
+        # Thanh tiến trình chạy (ProgressBar)
+        bar = ctk.CTkProgressBar(bg_frame, width=280, progress_color="#10B981")
+        bar.pack(pady=20)
+        bar.set(0)
+        
+        # Hàm tăng thanh tiến trình đơn giản sau mỗi 30 miligiây (chạy hết khoảng 3 giây)
+        def loading(val):
+            if val <= 1.0:
+                bar.set(val)
+                self.root.after(30, lambda: loading(val + 0.01))
+            else:
+                # Chạy xong 100% thì nhảy sang trang Đăng nhập
+                self.Hien_Thi_Trang_Dang_Nhap()
+
+        # Bắt đầu chạy hiệu ứng loading
+        loading(0)
 
     def run(self):
         """Kích hoạt vòng lặp chạy ứng dụng"""

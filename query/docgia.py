@@ -9,7 +9,7 @@ Lớp truy vấn dành riêng cho nghiệp vụ độc giả:
 from .base import Query
 MAX_BORROW = 5          # Giới hạn số sách mượn đồng thời
 BORROW_DAYS = 14        # Số ngày cho phép mượn
-
+#V
 
 class DocGiaQuery(Query):
     """Xử lý toàn bộ truy vấn cho giao diện độc giả."""
@@ -89,7 +89,7 @@ class DocGiaQuery(Query):
         )
         return result[0]["cnt"] if result else 0
 
-    def Sach_Dang_Muon(self, username: str, ma_sach: str) -> bool:
+    def is_borrowing_this_book(self, username: str, ma_sach: str) -> bool:
         """Kiểm tra user có đang giữ cuốn sách này không."""
         result = self.thuc_thi_query(
             """SELECT COUNT(*) as cnt FROM muontra

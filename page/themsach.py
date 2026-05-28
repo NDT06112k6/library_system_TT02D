@@ -4,14 +4,27 @@ from query.books import BookData
 from common.theme import Colors, Fonts, Spacing
 import threading
 import requests
-
+#Vinh
+#Q
 class ThemSachPage:
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager
         self.book_data = BookData()
+        self._is_active = True
         self.config()
         self.view()
+
+    def _safe_after(self, delay, func):
+        """Gửi after chỉ khi page vẫn active và master còn tồn tại"""
+        if not self._is_active:
+            return None
+        try:
+            if self.master.winfo_exists():
+                return self.master.after(delay, func)
+        except Exception:
+            pass
+        return None
 
     def config(self): 
         self.master.title("Thêm sách")
@@ -160,17 +173,18 @@ class ThemSachPage:
             messagebox.showerror("Lỗi", f"Không thể lưu: {str(e)}")
 
     def cancel(self): 
+        self._is_active = False
         self.app_manager.Hien_Thi_Trang_Quan_Ly_Sach()
 
     # CHỖ CHÈN LOGIC XỬ LÝ API (Nằm ở cuối cùng của Class) 
     def Lay_Du_Lieu_Api(self): # Đổi tên hàm
         """Gọi Open Library API để lấy thông tin sách dựa trên mã ISBN"""
         isbn = self.entry_isbn.get().strip()
-        
+
         if not isbn:
             messagebox.showwarning("Cảnh báo", "Vui lòng nhập mã ISBN để tra cứu (VD: 9780140328721)")
             return
-
+        
         def chay_ngam_api():
             try:
                 url = f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data"
@@ -187,16 +201,16 @@ class ThemSachPage:
                         authors = book_info.get("authors", [])
                         tac_gia_api = ", ".join([author["name"] for author in authors]) if authors else "Chưa rõ"
                         
-                        self.master.after(0, lambda: self.dien_du_lieu_api(ten_sach_api, tac_gia_api))
+                        self._safe_after(0, lambda: self.dien_du_lieu_api(ten_sach_api, tac_gia_api))
                     else:
-                        self.master.after(0, lambda: messagebox.showinfo("Thông báo", "Không tìm thấy dữ liệu sách với mã ISBN này!"))
+                        self._safe_after(0, lambda: messagebox.showinfo("Thông báo", "Không tìm thấy dữ liệu sách với mã ISBN này!"))
                 else:
-                    self.master.after(0, lambda: messagebox.showerror("Lỗi", "Máy chủ API từ chối kết nối."))
+                    self._safe_after(0, lambda: messagebox.showerror("Lỗi", "Máy chủ API từ chối kết nối."))
             
             except requests.exceptions.RequestException:
-                self.master.after(0, lambda: messagebox.showerror("Lỗi Mạng", "Vui lòng kiểm tra lại kết nối Internet của bạn!"))
+                self._safe_after(0, lambda: messagebox.showerror("Lỗi Mạng", "Vui lòng kiểm tra lại kết nối Internet của bạn!"))
             except Exception as e:
-                self.master.after(0, lambda msg=str(e): messagebox.showerror("Lỗi", f"Có lỗi xảy ra: {msg}"))
+                self._safe_after(0, lambda msg=str(e): messagebox.showerror("Lỗi", f"Có lỗi xảy ra: {msg}"))
 
         luong_api = threading.Thread(target=chay_ngam_api)
         luong_api.daemon = True
@@ -211,3 +225,7 @@ class ThemSachPage:
         self.entries["tac_gia"].insert(0, tac_gia)
         
         messagebox.showinfo("Thành công", "Đã lấy thông tin sách từ Internet thành công!")
+
+    def cleanup(self):
+        """Dọn dẹp tài nguyên: đảm bảo các thread không chạy sau khi page được xóa"""
+        self._is_active = False

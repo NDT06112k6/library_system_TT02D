@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import customtkinter as ctk
-
+#Q
 # HÀM HIỂN THỊ BẢNG
 def show_table(parent, columns, column_configs, height=10):
     """Hiển thị bảng Treeview 

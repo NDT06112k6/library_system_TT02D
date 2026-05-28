@@ -4,6 +4,7 @@ from query.books import BookData
 from query.muontra import MuonTraData  
 from common.theme import Colors, Fonts, Spacing
 import threading
+#Q
 
 class QuanLySachPage:
     def __init__(self, master, app_manager):
@@ -11,9 +12,21 @@ class QuanLySachPage:
         self.app_manager = app_manager
         self.book_data = BookData()
         self.muontra_data = MuonTraData()  
+        self._is_active = True
         self.config()
         self.view()
         self.Tai_Sach()
+
+    def _safe_after(self, delay, func):
+        """Gửi after chỉ khi page vẫn active và master còn tồn tại"""
+        if not self._is_active:
+            return None
+        try:
+            if self.master.winfo_exists():
+                return self.master.after(delay, func)
+        except Exception:
+            pass
+        return None
 
     def config(self):
         self.master.title("📚 Quản Lý Sách")
@@ -256,6 +269,7 @@ class QuanLySachPage:
             messagebox.showerror("Lỗi", f"Không thể xóa: {str(e)}")
 
     def back(self):
+        self._is_active = False
         self.app_manager.Hien_Thi_Trang_Chinh()
 
     def _Doc_Tat_Ca_Sach(self): 
@@ -338,9 +352,9 @@ class QuanLySachPage:
         def do_export():
             try:
                 ten_file = self.book_data.export_to_csv()
-                self.master.after(0, lambda: messagebox.showinfo("Thành công", f"Đã xuất file: {ten_file}"))
+                self._safe_after(0, lambda: messagebox.showinfo("Thành công", f"Đã xuất file: {ten_file}"))
             except Exception as loi:
-                self.master.after(0, lambda: messagebox.showerror("Lỗi", f"Không thể xuất file: {str(loi)}"))
+                self._safe_after(0, lambda: messagebox.showerror("Lỗi", f"Không thể xuất file: {str(loi)}"))
         
         thread = threading.Thread(target=do_export)
         thread.daemon = True
@@ -348,53 +362,57 @@ class QuanLySachPage:
 
     def nhap_du_lieu_csv(self):
         """Nhập dữ liệu từ file CSV (Sửa lỗi treo giao diện và hoàn thiện luồng Threading)"""
-        duong_dan_file = filedialog.askopenfilename(
+        # Mở hộp thoại chọn file ngay tại Main Thread
+        duong_dan = filedialog.askopenfilename(
             title="Chọn file CSV để nhập",
             filetypes=[("Tệp CSV", "*.csv"), ("Tất cả tệp", "*.*")]
         )
         
-        if not duong_dan_file:
+        if not duong_dan:
             return
         
-        #  Hỏi xác nhận ở Main Thread để tránh làm đơ giao diện Tkinter
-        xac_nhan_xoa = messagebox.askyesno(
+        # Hỏi xác nhận xóa dữ liệu cũ
+        xac_nhan = messagebox.askyesno(
             "Xác nhận",
             "Bạn có muốn xóa toàn bộ sách cũ trước khi nhập CSV mới không?\n(Nếu không -> dữ liệu mới sẽ được thêm nối tiếp vào bảng)"
         )
     
-        # Định nghĩa hàm chạy ngầm trong Thread phụ
-        def do_import():
+        # Định nghĩa hàm chạy ngầm (Truyền tham số 'path' và 'clear_old' để KHÔNG BỊ GẠCH VÀNG)
+        def do_import(path, clear_old):
             try:
-                if xac_nhan_xoa:
-                    ket_noi = self.book_data.connect()
-                    if ket_noi:
-                        con_tro = ket_noi.cursor()
+                if clear_old:
+                    # Kết nối an toàn để xóa dữ liệu
+                    if self.book_data.connect():
+                        con_tro = self.book_data.connection.cursor()
                         con_tro.execute("DELETE FROM books")
-                        ket_noi.commit()
+                        self.book_data.connection.commit()
                         con_tro.close()
                         self.book_data.close()
                 
                 # Thực hiện nạp file dữ liệu CSV vào MySQL
-                ket_qua_nhap = self.book_data.import_from_csv(duong_dan_file)
+                ket_qua_nhap = self.book_data.import_from_csv(path)
 
-                #  Gửi lệnh cập nhật giao diện và thông báo về Main Thread an toàn
+                # Gửi lệnh cập nhật giao diện về Main Thread
                 if ket_qua_nhap:
-                    self.master.after(0, self.Tai_Sach)
-                    self.master.after(0, lambda: messagebox.showinfo(
+                    self._safe_after(0, self.Tai_Sach)
+                    self._safe_after(0, lambda: messagebox.showinfo(
                         "Thành công", "Đã nhập dữ liệu sách từ file CSV thành công!"
                     ))
                 else:
-                    self.master.after(0, lambda: messagebox.showwarning(
+                    self._safe_after(0, lambda: messagebox.showwarning(
                         "Cảnh báo", "Nhập dữ liệu từ file CSV không thành công"
                     ))
             except Exception as loi:
-                # Chụp lại thông báo lỗi thành chuỗi trước khi truyền vào Lambda
                 error_msg = str(loi)  
-                self.master.after(0, lambda msg=error_msg: messagebox.showerror(
+                self._safe_after(0, lambda msg=error_msg: messagebox.showerror(
                     "Lỗi", f"Không thể nhập file sách: {msg}"
                 ))
         
-        # Kích hoạt luồng chạy ngầm
-        thread = threading.Thread(target=do_import)
+        # Kích hoạt luồng chạy ngầm (truyền biến vào args để tách biệt phạm vi)
+        thread = threading.Thread(target=do_import, args=(duong_dan, xac_nhan))
         thread.daemon = True
         thread.start()
+
+    def cleanup(self):
+        """Dọn dẹp tài nguyên: đảm bảo các thread không chạy sau khi page được xóa"""
+        self._is_active = False

@@ -63,7 +63,6 @@ class DocGiaPage:
         header.pack(fill="x", side="top")
         header.pack_propagate(False)
 
-        # Click để về trang chủ
         def _Ve_Trang_Chu():
             if self._current_view != self.VIEW_BOOKS:
                 self._current_view = self.VIEW_BOOKS
@@ -347,7 +346,7 @@ class DocGiaPage:
     # 2. TẢI DỮ LIỆU
     def _Tai_The_Loai(self):
         try:
-            cats = ["Tất cả"] + self.query.get_categories()
+            cats = ["Tất cả"] + self.query.lay_danh_muc()
             self.cat_menu.configure(values=cats)
         except Exception:
             pass
@@ -370,7 +369,7 @@ class DocGiaPage:
         self._Ap_Dung_Bo_Loc()
 
     def _Cap_Nhat_Han_Muon(self):
-        active = self.query.count_active_borrows(self.username)
+        active = self.query.dem_so_luot_muon(self.username)
         color = C["danger"] if active >= MAX_BORROW else C["success"]
         self.quota_label.configure(
             text=f"{active} / {MAX_BORROW} sách",
@@ -564,7 +563,7 @@ class DocGiaPage:
 
     # 5. MƯỢN SÁCH
     def _Xac_Nhan_Muon(self, ma_sach: str):
-        book = self.query.get_book_detail(ma_sach)
+        book = self.query.lay_chi_tiet_sach(ma_sach)
         if not book:
             messagebox.showerror("Lỗi", "Không tìm thấy thông tin sách.")
             return
@@ -579,7 +578,7 @@ class DocGiaPage:
         ):
             return
 
-        ok, msg, _ = self.query.create_borrow(self.username, ma_sach)
+        ok, msg, _ = self.query.tao_phieu_muon(self.username, ma_sach)
 
         if ok:
             messagebox.showinfo(
@@ -594,7 +593,7 @@ class DocGiaPage:
 
     # 6. CHI TIẾT SÁCH
     def _Hien_Thi_Chi_Tiet(self, ma_sach: str):
-        book = self.query.get_book_detail(ma_sach)
+        book = self.query.lay_chi_tiet_sach(ma_sach)
         if not book:
             return
             
@@ -675,7 +674,7 @@ class DocGiaPage:
         for w in self.scroll.winfo_children():
             w.destroy()
 
-        records = self.query.get_my_borrows(self.username)
+        records = self.query.lay_lich_su_muon(self.username)
         self.status_bar.configure(text=f"Lịch sử mượn: {len(records)} phiếu")
 
         if not records:
@@ -701,7 +700,7 @@ class DocGiaPage:
             BorrowRow(self.scroll, rec, idx).pack(fill="x", pady=1)
 
     def _Canh_Bao_Qua_Han(self):
-        records = self.query.get_my_borrows(self.username)
+        records = self.query.lay_lich_su_muon(self.username)
         has_overdue = False
         today = date.today()
 
@@ -768,8 +767,8 @@ class DocGiaPage:
 - CustomTkinter (GUI)
 - MySQL (Database)
 - Pandas & NumPy (Xử lý dữ liệu)
-
-📧 Liên Hệ: ductruong6116@gmail.com
+- Matplotlib (Biểu đồ thống kê)
+📧 Liên Hệ: Nhom1@gmail.com
 """
         messagebox.showinfo("Tổng Quan Về Chương Trình", thong_tin_about)
 

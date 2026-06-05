@@ -15,7 +15,7 @@ class ThemSachPage:
         self.config()
         self.view()
 
-    def _safe_after(self, delay, func):
+    def _an_toan_sau(self, delay, func):
         """Gửi after chỉ khi page vẫn active và master còn tồn tại"""
         if not self._is_active:
             return None
@@ -51,7 +51,7 @@ class ThemSachPage:
         form_frame.pack(fill="both", expand=True, padx=Spacing.LG, pady=Spacing.LG)
 
         # Hàm hỗ trợ tạo ô nhập liệu 
-        def Tao_Truong_Form(parent, label_text, placeholder=""): # Đổi tên hàm
+        def Tao_Truong_Form(parent, label_text, placeholder=""): 
             label = ctk.CTkLabel(parent, text=label_text, font=Fonts.SMALL_BOLD, text_color=Colors.TEXT_PRIMARY)
             label.pack(anchor="w", padx=Spacing.MD, pady=(Spacing.MD, Spacing.XS))
             
@@ -115,7 +115,7 @@ class ThemSachPage:
             fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, hover_color=Colors.BORDER_DARK, command=self.cancel
         ).pack(side="left", fill="x", expand=True)
 
-    def validate(self): 
+    def xac_thuc(self): 
         # Thu thập dữ liệu
         data = {}
         for k, v in self.entries.items():
@@ -151,14 +151,14 @@ class ThemSachPage:
             return None
 
         # Kiểm tra mã trùng
-        if self.book_data.check_exists(data["ma_sach"]) == True:
+        if self.book_data.kiem_tra_sach_ton_tai(data["ma_sach"]) == True:
             messagebox.showerror("Lỗi", f"Mã sách '{data['ma_sach']}' đã tồn tại")
             return None
 
         return data
 
     def save(self): 
-        data = self.validate()
+        data = self.xac_thuc()
         if data == None:
             return
         
@@ -177,7 +177,7 @@ class ThemSachPage:
         self.app_manager.Hien_Thi_Trang_Quan_Ly_Sach()
 
     # CHỖ CHÈN LOGIC XỬ LÝ API (Nằm ở cuối cùng của Class) 
-    def Lay_Du_Lieu_Api(self): # Đổi tên hàm
+    def Lay_Du_Lieu_Api(self): 
         """Gọi Open Library API để lấy thông tin sách dựa trên mã ISBN"""
         isbn = self.entry_isbn.get().strip()
 
@@ -201,16 +201,16 @@ class ThemSachPage:
                         authors = book_info.get("authors", [])
                         tac_gia_api = ", ".join([author["name"] for author in authors]) if authors else "Chưa rõ"
                         
-                        self._safe_after(0, lambda: self.dien_du_lieu_api(ten_sach_api, tac_gia_api))
+                        self._an_toan_sau(0, lambda: self.dien_du_lieu_api(ten_sach_api, tac_gia_api))
                     else:
-                        self._safe_after(0, lambda: messagebox.showinfo("Thông báo", "Không tìm thấy dữ liệu sách với mã ISBN này!"))
+                        self._an_toan_sau(0, lambda: messagebox.showinfo("Thông báo", "Không tìm thấy dữ liệu sách với mã ISBN này!"))
                 else:
-                    self._safe_after(0, lambda: messagebox.showerror("Lỗi", "Máy chủ API từ chối kết nối."))
+                    self._an_toan_sau(0, lambda: messagebox.showerror("Lỗi", "Máy chủ API từ chối kết nối."))
             
             except requests.exceptions.RequestException:
-                self._safe_after(0, lambda: messagebox.showerror("Lỗi Mạng", "Vui lòng kiểm tra lại kết nối Internet của bạn!"))
+                self._an_toan_sau(0, lambda: messagebox.showerror("Lỗi Mạng", "Vui lòng kiểm tra lại kết nối Internet của bạn!"))
             except Exception as e:
-                self._safe_after(0, lambda msg=str(e): messagebox.showerror("Lỗi", f"Có lỗi xảy ra: {msg}"))
+                self._an_toan_sau(0, lambda msg=str(e): messagebox.showerror("Lỗi", f"Có lỗi xảy ra: {msg}"))
 
         luong_api = threading.Thread(target=chay_ngam_api)
         luong_api.daemon = True

@@ -58,7 +58,7 @@ class TaoTKPage:
         right_col.grid(row=0, column=1, sticky="nsew", padx=(15, 0))
 
         # Hàm hỗ trợ tạo ô nhập liệu nhanh (tránh lặp code)
-        def make_input(parent, label_text, placeholder, is_password=False):
+        def tao_dau_vao(parent, label_text, placeholder, is_password=False):
             ctk.CTkLabel(
                 parent, text=label_text,
                 font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
@@ -78,14 +78,14 @@ class TaoTKPage:
             return entry
 
         # ----- PHÂN BỔ DỮ LIỆU CỘT TRÁI -----
-        self.entry_hoten = make_input(left_col, "HỌ TÊN:", "Nhập họ tên...")
-        self.entry_username = make_input(left_col, "USERNAME:", "Nhập tên đăng nhập...")
-        self.entry_password = make_input(left_col, "PASSWORD:", "Nhập mật khẩu...", is_password=True)
-        self.entry_confirm = make_input(left_col, "CONFIRM PASSWORD:", "Nhập lại mật khẩu...", is_password=True)
+        self.entry_hoten = tao_dau_vao(left_col, "HỌ TÊN:", "Nhập họ tên...")
+        self.entry_username = tao_dau_vao(left_col, "USERNAME:", "Nhập tên đăng nhập...")
+        self.entry_password = tao_dau_vao(left_col, "PASSWORD:", "Nhập mật khẩu...", is_password=True)
+        self.entry_confirm = tao_dau_vao(left_col, "CONFIRM PASSWORD:", "Nhập lại mật khẩu...", is_password=True)
 
         # ----- PHÂN BỔ DỮ LIỆU CỘT PHẢI -----
-        self.entry_sdt = make_input(right_col, "SỐ ĐIỆN THOẠI:", "Nhập SĐT...")
-        self.entry_gmail = make_input(right_col, "GMAIL:", "Nhập Gmail (@gmail.com)...")
+        self.entry_sdt = tao_dau_vao(right_col, "SỐ ĐIỆN THOẠI:", "Nhập SĐT...")
+        self.entry_gmail = tao_dau_vao(right_col, "GMAIL:", "Nhập Gmail (@gmail.com)...")
         
         # Ô Chức vụ (Đặc biệt vì có màu nền xám và bị khóa)
         ctk.CTkLabel(
@@ -149,23 +149,23 @@ class TaoTKPage:
         confirm  = self.entry_confirm.get().strip()
         
         # Kiểm tra username
-        valid, msg = Validation.is_valid_username(username)
+        valid, msg = Validation.xac_thuc_username(username)
         if valid == False:
             messagebox.showerror("Lỗi", msg)
             return
 
-        if self.account_data.check_exists(username) == True:
+        if self.account_data.kiem_tra_tai_khoan_ton_tai(username) == True:
             messagebox.showerror("Lỗi", f"Tên đăng nhập '{username}' đã tồn tại!")
             return
 
         # Kiểm tra email
-        valid_email, msg_email = Validation.is_valid_email_simple(gmail)
+        valid_email, msg_email = Validation.xac_thuc_email_co_ban(gmail)
         if valid_email == False:
             messagebox.showerror("Lỗi", msg_email)
             return
 
         # Kiểm tra SĐT
-        valid_phone, msg_phone = Validation.is_valid_phone(sdt)
+        valid_phone, msg_phone = Validation.xac_thuc_sdt(sdt)
         if valid_phone == False:
             messagebox.showerror("Lỗi", msg_phone)
             return

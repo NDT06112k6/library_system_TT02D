@@ -125,16 +125,16 @@ class ThongKePage:
         # Tính trung bình số lượng sách
         all_books = self.book_data.list_all()
         #quantities (SoLuong)
-        quantities = [book[5] for book in all_books]
-        avg_qty = np.mean(quantities) if quantities else 0
-        median_qty = np.median(quantities) if quantities else 0
+        soLuong = [book[5] for book in all_books]
+        avg_qty = np.mean(soLuong) if soLuong else 0
+        median_qty = np.median(soLuong) if soLuong else 0
         
         if all_books:
-            quantities = [book[5] for book in all_books]
+            soLuong = [book[5] for book in all_books]
             prices = [book[6] for book in all_books]
             
             stats = {
-                'Số sách TB': f"{np.mean(quantities):.0f}",
+                'Số sách TB': f"{np.mean(soLuong):.0f}",
                 'Giá TB': f"{np.mean(prices):,.0f} đ",
                 'Sách đắt nhất': f"{np.max(prices):,.0f} đ",
                 'Sách rẻ nhất': f"{np.min(prices):,.0f} đ",

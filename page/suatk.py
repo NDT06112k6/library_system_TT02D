@@ -243,13 +243,13 @@ class SuaTKPage:
             messagebox.showerror("Lỗi", f"Tên đăng nhập '{new_username}' đã tồn tại!")
             return False
 
-        valid_email, msg_email = Validation.is_valid_email_simple(new_email)
+        valid_email, msg_email = Validation.xac_thuc_email_co_ban(new_email)
         if not valid_email:
             messagebox.showerror("Lỗi", msg_email)
             return False
 
         new_sdt = self.entry_sdt.get().strip()
-        valid_phone, msg_phone = Validation.is_valid_phone(new_sdt)
+        valid_phone, msg_phone = Validation.xac_thuc_sdt(new_sdt)
         if not valid_phone:
             messagebox.showerror("Lỗi", msg_phone)
             return False

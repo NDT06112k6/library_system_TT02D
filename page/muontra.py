@@ -85,7 +85,7 @@ class MuonTraPage:
         scrollbar.pack(side="right", fill="y")
 
         # RÀNG BUỘC SỰ KIỆN CLICK CHUỘT TRÊN BẢNG TREEVIEW
-        self.phieu_tree.bind("<ButtonRelease-1>", self._on_tree_item_clicked)
+        self.phieu_tree.bind("<ButtonRelease-1>", self.click_phieu_tree)
 
         # Khung điều khiển hành động
         action_frame = ctk.CTkFrame(main_frame, fg_color=Colors.BG_SECONDARY)
@@ -114,7 +114,7 @@ class MuonTraPage:
 
         ctk.CTkButton(self.btns_container, text="← Quay Lại", fg_color=Colors.BORDER, text_color=Colors.TEXT_PRIMARY, font=Fonts.SMALL_BOLD, command=self.back).pack(side="left", padx=5) 
 
-    def _on_tree_item_clicked(self, event):
+    def click_phieu_tree(self, event):
         """Xử lý sự kiện tương tác khi người dùng bấm vào một dòng dữ liệu trên bảng."""
         # Xác định vùng click chuột trên Treeview
         clicked_region = self.phieu_tree.identify_region(event.x, event.y)
@@ -182,9 +182,7 @@ class MuonTraPage:
                     # --- TỰ ĐỘNG PHÁT HIỆN TRỄ HẠN ĐỂ ĐỔI GIAO DIỆN ---
                     if han_tra_str:
                         try:
-                            # So sánh Ngày hôm nay với Hạn trả
                             today = datetime.now().date()
-                            # Nếu han_tra_str là kiểu date thì dùng luôn, nếu là chuỗi thì ép kiểu
                             if isinstance(han_tra_str, str):
                                 han_tra_date = datetime.strptime(han_tra_str, "%Y-%m-%d").date()
                             else:
@@ -209,7 +207,6 @@ class MuonTraPage:
                 # Kiểm tra xem dữ liệu có tồn tại và có phải là kiểu số/chuỗi số không
                 if val_tien_phat is not None and not isinstance(val_tien_phat, (datetime, tk.Variable)):
                     try:
-                        # Chỉ ép kiểu int khi dữ liệu không phải là đối tượng ngày tháng
                         tien_phat = "{:,}".format(int(val_tien_phat))
                     except (ValueError, TypeError):
                         # Phòng hờ nếu cột bị lệch sang kiểu ngày tháng hoặc chuỗi lạ
@@ -267,7 +264,7 @@ class MuonTraPage:
                 han_tra_str = han_tra_date.strftime("%Y-%m-%d")
                 
                 self.muontra_data.Yeu_Cau_Phe_Duyet(values[1], ngay_muon_str, han_tra_str)
-                self.book_data.update_quantity(values[3], delta=-1)
+                self.book_data.cap_nhat_so_luong(values[3], delta=-1)
                 
                 messagebox.showinfo("Thành công", "Đã duyệt phiếu mượn.")
                 self.Tai_Phieu()
@@ -317,7 +314,6 @@ class MuonTraPage:
                         "Cảnh báo Quá Hạn", 
                         f"Độc giả đã trả trễ {so_ngay_tre} ngày!\n\nVui lòng thu số tiền phạt: {tien_phat:,} VNĐ"
                     )
-                # ────────────────────────────────────
 
                 # Cập nhật thông tin trả sách vào DB
                 self.muontra_data.update(
@@ -327,7 +323,7 @@ class MuonTraPage:
                 )
                 
                 # Cộng trả lại sách vào kho
-                self.book_data.update_quantity(values[3], delta=1)
+                self.book_data.cap_nhat_so_luong(values[3], delta=1)
                 
                 # Nếu không bị phạt thì báo thành công bình thường
                 if tien_phat == 0:
@@ -361,7 +357,7 @@ class MuonTraPage:
             try:
                 # Nếu phiếu đang giữ sách thực tế (Đang mượn) thì trả lại 1 cuốn vào kho
                 if "Đang Mượn" in trang_thai:
-                    self.book_data.update_quantity(ma_sach, delta=1)
+                    self.book_data.cap_nhat_so_luong(ma_sach, delta=1)
 
                 # Tiến hành xóa phiếu
                 ok, msg = self.muontra_data.delete_phieu(ma_phieu)
@@ -373,7 +369,7 @@ class MuonTraPage:
             except Exception as e:
                 messagebox.showerror("Lỗi", f"Không thể xóa phiếu: {str(e)}")
 
-    def Lay_Hian_Thi_TrenghTha__Thai(self, db_status): 
+    def Lay_Hian_Thi_Trang__Thai(self, db_status): 
         """Helper chuyển đổi trạng thái DB sang hiển thị UI"""
         mapping = {
             "cho_duyet": ("⏳ Chờ Duyệt", "cho_duyet"),

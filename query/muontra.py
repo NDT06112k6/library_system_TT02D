@@ -28,7 +28,7 @@ class MuonTraData(Query):
             print(f"Lỗi tìm kiếm mượn trả: {e}")
             return []
 
-    def confirm_return(self, ma_phieu, ngay_tra):
+    def xac_nhan_tra(self, ma_phieu, ngay_tra):
         """Xác nhận hoàn trả sách và cập nhật ngày trả cho phiếu mượn"""
         try:
             phieu_df = self.search("ma_phieu", ma_phieu, exact=True)
@@ -45,7 +45,7 @@ class MuonTraData(Query):
         except Exception as e:
             print(f"Lỗi xác nhận trả: {e}")
 
-    def generate_new_id(self):
+    def tao_ma_moi(self):
         """Hàm sinh mã phiếu mượn mới tăng dần tường minh"""
         try:
             query = "SELECT ma_phieu FROM muontra ORDER BY id DESC LIMIT 1"
@@ -69,7 +69,7 @@ class MuonTraData(Query):
         except Exception:
             return False
 
-    def get_status_counts(self):
+    def thong_ke_so_luong_trang_thai(self):
         """Thống kê tổng số lượng phiếu phân loại theo từng trạng thái"""
         try:
             result = self.thuc_thi_query(
@@ -79,7 +79,7 @@ class MuonTraData(Query):
         except Exception:
             return {}
 
-    def get_top_borrowed_books(self, limit=5):
+    def tim_kiem_sach_muon_nhieu_nhat(self, limit=5):
         """Thống kê danh sách sách được độc giả mượn nhiều nhất"""
         try:
             result = self.thuc_thi_query(
@@ -92,7 +92,7 @@ class MuonTraData(Query):
 
     def Tao_Yeu_Cau_Muon(self, username, ma_sach):
         """Ghi nhận yêu cầu mượn sách mới từ độc giả với trạng thái chờ duyệt"""
-        ma_phieu = self.generate_new_id()
+        ma_phieu = self.tao_ma_moi()
         data = [ma_phieu, username, ma_sach, None, None, None, 0, "cho_duyet"]
         return self.create(data)
 

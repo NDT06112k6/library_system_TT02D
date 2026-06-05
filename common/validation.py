@@ -11,7 +11,7 @@ class Validation:
 
 # Kiểm tra username hợp lệ
     @staticmethod
-    def is_valid_username(username):
+    def xac_thuc_username(username):
         if Validation.is_empty(username):
             return False, "Username không được trống"
         if len(username) < 3:
@@ -22,14 +22,14 @@ class Validation:
 
 # Kiểm tra email 
     @staticmethod
-    def is_valid_email_simple(email):
+    def xac_thuc_email_co_ban(email):
         if '@' not in email or '.' not in email:
             return False, "Email không hợp lệ"
         return True, ""
 
 # Kiểm tra số điện thoại
     @staticmethod
-    def is_valid_phone(phone):
+    def xac_thuc_sdt(phone):
         if not phone.isdigit() or len(phone) != 10:
             return False, "SĐT phải 10 chữ số"
         if not phone.startswith('0'):
@@ -38,7 +38,7 @@ class Validation:
     
 # Kiểm tra số dương
     @staticmethod
-    def is_positive_number(value, field_name="Giá trị"):
+    def xac_thuc_so_duong(value, field_name="Giá trị"):
         try:
             num = int(value)
             if num <= 0:
@@ -48,7 +48,7 @@ class Validation:
             return False, f"{field_name} phải là số"
 
     @staticmethod
-    def validate_email(email):
+    def xac_thuc_email(email):
         """"Kiểm tra email hợp lệ"""
         pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         if not re.match(pattern, email):
@@ -56,7 +56,7 @@ class Validation:
         return True, ""
 
     @staticmethod
-    def validate_date(date_str):
+    def xac_thuc_ngay_thang(date_str):
         """"Kiểm tra ngày tháng hợp lệ (dd/mm/yyyy)"""
         pattern = r'^\d{2}/\d{2}/\d{4}$'
         if not re.match(pattern, date_str):
@@ -68,14 +68,14 @@ class Validation:
             return False, "Ngày tháng không hợp lệ (kiểm tra ngày, tháng, năm)"
 
     @staticmethod
-    def validate_required(value, field_name):
+    def xac_thuc_truong_bat_buoc(value, field_name):
         """"Kiểm tra trường bắt buộc nhập"""
         if not value or value.strip() == "":
             return False, f"{field_name} không được để trống"
         return True, ""
 
     @staticmethod
-    def validate_positive_integer(value, field_name):
+    def xac_thuc_so_nguyen_duong(value, field_name):
         """"Kiểm tra số nguyên dương"""
         try:
             num = int(value)

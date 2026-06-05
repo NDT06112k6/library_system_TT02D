@@ -28,7 +28,7 @@ class BookData(Query):
         except Exception as e:
             print(f"Lỗi tìm sách: {e}")
             return []
-    def check_exists(self, ma_sach):
+    def kiem_tra_sach_ton_tai(self, ma_sach):
         """Kiểm tra sự tồn tại của đầu sách thông qua mã sách định danh"""
         try:
             result = self.search("ma_sach", ma_sach, exact=True)
@@ -36,7 +36,7 @@ class BookData(Query):
         except Exception:
             return False
 
-    def update_quantity(self, ma_sach, delta):
+    def cap_nhat_so_luong(self, ma_sach, delta):
         """Cập nhật thay đổi số lượng kho sách (tăng hoặc giảm)"""
         try:
             result = self.search("ma_sach", ma_sach, exact=True)
@@ -54,7 +54,7 @@ class BookData(Query):
         except Exception as e:
             print(f"Lỗi cập nhật số lượng: {e}")
 
-    def get_total_count(self):
+    def thong_ke_so_luong(self):
         """Thống kê tổng số lượng đầu sách đang quản lý"""
         try:
             results = self.list_all()

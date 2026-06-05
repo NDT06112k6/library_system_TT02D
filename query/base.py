@@ -138,7 +138,7 @@ class Query:
             cursor.close()
             self.close()
         
-    def export_to_csv(self):
+    def xuat_csv(self):
         try:
             results = self.list_all()
             filename = f"{self.table_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
@@ -152,7 +152,7 @@ class Query:
             messagebox.showerror("Lỗi", f"Export failed: {e}")
             return None
     
-    def import_from_csv(self, filepath):
+    def nhap_csv(self, filepath):
         """Nhập dữ liệu từ file CSV vào database"""
         try:
             with open(filepath, 'r', encoding='utf-8-sig') as tep_csv:

@@ -29,7 +29,7 @@ class AccountData(Query):
             print(f"Lỗi tìm kiếm tài khoản: {e}")
             return []
 
-    def get_all_accounts(self):
+    def lay_tat_ca_tai_khoan(self):
         """Truy vấn toàn bộ danh sách tài khoản hệ thống"""
         try:
             return self.list_all()
@@ -41,7 +41,7 @@ class AccountData(Query):
         """Thực hiện xóa một tài khoản ra khỏi hệ thống"""
         return self.delete("taikhoan", username)
 
-    def check_exists(self, username):
+    def kiem_tra_tai_khoan_ton_tai(self, username):
         """Kiểm tra trạng thái tồn tại của một tên đăng nhập"""
         try:
             result = self.search("taikhoan", username, exact=True)
@@ -49,14 +49,14 @@ class AccountData(Query):
         except Exception:
             return False
 
-    def is_valid_gmail(self, email: str) -> bool:
+    def gmail_hop_le(self, email: str) -> bool:
         """Kiểm tra tính hợp lệ định dạng thư điện tử Gmail"""
         pattern = r'^[a-zA-Z0-9._%+\-]+@gmail\.com$'
         return bool(re.match(pattern, email))
 
-    def validate_and_create(self, data: list):
+    def xac_thuc_va_tao_tai_khoan(self, data: list):
         """Kiểm tra điều kiện ràng buộc dữ liệu trước khi tiến hành tạo tài khoản mới"""
         username = data[0]
-        if self.check_exists(username):
+        if self.kiem_tra_tai_khoan_ton_tai(username):
             raise Nhap_Lieu_Trung_Lap(f"Tên đăng nhập '{username}' đã tồn tại")
         return self.create(data)

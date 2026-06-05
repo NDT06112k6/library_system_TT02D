@@ -31,15 +31,6 @@ class AppManager:
         self.current_page = None
         self._is_closing = False
         
-        # Xử lý background errors để tránh "application has been destroyed"
-        def _bgerror_handler(err):
-            """Bỏ qua lỗi background sau khi app đã đóng"""
-            if not self._is_closing:
-                try:
-                    print(f"Background error: {err}")
-                except Exception:
-                    pass
-        
         try:
             self.root.tk.call('proc', 'bgerror', 'msg', 'return')
         except Exception:
@@ -52,7 +43,6 @@ class AppManager:
         """Xóa tất cả widget của page hiện tại để chuẩn bị chuyển giao diện"""
         try:
             if self.current_page:
-                # Đánh dấu page không còn active
                 if hasattr(self.current_page, "_is_active"):
                     try:
                         self.current_page._is_active = False
@@ -68,7 +58,6 @@ class AppManager:
         except Exception:
             pass
 
-        # Giải quyết nốt các animation/tác vụ đồ họa còn sót lại trước khi xóa
         try:
             self.root.update_idletasks()
         except Exception:
@@ -76,7 +65,6 @@ class AppManager:
 
         for widget in self.root.winfo_children():
             try:
-                # Ngắt gói giao diện trước để tránh xung đột render
                 if hasattr(widget, "pack_forget"): widget.pack_forget()
                 if hasattr(widget, "grid_forget"): widget.grid_forget()
                 widget.destroy()
@@ -109,7 +97,6 @@ class AppManager:
             try:
                 infos = self.root.tk.call('after', 'info')
                 if infos:
-                    # infos may be a string or sequence
                     try:
                         for aid in infos:
                             try:
@@ -133,7 +120,6 @@ class AppManager:
             except Exception:
                 pass
         finally:
-            # đảm bảo tiến trình kết thúc
             try:
                 sys.exit(0)
             except Exception:

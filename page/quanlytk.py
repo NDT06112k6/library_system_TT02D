@@ -155,7 +155,7 @@ class QuanLyTKPage:
         self.entry_search.insert(0, "Tìm theo tên đăng nhập...")
         self.entry_search.configure(text_color="gray")
         try:
-            rows = self.account_data.get_all_accounts()
+            rows = self.account_data.lay_tat_ca_tai_khoan()
             self._Tong_Tai_Khoan(rows)
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể tải dữ liệu: {str(e)}")

@@ -78,7 +78,7 @@ class SuaSachPage:
             command=self.cancel
         ).pack(side="left", padx=10)
 
-    def validate(self): 
+    def xac_thuc(self): 
         data = {k: v.get().strip() for k, v in self.entries.items()}
 
         for key in ("ten_sach", "tac_gia", "the_loai", "so_luong", "gia"):
@@ -94,7 +94,7 @@ class SuaSachPage:
         return data
 
     def save(self): 
-        data = self.validate()
+        data = self.xac_thuc()
         if data is None:
             return
 

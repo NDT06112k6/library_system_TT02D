@@ -116,7 +116,7 @@ class LoginPage:
         self.register_button = ctk.CTkButton(
             btn_frame,
             text="Đăng Ký Tài Khoản",
-            command=self.go_to_register,
+            command=self.Dang_Ky_Tai_Khoan,
             height=40,
             font=Fonts.SMALL_BOLD,
             fg_color="transparent",
@@ -159,7 +159,7 @@ class LoginPage:
         except Exception:
             pass
 
-    def go_to_register(self):
+    def Dang_Ky_Tai_Khoan(self):
         """Chuyển hướng người dùng sang giao diện đăng ký tài khoản độc giả"""
         self.app_manager.Hien_Thi_Trang_Dang_Ky()
 

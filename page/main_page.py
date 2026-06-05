@@ -252,7 +252,6 @@ class MainPage:
 
         except Exception as e:
             print(f"Lỗi khi tải dữ liệu cho bảng điều khiển Dashboard: {e}")
-            # Cập nhật giao diện Tkinter để tránh kẹt Frame
             try:
                 self.master.update_idletasks()
             except:

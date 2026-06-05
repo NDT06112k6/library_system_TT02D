@@ -208,7 +208,6 @@ class QuanLySachPage:
         # 3. Tiến hành gửi yêu cầu phê duyệt lên hệ thống
         if messagebox.askyesno("Xác nhận", f"Bạn có chắc chắn muốn gửi yêu cầu mượn cuốn sách:\n'{ten_sach}'?"):
             try:
-                # Gọi hàm lưu trạng thái 'cho_duyet' vừa bổ sung vào tầng query
                 self.muontra_data.Tao_Yeu_Cau_Muon(username_hien_tai, ma_sach)
                 messagebox.showinfo("Thành công", "Gửi yêu cầu thành công!\nVui lòng đến quầy thư viện để nhận sách và duyệt phiếu.") 
                 self.Tai_Sach()
@@ -351,7 +350,7 @@ class QuanLySachPage:
         """Hàm xuất dữ liệu sách sang file CSV"""
         def do_export():
             try:
-                ten_file = self.book_data.export_to_csv()
+                ten_file = self.book_data.xuat_csv()
                 self._safe_after(0, lambda: messagebox.showinfo("Thành công", f"Đã xuất file: {ten_file}"))
             except Exception as loi:
                 self._safe_after(0, lambda: messagebox.showerror("Lỗi", f"Không thể xuất file: {str(loi)}"))
@@ -362,7 +361,6 @@ class QuanLySachPage:
 
     def nhap_du_lieu_csv(self):
         """Nhập dữ liệu từ file CSV (Sửa lỗi treo giao diện và hoàn thiện luồng Threading)"""
-        # Mở hộp thoại chọn file ngay tại Main Thread
         duong_dan = filedialog.askopenfilename(
             title="Chọn file CSV để nhập",
             filetypes=[("Tệp CSV", "*.csv"), ("Tất cả tệp", "*.*")]
@@ -371,17 +369,14 @@ class QuanLySachPage:
         if not duong_dan:
             return
         
-        # Hỏi xác nhận xóa dữ liệu cũ
         xac_nhan = messagebox.askyesno(
             "Xác nhận",
             "Bạn có muốn xóa toàn bộ sách cũ trước khi nhập CSV mới không?\n(Nếu không -> dữ liệu mới sẽ được thêm nối tiếp vào bảng)"
         )
     
-        # Định nghĩa hàm chạy ngầm (Truyền tham số 'path' và 'clear_old' để KHÔNG BỊ GẠCH VÀNG)
         def do_import(path, clear_old):
             try:
                 if clear_old:
-                    # Kết nối an toàn để xóa dữ liệu
                     if self.book_data.connect():
                         con_tro = self.book_data.connection.cursor()
                         con_tro.execute("DELETE FROM books")
@@ -390,7 +385,7 @@ class QuanLySachPage:
                         self.book_data.close()
                 
                 # Thực hiện nạp file dữ liệu CSV vào MySQL
-                ket_qua_nhap = self.book_data.import_from_csv(path)
+                ket_qua_nhap = self.book_data.nhap_csv(path)
 
                 # Gửi lệnh cập nhật giao diện về Main Thread
                 if ket_qua_nhap:

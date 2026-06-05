@@ -60,19 +60,19 @@ class DocGiaQuery(Query):
         """
         return self.thuc_thi_query(query, params or None) or []
 
-    def get_categories(self):
+    def lay_danh_muc(self):
         """Lấy danh sách thể loại để fill vào filter."""
         result = self.thuc_thi_query("SELECT DISTINCT the_loai FROM books ORDER BY the_loai")
         return [r["the_loai"] for r in result if r["the_loai"]] if result else []
 
-    def get_book_detail(self, ma_sach: str):
+    def lay_chi_tiet_sach(self, ma_sach: str):
         """Lấy thông tin chi tiết 1 cuốn sách."""
         result = self.thuc_thi_query(
             "SELECT * FROM books WHERE ma_sach = %s", (ma_sach,)
         )
         return result[0] if result else None
 
-    def get_borrow_count_for_book(self, ma_sach: str) -> int:
+    def lay_so_luong_muon(self, ma_sach: str) -> int:
         """Đếm tổng số lần sách được mượn (dùng cho badge 'Phổ biến')."""
         result = self.thuc_thi_query(
             "SELECT COUNT(*) as cnt FROM muontra WHERE ma_sach = %s", (ma_sach,)
@@ -80,7 +80,7 @@ class DocGiaQuery(Query):
         return result[0]["cnt"] if result else 0
 
     # MƯỢN SÁCH 
-    def count_active_borrows(self, username: str) -> int:
+    def dem_so_luot_muon(self, username: str) -> int:
         """Đếm số phiếu đang mượn (chưa trả + chờ duyệt) của user."""
         result = self.thuc_thi_query(
             """SELECT COUNT(*) as cnt FROM muontra
@@ -89,7 +89,7 @@ class DocGiaQuery(Query):
         )
         return result[0]["cnt"] if result else 0
 
-    def is_borrowing_this_book(self, username: str, ma_sach: str) -> bool:
+    def sach_dang_muon(self, username: str, ma_sach: str) -> bool:
         """Kiểm tra user có đang giữ cuốn sách này không."""
         result = self.thuc_thi_query(
             """SELECT COUNT(*) as cnt FROM muontra
@@ -99,7 +99,7 @@ class DocGiaQuery(Query):
         )
         return (result[0]["cnt"] if result else 0) > 0
 
-    def Lay_So_Luong_Sach(self, ma_sach: str) -> int:
+    def lay_so_luong_sach(self, ma_sach: str) -> int:
         """Lấy số lượng tồn kho."""
         result = self.thuc_thi_query(
             "SELECT so_luong FROM books WHERE ma_sach = %s", (ma_sach,)
@@ -118,21 +118,21 @@ class DocGiaQuery(Query):
                 pass
         return "MT001"
 
-    def create_borrow(self, username: str, ma_sach: str):
+    def tao_phieu_muon(self, username: str, ma_sach: str):
         """
         Tạo phiếu mượn với trạng thái 'cho_duyet'.
         Tồn kho KHÔNG giảm ở đây — chỉ giảm khi quản lý duyệt.
         Trả về (True, ma_phieu, None) hoặc (False, error_message, None).
         """
         # --- Kiểm tra điều kiện ---
-        so_luong = self.Lay_So_Luong_Sach(ma_sach)
+        so_luong = self.lay_so_luong_sach(ma_sach)
         if so_luong <= 0:
             return False, "Sách đã hết, không thể gửi yêu cầu mượn.", None
 
-        if self.is_borrowing_this_book(username, ma_sach):
+        if self.sach_dang_muon(username, ma_sach):
             return False, "Bạn đã có yêu cầu hoặc đang mượn cuốn sách này rồi.", None
 
-        active = self.count_active_borrows(username)
+        active = self.dem_so_luot_muon(username)
         if active >= MAX_BORROW:
             return False, f"Bạn đang có {active}/{MAX_BORROW} yêu cầu/phiếu mượn. Hãy trả bớt trước.", None
 
@@ -161,7 +161,7 @@ class DocGiaQuery(Query):
 
     # LỊCH SỬ 
 
-    def get_my_borrows(self, username: str):
+    def lay_lich_su_muon(self, username: str):
         """
         Lấy lịch sử mượn của user kèm tên sách, tác giả, thể loại
         """

@@ -44,7 +44,7 @@ class TaoMuonPage:
         ctk.CTkLabel(row1, text="Mã phiếu:", font=("Segoe UI", 12), width=100, anchor="w").pack(side="left")
         self.entry_maphieu = ctk.CTkEntry(row1, font=("Segoe UI", 12), corner_radius=8, fg_color="#e9ecef")
         self.entry_maphieu.pack(side="right", fill="x", expand=True)
-        self.entry_maphieu.insert(0, self.muontra_data.generate_new_id())
+        self.entry_maphieu.insert(0, self.muontra_data.tao_ma_moi())
         self.entry_maphieu.configure(state="disabled")
 
         # Username người mượn
@@ -138,7 +138,7 @@ class TaoMuonPage:
             return
 
         # Kiểm tra sự tồn tại của tài khoản
-        exists_account = self.account_data.check_exists(username)
+        exists_account = self.account_data.kiem_tra_tai_khoan_ton_tai(username)
         if exists_account == False:
             messagebox.showerror("Lỗi", f"Username '{username}' không tồn tại")
             return
@@ -194,7 +194,7 @@ class TaoMuonPage:
             ])
 
             # Khấu trừ số lượng tồn kho của sách đi 1 đơn vị
-            self.book_data.update_quantity(ma_sach, delta=-1)
+            self.book_data.cap_nhat_so_luong(ma_sach, delta=-1)
 
             messagebox.showinfo("Thành công", f"Đã tạo phiếu mượn '{ma_phieu}' với hạn trả là {han_tra_date.strftime('%d/%m/%Y')}")
             self.app_manager.show_muontra_page()

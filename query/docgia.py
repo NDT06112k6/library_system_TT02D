@@ -1,21 +1,11 @@
-"""
-query/docgia.py
-Lớp truy vấn dành riêng cho nghiệp vụ độc giả:
-  - Tìm/lọc sách
-  - Kiểm tra điều kiện mượn
-  - Tạo phiếu mượn
-  - Xem lịch sử mượn cá nhân
-"""
 from .base import Query
-MAX_BORROW = 5          # Giới hạn số sách mượn đồng thời
+MAX_BORROW = 10        # Giới hạn số sách mượn đồng thời
 BORROW_DAYS = 14        # Số ngày cho phép mượn
-#V
 
 class DocGiaQuery(Query):
     """Xử lý toàn bộ truy vấn cho giao diện độc giả."""
 
     #  SÁCH 
-
     def get_all_books(self):
         """Lấy toàn bộ sách cùng thông tin cần thiết cho card"""
         query = """

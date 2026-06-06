@@ -12,7 +12,6 @@ from page.taomuon import TaoMuonPage
 from page.thongke import ThongKePage
 from page.main_page import MainPage
 from page.docgia import DocGiaPage
-#Trường
 
 class AppManager:
     """Lớp quản lý toàn bộ ứng dụng"""
@@ -24,7 +23,6 @@ class AppManager:
         self.root = ctk.CTk()
         self.root.title("Hệ Thống Quản Lý Thư Viện")
         self.root.geometry("300x200")
-        # đảm bảo dọn dẹp khi người dùng đóng cửa sổ
         self.root.protocol("WM_DELETE_WINDOW", self.Dong_Ung_Dung)
         self.current_user = None  
         self.current_role = None  
@@ -48,8 +46,6 @@ class AppManager:
                         self.current_page._is_active = False
                     except Exception:
                         pass
-                
-                # Gọi cleanup nếu có
                 if hasattr(self.current_page, "cleanup"):
                     try:
                         self.current_page.cleanup()

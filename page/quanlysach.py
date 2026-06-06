@@ -4,7 +4,6 @@ from query.books import BookData
 from query.muontra import MuonTraData  
 from common.theme import Colors, Fonts, Spacing
 import threading
-#Q
 
 class QuanLySachPage:
     def __init__(self, master, app_manager):

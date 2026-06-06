@@ -4,8 +4,7 @@ from query.books import BookData
 from common.theme import Colors, Fonts, Spacing
 import threading
 import requests
-#Vinh
-#Q
+
 class ThemSachPage:
     def __init__(self, master, app_manager):
         self.master = master

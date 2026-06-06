@@ -1,6 +1,6 @@
 
 import tkinter as tk
-#Q
+
 class CustomButton(tk.Button):
     """Button tùy chỉnh với nhiều style khác nhau
     """

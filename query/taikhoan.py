@@ -2,7 +2,7 @@ from .base import Query
 import pandas as pd
 import re
 from page.exceptions import Nhap_Lieu_Trung_Lap
-#V
+
 class AccountData(Query):
     def __init__(self):
         """Khởi tạo thực thể quản lý dữ liệu tài khoản thư viện"""

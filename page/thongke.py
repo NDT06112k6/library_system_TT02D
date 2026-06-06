@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-#Q
 
 # Bảng màu chuẩn đồng bộ với hệ thống
 C = {

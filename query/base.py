@@ -2,7 +2,6 @@ import pandas as pd
 from tkinter import messagebox
 import csv
 from datetime import datetime
-# Import MySQLHandler từ thư mục database
 from database.mysql_handler import MySQLHandler
 
 class Query:

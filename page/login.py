@@ -5,7 +5,6 @@ import os
 import json
 from query.taikhoan import AccountData
 from common.theme import Colors, Fonts, Spacing
-#Vinh
 
 REMEMBER_FILE = "database/remember.json"
 

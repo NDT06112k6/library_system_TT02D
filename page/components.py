@@ -1,5 +1,5 @@
 import customtkinter as ctk
-#Q
+
 # Màu
 C = {
     "bg":          "#F0F4F8",

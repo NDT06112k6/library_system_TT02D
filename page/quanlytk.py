@@ -2,10 +2,8 @@ import customtkinter as ctk
 from tkinter import messagebox, ttk
 from common.button import CustomButton
 from query.taikhoan import AccountData
-#V
 
 class QuanLyTKPage:
-
     def __init__(self, master, app_manager):
         self.master = master
         self.app_manager = app_manager

@@ -5,8 +5,6 @@ from datetime import datetime, timedelta
 from query.muontra import MuonTraData
 from query.books import BookData
 from common.theme import Colors, Fonts, Spacing
-#Vinh
-#Q
 
 class MuonTraPage:
     """Quản lý hiển thị, duyệt mượn và xác nhận trả sách."""

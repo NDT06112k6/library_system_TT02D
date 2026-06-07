@@ -19,7 +19,6 @@ class AppManager:
     # HÀM KHỞI TẠO
     def __init__(self):
         """Khởi tạo ứng dụng"""
-
         self.root = ctk.CTk()
         self.root.title("Hệ Thống Quản Lý Thư Viện")
         self.root.geometry("300x200")
@@ -145,7 +144,7 @@ class AppManager:
         self.current_role = None
         self.current_page = LoginPage(self.root, self)
 
-    # TRANG CHÍNH ĐỘC GIẢ # Giữ nguyên comment
+    # TRANG CHÍNH ADMIN
     def Hien_Thi_Trang_Chinh(self, username="Admin"): 
         """Hiển thị trang Dashboard chính (Menu chính)"""
         self.Xoa_Trang_Hien_Tai()
@@ -257,16 +256,13 @@ class AppManager:
         bar.pack(pady=20)
         bar.set(0)
         
-        # Hàm tăng thanh tiến trình đơn giản sau mỗi 30 miligiây (chạy hết khoảng 3 giây)
         def loading(val):
             if val <= 1.0:
                 bar.set(val)
                 self.root.after(30, lambda: loading(val + 0.01))
             else:
-                # Chạy xong 100% thì nhảy sang trang Đăng nhập
                 self.Hien_Thi_Trang_Dang_Nhap()
 
-        # Bắt đầu chạy hiệu ứng loading
         loading(0)
 
     def run(self):

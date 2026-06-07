@@ -30,17 +30,17 @@ class MySQLHandler:
             cursor.execute("SET NAMES utf8mb4")
             cursor.close()
             if self.connection.is_connected():
-                print(f"✓ Kết nối MySQL thành công: {self.database}")
+                print(f"Kết nối MySQL thành công: {self.database}")
                 return True
         except Error as e:
-            print(f"✗ Lỗi kết nối MySQL: {e}")
+            print(f"Lỗi kết nối MySQL: {e}")
             return False
     
     def disconnect(self) -> None:
         """Đóng kết nối nếu đang mở."""
         if self.connection and self.connection.is_connected():
             self.connection.close()
-            print("✓ Đóng kết nối MySQL")
+            print("Đóng kết nối MySQL")
     
     def thuc_thi_query(self, query: str, params: tuple = None) -> bool:
         """
@@ -57,7 +57,7 @@ class MySQLHandler:
             cursor.close()
             return True
         except Error as e:
-            print(f"✗ Lỗi execute query: {e}")
+            print(f"Lỗi execute query: {e}")
             self.connection.rollback()
             return False
     
@@ -73,10 +73,10 @@ class MySQLHandler:
             cursor.close()
             return result
         except Error as e:
-            print(f"✗ Lỗi lấy một bản ghi: {e}")
+            print(f"Lỗi lấy một bản ghi: {e}")
             return None
     
-    def fetch_all(self, query: str, params: tuple = None) -> List[tuple]:
+    def lay_all_ban_ghi(self, query: str, params: tuple = None) -> List[tuple]:
         """Truy vấn lấy danh sách tất cả các bản ghi dạng Tuple"""
         try:
             cursor = self.connection.cursor()
@@ -88,7 +88,7 @@ class MySQLHandler:
             cursor.close()
             return results
         except Error as e:
-            print(f"✗ Lỗi fetch_all: {e}")
+            print(f"Lỗi lay_all_ban_ghi: {e}")
             return []
     
     def Lay_All_Dang_Tu_Dien(self, query: str, params: tuple = None) -> List[Dict]:
@@ -103,7 +103,7 @@ class MySQLHandler:
             cursor.close()
             return results
         except Error as e:
-            print(f"✗ Lỗi lấy tất cả bản ghi dưới dạng từ điển: {e}")
+            print(f"Lỗi lấy tất cả bản ghi dưới dạng từ điển: {e}")
             return []
     
     def Lay_Ten_Cot(self, table: str) -> List[str]:
@@ -117,7 +117,7 @@ class MySQLHandler:
             cursor.close()
             return columns
         except Error as e:
-            print(f"✗ Lỗi lấy tên cột: {e}")
+            print(f"Lỗi lấy tên cột: {e}")
             return []
     
     def is_connected(self) -> bool:

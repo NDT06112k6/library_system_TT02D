@@ -49,7 +49,6 @@ class Query:
             cursor.close()
             self.close()
 
-    #T
     def search(self, column_name, keyword, exact=False):
         """Tìm kiếm dữ liệu dựa trên cột và từ khóa chỉ định"""
         if exact:
@@ -72,7 +71,6 @@ class Query:
             return [list(row.values()) for row in result]
         return []
 
-    #T
     def delete(self, column_name, value):
         """Xóa bản ghi khỏi cơ sở dữ liệu theo điều kiện cột"""
         query = f"DELETE FROM {self.table_name} WHERE {column_name} = %s"
@@ -111,7 +109,6 @@ class Query:
             cursor.close()
             self.close()
     
-    #T
     def update(self, key_column, key_value, update_data: dict):
         """Cập nhật dữ liệu động theo cặp khóa-giá trị"""
         if not update_data:

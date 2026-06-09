@@ -1,4 +1,3 @@
-
 from app_manager import AppManager
 
 def main():

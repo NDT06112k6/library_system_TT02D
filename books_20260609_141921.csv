@@ -1,0 +1,38 @@
+﻿id,ma_sach,ten_sach,tac_gia,the_loai,so_luong,gia
+1158,IT001,Lập trình Python căn bản,Nguyễn Văn A,CÔNG NGHỆ,10,150000.00,2026-05-28 16:44:57
+1159,IT002,Cơ sở dữ liệu MySQL,Trần Văn B,CÔNG NGHỆ,8,120000.00,2026-05-28 16:44:58
+1160,IT003,Mạng máy tính hiện đại,Andrew Tanenbaum,CÔNG NGHỆ,6,250000.00,2026-05-28 16:44:58
+1161,IT004,Trí tuệ nhân tạo (AI),Stuart Russell,CÔNG NGHỆ,6,300000.00,2026-05-28 16:44:58
+1162,IT005,Thiết kế Web thực chiến,Jon Duckett,CÔNG NGHỆ,7,200000.00,2026-05-28 16:44:58
+1163,KT001,Quốc gia khởi nghiệp,Dan Senor,KINH TẾ,12,180000.00,2026-05-28 16:44:58
+1164,KT002,Cha giàu cha nghèo,Robert Kiyosaki,KINH TẾ,15,90000.00,2026-05-28 16:44:58
+1165,KT003,Tư duy hệ thống,Peter Senge,KINH TẾ,20,220000.00,2026-05-28 16:44:58
+1166,KT004,Quản trị doanh nghiệp,Peter Drucker,KINH TẾ,6,250000.00,2026-05-28 16:44:58
+1167,KT005,Tài chính cá nhân,Ramit Sethi,KINH TẾ,15,140000.00,2026-05-28 16:44:58
+1168,VH001,Truyện Kiều,Nguyễn Du,VĂN HỌC,20,50000.00,2026-05-28 16:44:58
+1169,VH002,Số đỏ,Vũ Trọng Phụng,VĂN HỌC,10,60000.00,2026-05-28 16:44:58
+1170,VH003,Nhà giả kim,Paulo Coelho,VĂN HỌC,25,80000.00,2026-05-28 16:44:58
+1171,VH004,Bố già,Mario Puzo,VĂN HỌC,9,120000.00,2026-05-28 16:44:58
+1172,VH005,Rừng Na Uy,Haruki Murakami,VĂN HỌC,6,100000.00,2026-05-28 16:44:58
+1173,KN001,Đắc nhân tâm,Dale Carnegie,KỸ NĂNG,31,70000.00,2026-05-28 16:44:58
+1174,KN002,7 Thói quen thành đạt,Stephen Covey,KỸ NĂNG,12,130000.00,2026-05-28 16:44:58
+1175,KN003,Sức mạnh của thói quen,Charles Duhigg,KỸ NĂNG,10,110000.00,2026-05-28 16:44:58
+1176,KN004,Tư duy nhanh và chậm,Daniel Kahneman,KỸ NĂNG,5,200000.00,2026-05-28 16:44:58
+1177,KN005,Tuần làm việc 4 giờ,Timothy Ferriss,KỸ NĂNG,8,150000.00,2026-05-28 16:44:58
+1178,NN001,Tiếng Anh giao tiếp,John Smith,NGOẠI NGỮ,19,100000.00,2026-05-28 16:44:58
+1179,NN002,Tự học tiếng Nhật,Tanaka Kenji,NGOẠI NGỮ,15,120000.00,2026-05-28 16:44:58
+1180,NN003,Tiếng Hàn tổng hợp,Kim Huyn,NGOẠI NGỮ,10,130000.00,2026-05-28 16:44:58
+1181,NN004,Tiếng Trung cấp tốc,Wang Li,NGOẠI NGỮ,8,110000.00,2026-05-28 16:44:58
+1182,NN005,Luyện thi IELTS,Cambridge,NGOẠI NGỮ,5,300000.00,2026-05-28 16:44:58
+1183,KH001,Lược sử thời gian,Stephen Hawking,KHOA HỌC,6,180000.00,2026-05-28 16:44:58
+1184,KH002,Thế giới phẳng,Thomas Friedman,KHOA HỌC,4,190000.00,2026-05-28 16:44:59
+1185,KH003,Lịch sử nhân loại,Yuval Harari,KHOA HỌC,7,250000.00,2026-05-28 16:44:59
+1186,KH004,Vũ trụ trong vỏ hạt dẻ,Stephen Hawking,KHOA HỌC,5,170000.00,2026-05-28 16:44:59
+1187,KH005,Khoa học về sự sống,Bill Bryson,KHOA HỌC,6,220000.00,2026-05-28 16:44:59
+1188,IT006,Thuật toán và cấu trúc dữ liệu,Thomas H. Cormen,CÔNG NGHỆ,5,350000.00,2026-05-28 16:44:59
+1189,IT007,Clean Code,Robert C. Martin,CÔNG NGHỆ,8,280000.00,2026-05-28 16:44:59
+1190,IT008,Ngôn ngữ lập trình C++,Bjarne Stroustrup,CÔNG NGHỆ,4,210000.00,2026-05-28 16:44:59
+1191,IT009,Hệ điều hành hiện đại,Andrew Tanenbaum,CÔNG NGHỆ,3,320000.00,2026-05-28 16:44:59
+1192,IT010,Bảo mật hệ thống thông tin,William Stallings,CÔNG NGHỆ,5,290000.00,2026-05-28 16:44:59
+1193,IT00124,ABC,AAA,CÔNG NGHỆ,11,2221111.00,2026-05-28 16:44:59
+1194,IT04,ABC,AAA,CÔNG NGHỆ,11,2221111.00,2026-05-28 16:44:59

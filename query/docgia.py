@@ -153,11 +153,11 @@ class DocGiaQuery(Query):
 
     def lay_lich_su_muon(self, username: str):
         """
-        Lấy lịch sử mượn của user kèm tên sách, tác giả, thể loại
+        Lấy lịch sử mươn của user kèm tên sách, tác giả, thể loại
         """
         return self.thuc_thi_query(
             """SELECT m.ma_phieu, m.ma_sach, b.ten_sach, b.tac_gia, b.the_loai,
-                      m.ngay_muon, m.ngay_tra, m.trang_thai
+                      m.ngay_muon, m.han_tra, m.ngay_tra, m.trang_thai
                FROM muontra m
                JOIN books b ON m.ma_sach = b.ma_sach
                WHERE m.username = %s

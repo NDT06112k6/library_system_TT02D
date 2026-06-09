@@ -82,8 +82,7 @@ class QuanLyTKPage:
 
         # Cụm nút bấm chức năng chính xếp dọc
         CustomButton(sidebar_frame, text="🔄 Làm mới dữ liệu", command=self.Tai_Tai_Khoan, style_type="info").pack(fill="x", padx=15, pady=5)
-        CustomButton(sidebar_frame, text="➕ Thêm tài khoản mới", command=self.Them_Tai_Khoan, style_type="success").pack(fill="x", padx=15, pady=5)
-        CustomButton(sidebar_frame, text="➕ Tạo Tài Khoản Độc Giả", command=self.tao_tai_khoan_docgia, style_type="info").pack(fill="x", padx=15, pady=5)
+        CustomButton(sidebar_frame, text="➕ Tạo Tài Khoản Độc Giả", command=self.tao_tai_khoan_docgia, style_type="success").pack(fill="x", padx=15, pady=5)
         CustomButton(sidebar_frame, text="✏️ Chỉnh sửa tài khoản", command=self.edit_account, style_type="warning").pack(fill="x", padx=15, pady=5)
         CustomButton(sidebar_frame, text="🗑️ Xóa tài khoản", command=self.Xoa_Tai_Khoan, style_type="danger").pack(fill="x", padx=15, pady=5)
         
@@ -226,9 +225,6 @@ class QuanLyTKPage:
                     row[6]
                 ))
         self.status_label.configure(text=f"Tổng số: {len(data)} tài khoản")
-    
-    def Them_Tai_Khoan(self): 
-        self.app_manager.Hien_Thi_Trang_Tao_TK(is_admin=True)
     
     def tao_tai_khoan_docgia(self):
         """Mở form tạo tài khoản độc giả"""

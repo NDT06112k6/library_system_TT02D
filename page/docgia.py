@@ -5,7 +5,6 @@ from query.docgia import DocGiaQuery, MAX_BORROW, BORROW_DAYS
 from page.components import BookCard, BorrowRow, C, FONT_FAMILY
 from datetime import date, datetime
 import os
-import webbrowser
 import threading
 
 class DocGiaPage:
@@ -274,32 +273,6 @@ class DocGiaPage:
             font=(FONT_FAMILY, 11),
             command=self._Lam_Moi_Sach,
         ).pack(fill="x", padx=18, pady=(24, 0))
-
-        # Nút Mở tài liệu HDSD PDF (Đạt điểm tối đa theo biểu điểm)
-        ctk.CTkButton(
-            sb,
-            text="📄 Hướng Dẫn Sử Dụng",
-            height=34,
-            corner_radius=8,
-            fg_color="#10B981", 
-            hover_color="#059669",
-            text_color="white",
-            font=(FONT_FAMILY, 11, "bold"),
-            command=self._Mo_File_PDF_HDSD,
-        ).pack(fill="x", padx=18, pady=(10, 0))
-    
-        # Nút Tổng quan chương trình (About)
-        ctk.CTkButton(
-            sb, 
-            text="ℹ️ Tổng Quan Chương Trình",
-            height=34,
-            corner_radius=8,
-            fg_color="#17a2b8",
-            hover_color="#138496",
-            text_color="white",
-            font=(FONT_FAMILY, 11, "bold"),
-            command=self.hien_thi_about,
-        ).pack(fill="x", padx=18, pady=(10, 0))
 
     # Nội dung
     def _Xay_Dung_Noi_Dung(self, parent):
@@ -727,50 +700,6 @@ class DocGiaPage:
         self._is_active = False
         if messagebox.askyesno("Đăng xuất", "Bạn có chắc muốn đăng xuất?"):
             self.app_manager.Hien_Thi_Trang_Dang_Nhap()
-
-    # HÀM MỞ FILE PDF HDSD
-    def _Mo_File_PDF_HDSD(self):     
-        file_name = "HDSD.pdf" 
-        if os.path.exists(file_name):
-            try:
-                duong_dan = os.path.abspath(file_name)
-                messagebox.showinfo("Thông báo", "Hệ thống đang mở tệp PDF Hướng dẫn sử dụng!")
-                webbrowser.open(duong_dan)
-            except Exception as e:
-                messagebox.showerror("Lỗi", f"Không thể mở PDF: {str(e)}")
-        else:
-            messagebox.showwarning("Thông báo", f"Tệp tin '{file_name}' không tồn tại trong thư mục gốc của dự án!")
-
-    # HÀM HIỂN THỊ THÔNG TIN ABOUT NHÓM
-    def hien_thi_about(self):
-        """Hiển thị cửa sổ thông tin về chương trình"""
-        thong_tin_about = """
-  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN        
-       QUANG VINH LIBRARY             
-
-📋 Thông Tin Chương Trình:
-- Phiên bản: 1.0
-- Năm phát triển: 2026
-- Mô tả: Ứng dụng quản lý kho sách,
-  mượn trả sách, thống kê báo cáo
-
-👥 Nhóm Thực Hiện: 1
-- Thành viên 1: Nguyễn Đức Trường (Nhóm trưởng)
-- Thành viên 2: Kiều Xuân Vinh
-- Thành viên 3: Chu Việt Quang
-
-🎓 Lớp: Lập Trình Python
-👨‍🏫 Giảng Viên: Phạm Nguyên Hồng
-🏫 Trường: Đại Học Hạ Long
-
-💻 Công Nghệ Sử Dụng:
-- CustomTkinter (GUI)
-- MySQL (Database)
-- Pandas & NumPy (Xử lý dữ liệu)
-- Matplotlib (Biểu đồ thống kê)
-📧 Liên Hệ: Nhom1@gmail.com
-"""
-        messagebox.showinfo("Tổng Quan Về Chương Trình", thong_tin_about)
 
     def cleanup(self):
         """Dọn dẹp tài nguyên: huỷ after callbacks"""

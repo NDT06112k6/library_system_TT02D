@@ -62,12 +62,30 @@ class MainPage:
             command=lambda: self.app_manager.Hien_Thi_Trang_Quan_Ly_TK()
         ).pack(fill="x", padx=10, pady=5)
 
+        # Footer frame - chứa các nút ở cuối sidebar
+        footer_frame = ctk.CTkFrame(sidebar, fg_color="transparent")
+        footer_frame.pack(side="bottom", fill="x", padx=10, pady=10)
+
+        # Nút Hướng Dẫn Sử Dụng
+        ctk.CTkButton(
+            footer_frame, text="📄 Hướng Dẫn Sử Dụng", fg_color="#10b981", text_color="white",
+            hover_color="#059669", font=("Segoe UI", 11, "bold"), height=36,
+            command=self._Mo_File_PDF_HDSD
+        ).pack(fill="x", pady=5)
+
+        # Nút Tổng Quan Chương Trình
+        ctk.CTkButton(
+            footer_frame, text="ℹ️ Tổng Quan Chương Trình", fg_color="#17a2b8", text_color="white",
+            hover_color="#138496", font=("Segoe UI", 11, "bold"), height=36,
+            command=self.hien_thi_about
+        ).pack(fill="x", pady=5)
+
         # Nút Đăng xuất ở cuối thanh bên
         ctk.CTkButton(
-            sidebar, text="Đăng Xuất", fg_color="#ef4444", text_color="white",
+            footer_frame, text="Đăng Xuất", fg_color="#ef4444", text_color="white",
             hover_color="#dc2626", font=("Segoe UI", 13, "bold"), height=35,
             command=self.xac_nhan_dang_xuat
-        ).pack(side="bottom", fill="x", padx=15, pady=20)
+        ).pack(fill="x", pady=(5, 0))
 
         # 2. ─── VÙNG KHÔNG GIAN BÊN PHẢI  ───
         content_area = ctk.CTkFrame(main_container, fg_color="#f8fafc", corner_radius=0)
@@ -189,7 +207,56 @@ class MainPage:
         if ans == True:
             self.app_manager.Hien_Thi_Trang_Dang_Nhap()
 
-    # ================= LOGIC ĐỌC DỮ LIỆU TỪ MYSQL DOCKER =================
+    def _Mo_File_PDF_HDSD(self):     
+        """Mở file PDF hướng dẫn sử dụng"""
+        import os
+        import webbrowser
+        from tkinter import messagebox
+        
+        file_name = "HDSD.pdf" 
+        if os.path.exists(file_name):
+            try:
+                duong_dan = os.path.abspath(file_name)
+                messagebox.showinfo("Thông báo", "Hệ thống đang mở tệp PDF Hướng dẫn sử dụng!")
+                webbrowser.open(duong_dan)
+            except Exception as e:
+                messagebox.showerror("Lỗi", f"Không thể mở PDF: {str(e)}")
+        else:
+            messagebox.showwarning("Thông báo", f"Tệp tin '{file_name}' không tồn tại trong thư mục gốc của dự án!")
+
+    def hien_thi_about(self):
+        """Hiển thị cửa sổ thông tin về chương trình"""
+        from tkinter import messagebox
+        
+        thong_tin_about = """
+  📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN        
+       QUANG VINH LIBRARY             
+
+📋 Thông Tin Chương Trình:
+- Phiên bản: 1.0
+- Năm phát triển: 2026
+- Mô tả: Ứng dụng quản lý kho sách,
+  mượn trả sách, thống kê báo cáo
+
+👥 Nhóm Thực Hiện: 1
+- Thành viên 1: Nguyễn Đức Trường (Nhóm trưởng)
+- Thành viên 2: Kiều Xuân Vinh
+- Thành viên 3: Chu Việt Quang
+
+🎓 Lớp: Lập Trình Python
+👨‍🏫 Giảng Viên: Phạm Nguyên Hồng
+🏫 Trường: Đại Học Hạ Long
+
+💻 Công Nghệ Sử Dụng:
+- CustomTkinter (GUI)
+- MySQL (Database)
+- Pandas & NumPy (Xử lý dữ liệu)
+- Matplotlib (Biểu đồ thống kê)
+📧 Liên Hệ: Nhom1@gmail.com
+"""
+        messagebox.showinfo("Tổng Quan Về Chương Trình", thong_tin_about)
+
+
     def Tai_Du_Lieu_Bang_Dieu_Khien(self): 
         """Đổ dữ liệu thời gian thực từ database lên các Card và 2 bảng thông báo nhanh"""
         try:

@@ -161,7 +161,7 @@ class QuanLySachPage:
 
         if current_role in ["Admin", "Quản lý", "Thủ thư"]:
             # Hiển thị các nút Quản trị nếu là nhân viên quản lý
-            ctk.CTkButton(btns_container, text="Thêm Mới", fg_color=Colors.SUCCESS, font=Fonts.SMALL_BOLD, command=self.them_sach).pack(side="left", padx=5)
+            ctk.CTkButton(btns_container, text="Thêm Sách Mới", fg_color=Colors.SUCCESS, font=Fonts.SMALL_BOLD, command=self.them_sach).pack(side="left", padx=5)
             ctk.CTkButton(btns_container, text="Sửa", fg_color=Colors.INFO, font=Fonts.SMALL_BOLD, command=self.sua_sach).pack(side="left", padx=5)
             ctk.CTkButton(btns_container, text="Xóa", fg_color=Colors.ERROR, font=Fonts.SMALL_BOLD, command=self.xoa_sach).pack(side="left", padx=5)
             ctk.CTkButton(btns_container, text="Xuất CSV", fg_color="#8B5CF6", font=Fonts.SMALL_BOLD, command=self.xuat_du_lieu_csv).pack(side="left", padx=5)

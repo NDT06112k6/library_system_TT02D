@@ -2,7 +2,6 @@
 Theme & Color Constants cho toàn ứng dụng
 Thay đổi 1 chỗ → toàn ứng dụng đổi theo
 """
-#Q
 # ===== COLOR SCHEME =====
 class Colors:
     # Primary
@@ -14,7 +13,7 @@ class Colors:
     BG_SECONDARY = "#FFFFFF"     # Trắng (card, frame)
     BG_HOVER = "#E8F0FF"         # Xanh rất nhạt (hover row)
     
-    # Text
+    # Chữ
     TEXT_PRIMARY = "#1A1A1A"     # Đen (chữ chính)
     TEXT_SECONDARY = "#666666"   # Xám (chữ phụ)
     TEXT_LIGHT = "#999999"       # Xám nhạt (placeholder)

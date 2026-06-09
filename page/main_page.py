@@ -75,7 +75,7 @@ class MainPage:
 
         # Nút Tổng Quan Chương Trình
         ctk.CTkButton(
-            footer_frame, text="ℹ️ Tổng Quan Chương Trình", fg_color="#17a2b8", text_color="white",
+            footer_frame, text="ℹ️ Tổng Quan Về Chương Trình", fg_color="#17a2b8", text_color="white",
             hover_color="#138496", font=("Segoe UI", 11, "bold"), height=36,
             command=self.hien_thi_about
         ).pack(fill="x", pady=5)

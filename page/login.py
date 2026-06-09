@@ -114,15 +114,16 @@ class LoginPage:
 
         self.register_button = ctk.CTkButton(
             btn_frame,
-            text="Đăng Ký Tài Khoản",
+            text="Bạn chưa có tài khoản? Liên hệ Admin",
             command=self.Dang_Ky_Tai_Khoan,
             height=40,
             font=Fonts.SMALL_BOLD,
             fg_color="transparent",
             border_width=1,
             border_color=Colors.PRIMARY,
-            text_color=Colors.PRIMARY,
-            hover_color=Colors.BG_HOVER
+            text_color="#999999",
+            hover_color=Colors.BG_HOVER,
+            state="disabled"
         )
         self.register_button.pack(fill="x")
 

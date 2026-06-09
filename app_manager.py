@@ -152,16 +152,21 @@ class AppManager:
         self.current_page = MainPage(self.root, self, username)
 
     # TRANG TẠO TÀI KHOẢN
-    def Hien_Thi_Trang_Tao_TK(self, is_admin=False): 
+    def Hien_Thi_Trang_Tao_TK(self, is_admin=False, is_docgia=False): 
         """Hiển thị trang tạo tài khoản mới"""
         self.Xoa_Trang_Hien_Tai()
         self.root.geometry("420x650")
-        self.current_page = TaoTKPage(self.root, self, is_admin=is_admin)
+        self.current_page = TaoTKPage(self.root, self, is_admin=is_admin, is_docgia=is_docgia)
     
     # TRANG ĐĂNG KÝ
     def Hien_Thi_Trang_Dang_Ky(self):
-        """Hàm bổ trợ đồng bộ luồng gọi chuyển từ LoginPage sang trang Đăng Ký"""
-        self.Hien_Thi_Trang_Tao_TK()
+        """Hiển thị thông báo: Độc giả phải liên hệ admin để tạo tài khoản"""
+        from tkinter import messagebox
+        messagebox.showinfo(
+            "Thông Báo",
+            "Để tạo tài khoản độc giả, vui lòng liên hệ với Admin."
+        )
+        self.Hien_Thi_Trang_Dang_Nhap()
 
     # TRANG QUẢN LÝ TÀI KHOẢN
     def Hien_Thi_Trang_Quan_Ly_TK(self): 

@@ -7,10 +7,11 @@ class TaoTKPage:
     Trang tạo tài khoản mới dành cho khách hàng với chức vụ mặc định là Độc giả.
     Hỗ trợ cuộn chuột khi form quá dài.
     """
-    def __init__(self, master, app_manager, is_admin=False):
+    def __init__(self, master, app_manager, is_admin=False, is_docgia=False):
         self.master = master
         self.app_manager = app_manager
         self.is_admin = is_admin
+        self.is_docgia = is_docgia
         self.account_data = AccountData()
         self.config()
         self.view()
@@ -85,20 +86,28 @@ class TaoTKPage:
         self.entry_sdt = tao_dau_vao(right_col, "SỐ ĐIỆN THOẠI:", "Nhập SĐT...")
         self.entry_gmail = tao_dau_vao(right_col, "GMAIL:", "Nhập Gmail (@gmail.com)...")
         
-        # Ô Chức vụ (Đặc biệt vì có màu nền xám và bị khóa)
-        ctk.CTkLabel(
+        # Ô Chức vụ (Ẩn nếu tạo độc giả)
+        self.label_chucvu = ctk.CTkLabel(
             right_col, text="CHỨC VỤ:",
             font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
             text_color="#566573"
-        ).pack(anchor="w", pady=(0, 4))
+        )
+        self.label_chucvu.pack(anchor="w", pady=(0, 4))
         
         self.entry_chucvu = ctk.CTkEntry(
             right_col, height=40, font=ctk.CTkFont(family="Segoe UI", size=12),
             fg_color="#E5E8E8", border_color="#ABB2B9", border_width=1, corner_radius=8
         )
         self.entry_chucvu.pack(fill="x", pady=(0, 15))
-        self.entry_chucvu.insert(0, "Độc giả")
-        self.entry_chucvu.configure(state="disabled")
+        
+        # Nếu tạo độc giả, ẩn label và entry role
+        if self.is_docgia:
+            self.label_chucvu.pack_forget()
+            self.entry_chucvu.pack_forget()
+            self.entry_chucvu.insert(0, "Độc giả")
+        else:
+            self.entry_chucvu.insert(0, "Độc giả")
+            self.entry_chucvu.configure(state="disabled")
 
         # ========== KHUNG NÚT BẤM (Căn giữa dưới cùng) ==========
         button_frame = ctk.CTkFrame(inner_frame, fg_color="transparent")
@@ -110,7 +119,14 @@ class TaoTKPage:
             font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), corner_radius=8
         ).pack(pady=(0, 10))
 
-        if not self.is_admin:
+        if self.is_docgia:
+            # Nếu tạo độc giả từ admin, quay lại trang quản lý
+            ctk.CTkButton(
+                button_frame, text="QUAY LẠI TRANG QUẢN LÝ", command=self.back_admin,
+                width=280, height=42, fg_color="#BDC3C7", hover_color="#A6B1B9",
+                text_color="#2C3E50", font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), corner_radius=8
+            ).pack()
+        elif not self.is_admin:
             ctk.CTkButton(
                 button_frame, text="QUAY LẠI ĐĂNG NHẬP", command=self.back_login,
                 width=280, height=42, fg_color="#BDC3C7", hover_color="#A6B1B9",
@@ -142,7 +158,7 @@ class TaoTKPage:
         gmail    = self.entry_gmail.get().strip()
         hoten    = self.entry_hoten.get().strip()
         sdt      = self.entry_sdt.get().strip()
-        chucvu   = "Độc giả"
+        chucvu   = "Độc giả" if self.is_docgia else self.entry_chucvu.get().strip()
         password = self.entry_password.get().strip()
         confirm  = self.entry_confirm.get().strip()
         
@@ -188,7 +204,7 @@ class TaoTKPage:
             self.account_data.create([username, password, hoten, sdt, chucvu, gmail])
             messagebox.showinfo("Thông báo", "Tạo tài khoản thành công!")
             
-            if getattr(self, 'is_admin', False): 
+            if self.is_docgia or getattr(self, 'is_admin', False): 
                 self.back_admin()
             else:
                 self.back_login()

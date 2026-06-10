@@ -33,6 +33,7 @@ class Query:
 
     def thuc_thi_query(self, query, params=None):
         """Thực thi câu lệnh truy vấn SQL và trả về kết quả dưới dạng danh sách"""
+        #params = tham số
         conn = self.connect()
         if not conn:
             return None
@@ -98,6 +99,7 @@ class Query:
         if not conn:
             return False
         cursor = conn.cursor()
+        #execute = thực thi
         try:
             cursor.execute(query, tuple(data))
             conn.commit()
@@ -108,12 +110,12 @@ class Query:
         finally:
             cursor.close()
             self.close()
-    
+    #dictionary = từ điển
     def update(self, key_column, key_value, update_data: dict):
         """Cập nhật dữ liệu động theo cặp khóa-giá trị"""
         if not update_data:
             return False
-            
+        #set_clause = đặt điều khoản   
         set_clause = ", ".join([f"{col} = %s" for col in update_data.keys()])
         query = f"UPDATE {self.table_name} SET {set_clause} WHERE {key_column} = %s"
         

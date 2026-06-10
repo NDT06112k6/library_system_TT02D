@@ -7,11 +7,12 @@ class TaoTKPage:
     Trang tạo tài khoản mới dành cho khách hàng với chức vụ mặc định là Độc giả.
     Hỗ trợ cuộn chuột khi form quá dài.
     """
-    def __init__(self, master, app_manager, is_admin=False, is_docgia=False):
+    def __init__(self, master, app_manager, is_admin=False, is_docgia=False, is_manager=False):
         self.master = master
         self.app_manager = app_manager
         self.is_admin = is_admin
         self.is_docgia = is_docgia
+        self.is_manager = is_manager
         self.account_data = AccountData()
         self.config()
         self.view()
@@ -100,12 +101,17 @@ class TaoTKPage:
         )
         self.entry_chucvu.pack(fill="x", pady=(0, 15))
         
-        # Nếu tạo độc giả, ẩn label và entry role
+        # Xác định chức vụ dựa trên loại tài khoản
         if self.is_docgia:
-            self.label_chucvu.pack_forget()
-            self.entry_chucvu.pack_forget()
+            # Tạo tài khoản độc giả
             self.entry_chucvu.insert(0, "Độc giả")
+            self.entry_chucvu.configure(state="disabled")
+        elif self.is_manager:
+            # Tạo tài khoản quản lý
+            self.entry_chucvu.insert(0, "Quản lý")
+            self.entry_chucvu.configure(state="disabled")
         else:
+            # Mặc định là độc giả
             self.entry_chucvu.insert(0, "Độc giả")
             self.entry_chucvu.configure(state="disabled")
 
@@ -158,9 +164,16 @@ class TaoTKPage:
         gmail    = self.entry_gmail.get().strip()
         hoten    = self.entry_hoten.get().strip()
         sdt      = self.entry_sdt.get().strip()
-        chucvu   = "Độc giả" if self.is_docgia else self.entry_chucvu.get().strip()
         password = self.entry_password.get().strip()
         confirm  = self.entry_confirm.get().strip()
+        
+        # Xác định chức vụ dựa trên loại tài khoản
+        if self.is_docgia:
+            chucvu = "Độc giả"
+        elif self.is_manager:
+            chucvu = "Quản lý"
+        else:
+            chucvu = "Độc giả"
         
         # Kiểm tra username
         valid, msg = Validation.xac_thuc_username(username)
@@ -204,7 +217,7 @@ class TaoTKPage:
             self.account_data.create([username, password, hoten, sdt, chucvu, gmail])
             messagebox.showinfo("Thông báo", "Tạo tài khoản thành công!")
             
-            if self.is_docgia or getattr(self, 'is_admin', False): 
+            if self.is_docgia or self.is_manager or getattr(self, 'is_admin', False): 
                 self.back_admin()
             else:
                 self.back_login()

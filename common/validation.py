@@ -1,4 +1,5 @@
-﻿import re
+﻿#Thư viện Regular Expression
+import re
 from datetime import datetime
 
 class Validation:
@@ -49,6 +50,7 @@ class Validation:
     @staticmethod
     def xac_thuc_email(email):
         """"Kiểm tra email hợp lệ"""
+        #mẫu
         pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         if not re.match(pattern, email):
             return False, "Email không hợp lệ (ví dụ: user@example.com)"

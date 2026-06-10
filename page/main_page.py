@@ -2,7 +2,9 @@ import customtkinter as ctk
 from tkinter import ttk
 from query.muontra import MuonTraData
 from query.books import BookData
-
+import os
+import webbrowser
+from tkinter import messagebox
 
 class MainPage:
     def __init__(self, master, app_manager, username="Admin"):
@@ -209,10 +211,6 @@ class MainPage:
 
     def _Mo_File_PDF_HDSD(self):     
         """Mở file PDF hướng dẫn sử dụng"""
-        import os
-        import webbrowser
-        from tkinter import messagebox
-        
         file_name = "HDSD.pdf" 
         if os.path.exists(file_name):
             try:

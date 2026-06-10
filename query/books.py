@@ -23,6 +23,7 @@ class BookData(Query):
             by_the_loai = self.search("the_loai", keyword, exact=False)
             
             # Gom tất cả kết quả lại và loại bỏ các dòng trùng lặp
+            #concatenate = kết hợp dp lại với nhau và drop = loại trùng lặp
             result = pd.concat([by_ma, by_ten, by_tac_gia, by_the_loai]).drop_duplicates()
             return result.values.tolist()
         except Exception as e:

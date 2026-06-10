@@ -152,11 +152,11 @@ class AppManager:
         self.current_page = MainPage(self.root, self, username)
 
     # TRANG TẠO TÀI KHOẢN
-    def Hien_Thi_Trang_Tao_TK(self, is_admin=False, is_docgia=False): 
+    def Hien_Thi_Trang_Tao_TK(self, is_admin=False, is_docgia=False, is_manager=False): 
         """Hiển thị trang tạo tài khoản mới"""
         self.Xoa_Trang_Hien_Tai()
         self.root.geometry("420x650")
-        self.current_page = TaoTKPage(self.root, self, is_admin=is_admin, is_docgia=is_docgia)
+        self.current_page = TaoTKPage(self.root, self, is_admin=is_admin, is_docgia=is_docgia, is_manager=is_manager)
     
     # TRANG ĐĂNG KÝ
     def Hien_Thi_Trang_Dang_Ky(self):

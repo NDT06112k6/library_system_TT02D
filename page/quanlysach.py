@@ -241,6 +241,7 @@ class QuanLySachPage:
         self.app_manager.Hien_Thi_Trang_Them_Sach()
 
     def sua_sach(self):
+        #selection = chọn
         selected = self.book_tree.selection()
         if not selected:
             messagebox.showwarning("Cảnh báo", "Vui lòng chọn sách cần sửa")
@@ -281,7 +282,7 @@ class QuanLySachPage:
         """Hiển thị dữ liệu sách lên Treeview tự động nhận diện kiểu dữ liệu"""
         for item in self.book_tree.get_children():
             self.book_tree.delete(item)
-        
+        #enumerate = liệt kê
         for idx, row in enumerate(rows, 1):
             try:
                 if isinstance(row, dict):
@@ -335,7 +336,7 @@ class QuanLySachPage:
 
     def _Xoa_Sach_Khoi_File(self, ma_sach_xoa): 
         try:
-            from query.muontra import MuonTraData
+            
             muon_tra_data = MuonTraData()
             query = "DELETE FROM muontra WHERE ma_sach = %s"
             muon_tra_data.thuc_thi_query(query, (ma_sach_xoa,))

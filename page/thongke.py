@@ -125,6 +125,7 @@ class ThongKePage:
         all_books = self.book_data.list_all()
         #quantities (SoLuong)
         soLuong = [book[5] for book in all_books]
+        #mean = tbc median = trung vị
         avg_qty = np.mean(soLuong) if soLuong else 0
         median_qty = np.median(soLuong) if soLuong else 0
         
@@ -276,10 +277,11 @@ class ThongKePage:
             nhan = ["Đang mượn", "Chờ duyệt", "Đã trả"]
             
         mau_sac = ['#3b82f6', '#f59e0b', '#10b981'] # Xanh dương, Vàng, Xanh lá
-
+        #subplots = vùng vẽ 
         fig, ax = plt.subplots(figsize=(4, 4), facecolor='#F0F4F8')
         ax.pie(so_lieu, labels=nhan, autopct='%1.1f%%', colors=mau_sac, startangle=90)
-        ax.axis('equal') # Đảm bảo biểu đồ hình tròn
+        # Đảm bảo biểu đồ hình tròn
+        ax.axis('equal') 
         ax.set_title("Tỷ Lệ Trạng Thái Mượn Sách", fontweight="bold", pad=15)
 
         canvas = FigureCanvasTkAgg(fig, master=frame_chua)

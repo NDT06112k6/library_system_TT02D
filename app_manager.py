@@ -12,7 +12,7 @@ from page.taomuon import TaoMuonPage
 from page.thongke import ThongKePage
 from page.main_page import MainPage
 from page.docgia import DocGiaPage
-
+from tkinter import messagebox
 class AppManager:
     """Lớp quản lý toàn bộ ứng dụng"""
 
@@ -161,7 +161,7 @@ class AppManager:
     # TRANG ĐĂNG KÝ
     def Hien_Thi_Trang_Dang_Ky(self):
         """Hiển thị thông báo: Độc giả phải liên hệ admin để tạo tài khoản"""
-        from tkinter import messagebox
+        
         messagebox.showinfo(
             "Thông Báo",
             "Để tạo tài khoản độc giả, vui lòng liên hệ với Admin."

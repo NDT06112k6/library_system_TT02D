@@ -140,6 +140,7 @@ class LoginPage:
             pass
 
     def save_remember(self, username, password):
+        #tao thu muc
         os.makedirs("database", exist_ok=True)
         try:
             with open(REMEMBER_FILE, "w", encoding="utf-8") as f:
@@ -160,7 +161,7 @@ class LoginPage:
             pass
 
     def Dang_Ky_Tai_Khoan(self):
-        """Chuyển hướng người dùng sang giao diện đăng ký tài khoản độc giả"""
+        """Chuyển hướng người dùng sang giao diện  tài khoản độc giả"""
         self.app_manager.Hien_Thi_Trang_Dang_Ky()
 
     def login(self):

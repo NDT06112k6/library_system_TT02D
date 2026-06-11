@@ -204,7 +204,7 @@ class MainPage:
 
     def xac_nhan_dang_xuat(self):
         """Hiển thị hộp thoại yêu cầu xác nhận trước khi đăng xuất hệ thống."""
-        from tkinter import messagebox
+        
         ans = messagebox.askyesno("Xác nhận đăng xuất", "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?")
         if ans == True:
             self.app_manager.Hien_Thi_Trang_Dang_Nhap()
@@ -214,6 +214,7 @@ class MainPage:
         file_name = "HDSD.pdf" 
         if os.path.exists(file_name):
             try:
+
                 duong_dan = os.path.abspath(file_name)
                 messagebox.showinfo("Thông báo", "Hệ thống đang mở tệp PDF Hướng dẫn sử dụng!")
                 webbrowser.open(duong_dan)
@@ -224,7 +225,6 @@ class MainPage:
 
     def hien_thi_about(self):
         """Hiển thị cửa sổ thông tin về chương trình"""
-        from tkinter import messagebox
         
         thong_tin_about = """
   📚 HỆ THỐNG QUẢN LÝ THƯ VIỆN        

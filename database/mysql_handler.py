@@ -69,6 +69,7 @@ class MySQLHandler:
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
+            #fetchone = MỘT DÒNG kết quả từ câu lệnh SQL vừa chạy
             result = cursor.fetchone()
             cursor.close()
             return result
@@ -107,7 +108,7 @@ class MySQLHandler:
             return []
     
     def Lay_Ten_Cot(self, table: str) -> List[str]:
-        """Lấy danh sách tên các cột của một bảng bằng lệnh DESCRIBE"""
+        """Lấy danh sách tên các cột của một bảng bằng lệnh DESCRIBE (lấy cấu trúc bảng)"""
         try:
             cursor = self.connection.cursor()
             cursor.execute(f"DESCRIBE {table}")

@@ -19,6 +19,8 @@ class DocGiaQuery(Query):
         """
         Tìm sách theo từ khoá (tên / tác giả / thể loại) + filter + sắp xếp
         """
+        #conditions = điều kiện
+        #params = tham số
         conditions = []
         params = []
 
@@ -111,8 +113,6 @@ class DocGiaQuery(Query):
     def tao_phieu_muon(self, username: str, ma_sach: str):
         """
         Tạo phiếu mượn với trạng thái 'cho_duyet'.
-        Tồn kho KHÔNG giảm ở đây — chỉ giảm khi quản lý duyệt.
-        Trả về (True, ma_phieu, None) hoặc (False, error_message, None).
         """
         # --- Kiểm tra điều kiện ---
         so_luong = self.lay_so_luong_sach(ma_sach)

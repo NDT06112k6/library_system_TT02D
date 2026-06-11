@@ -187,6 +187,7 @@ class ThemSachPage:
         def chay_ngam_api():
             try:
                 url = f"https://openlibrary.org/api/books?bibkeys=ISBN:{isbn}&format=json&jscmd=data"
+                #response = phản hồi từ máy chủ sau khi gửi yêu cầu GET đến URL API với mã ISBN đã nhập, timeout=10 giây để tránh treo ứng dụng nếu máy chủ không phản hồi
                 response = requests.get(url, timeout=10)
                 
                 if response.status_code == 200:
@@ -212,6 +213,7 @@ class ThemSachPage:
                 self._an_toan_sau(0, lambda msg=str(e): messagebox.showerror("Lỗi", f"Có lỗi xảy ra: {msg}"))
 
         luong_api = threading.Thread(target=chay_ngam_api)
+        # tắt ngay
         luong_api.daemon = True
         luong_api.start()
 
